@@ -35,6 +35,12 @@ Create one coherent system of surfaces, motion, and readable controls. Adapt it 
 
 Treat this skill as a maintained, reusable knowledge base. After meaningful UI iterations, record a concise, generalized finding in references/knowledge-log.md: observation, mechanism, fix, environment, evidence and remaining uncertainty. Exclude personal records, account identifiers and project secrets. Deduplicate entries; replace disproved guidance instead of collecting contradictory rules. Separate verified implementation facts, platform design principles and untested proposals. Read references/terminology.md when choosing vocabulary and references/material-profiles.md when defining surfaces. Do not imply that future conversations automatically update this skill: save substantive findings through the personal-skill workflow when working on it.
 
+## Completion and handoff
+
+After each completed implementation stage, persist substantive UI findings through the personal-skill update workflow. Follow [completion](references/completion.md) to capture verified behavior, failed explanations, browser limits and open acceptance work. Keep project-specific source maps and release state in the project context instead of embedding private records in the skill.
+
+For this owner's UI projects, provide an updated project source ZIP at completion and update the owner's configured GitHub skill mirror. Preserve distinct destinations: a skill repository receives reusable skill content; an application repository receives application source. Never put application source into a skill repository merely because it is the only configured destination. Report each delivery's actual result and any missing destination.
+
 ## Resources
 
 | Need | Read/use |
@@ -46,6 +52,7 @@ Treat this skill as a maintained, reusable knowledge base. After meaningful UI i
 | Chart legends and real analytical UI | references/product-patterns.md |
 | Browser/device and evidence gates | references/acceptance.md |
 | Failure diagnosis from real iterations | references/lessons.md |
+| Stage completion, knowledge capture and delivery | references/completion.md |
 | Ready optical math | assets/core/displacement-map.js and liquid-glass-core.js |
 | Numerical regression check | node scripts/test-displacement-map.mjs |
 

@@ -30,3 +30,20 @@ A compound custom property inherited from the theme can resolve references in it
 ## 2026-11-11 — Selection-first comparison
 
 A comparison page can feel complete before a graph exists by presenting actual records with useful metrics and explicit selection states. After the second selection, compact the picker to selected records and keep an obvious edit-selection action. Preserve independent toggles and a count; avoid invented preview data or a giant empty stage. Check deselection, reset, keyboard operation and mobile overflow.
+
+
+## 2026-11-12 — System preferences can explain cross-browser differences
+
+Observation: the same hosted UI animated and transmitted its backdrop in cloud Chromium but appeared static or opaque on a user's desktop. Mechanism: reduced-motion and reduced-transparency media queries independently selected immediate transitions and opaque material. User-confirmed query results explained the distinct symptoms; changing the relevant system settings resolved the reported behavior. Inspect both preferences and contrast before blaming caching or publishing. Keep accessibility choices respected, expose the effective renderer (opaque/frosted/SVG), and respond to setting changes. A successful deployment alone does not prove the user's visible result.
+
+## 2026-11-12 — Shared motion presentation, bounded optical work
+
+Implementation finding: connect actual spring presentation (signed drive, contact and settling) to material parameters, rather than resetting lighting at pointerup while geometry still moves. Retain signed leading/trailing geometry. Cache maps by geometry/profile, debounce map rebuilds until settling, and vary bounded filter parameters without allocating canvases per input frame. Stop spring RAF work at rest and wake on target changes. Numerical shape/spring tests passed; desktop UI inspection covered intermediate position histories and rest recovery. Continuous interaction recordings and physical iPhone performance remain open; parameter wiring alone does not prove natural optics.
+
+## 2026-11-12 — Portal observation and reversible menu lifetime
+
+Observation: a shared material scanner scoped to the application subtree missed a menu portaled to body. Correction: observe an appropriate shared ancestor or explicitly register portals, while excluding per-frame style attributes to avoid self-triggered scans. Desktop Chromium inspection confirmed SVG assignment to the menu after the fix. Anchor opening and closing to the trigger rectangle, preserve the panel until exit finishes, and start reversals from the current presentation. Keep closing content inert, restore focus on Escape/selection, retain arrow/Home/End semantics, constrain bounds and long-list scrolling, and avoid closing a menu for its own internal scroll. Desktop menu selection and Escape/focus were checked; mobile and rapid-reversal recordings remain unverified.
+
+## 2026-11-12 — Scroll separation and honest diagnostics
+
+Implementation finding: detect real content crossing floating controls before increasing neutral density; do not animate background artwork to simulate environmental response. Coalesce scroll work into one scheduled frame and return to idle after scrolling. Desktop scrolling confirmed the overlap state changed at a sticky toolbar. Density change is readability treatment, not proof of refraction or luminance sampling. Diagnostics should distinguish syntax support, configured renderer, pixel proof, WebGL context availability, actual shader compilation, RAF intervals, input-to-RAF delay and GPU timing. UA may not reliably identify an embedded WebView. A zero delay before interaction is not a latency measurement. Safari and Telegram require separate physical-device observations.
