@@ -1,0 +1,15 @@
+interface:
+  display_name: iOS Liquid Glass
+  short_description: Build layered glass UI with clear, tested behavior
+  default_prompt: Use $ios-liquid-glass to build or refine this interface with a coherent
+    layered glass system, preserve its brand and functions, and verify the rendered
+    result.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

@@ -1,0 +1,42 @@
+/* Framework-neutral starter. Tune against the actual product; not native Apple constants. */
+:root {
+  --material-ink: #151515;
+  --material-muted: #626262;
+  --material-tint: rgb(255 255 255 / .32);
+  --material-rim: rgb(255 255 255 / .55);
+  --material-refractive-blur: .3px;
+  --material-fallback-blur: 7px;
+  --material-refraction: 1.1;
+  --material-shadow: 0 10px 30px rgb(0 0 0 / .14);
+  --material-light-x: 80%;
+  --material-light-y: 8%;
+  --material-radius: 28px;
+}
+[data-theme="dark"] {
+  --material-ink: #f4f4f4;
+  --material-muted: #aaa;
+  --material-tint: rgb(12 12 12 / .36);
+  --material-rim: rgb(255 255 255 / .3);
+  --material-shadow: 0 12px 32px rgb(0 0 0 / .3);
+}
+.material-surface {
+  color: var(--material-ink);
+  background: radial-gradient(ellipse at var(--material-light-x) var(--material-light-y), #ffffff18, transparent 42%), var(--material-tint);
+  border: 1px solid var(--material-rim);
+  border-radius: var(--material-radius);
+  box-shadow: inset 0 1px 1px #ffffff88, inset 0 -1px 1px #ffffff30, var(--material-shadow);
+  backdrop-filter: blur(var(--material-fallback-blur));
+  -webkit-backdrop-filter: blur(var(--material-fallback-blur));
+}
+.material-surface[data-optics="svg"] {
+  backdrop-filter: var(--material-filter) blur(var(--material-refractive-blur));
+  -webkit-backdrop-filter: var(--material-filter) blur(var(--material-refractive-blur));
+}
+/* The foreground stays unfiltered. Keep overlays outside filtered/clipped ancestors. */
+@media(prefers-reduced-transparency: reduce),(prefers-contrast: more) {
+  .material-surface {background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;border-color:currentColor}
+  [data-theme="dark"] .material-surface {background:#111}
+}
+@media(prefers-reduced-motion: reduce) {
+  .material-surface {animation:none;transition:none}
+}
