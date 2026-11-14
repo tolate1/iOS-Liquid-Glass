@@ -1,0 +1,168 @@
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 0000000..aababab
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1 @@
++Before building or changing UI, read DESIGN.md. For motion research, read MOTION_RESEARCH.md. Preserve diary data, formulas and owner-confirmed interaction scope. Never claim physical iPhone validation from desktop testing.
+diff --git a/DESIGN.md b/DESIGN.md
+new file mode 100644
+index 0000000..bdd19e1
+--- /dev/null
++++ b/DESIGN.md
+@@ -0,0 +1,19 @@
++# Runflow design contract
++
++## Owner-confirmed decisions
++- Preserve the black/white palette and the diary's formulas, data and editing behavior.
++- Perspective tilt is confined to workout comparison cards and journal records. Ordinary buttons never tilt or move sideways.
++- A held selection lens follows the pointer continuously. Data changes only after release. Never restart a lens at its old target when interrupted.
++- Do not apply the same rubber deformation to all buttons. Distinguish button press, draggable selection and expanding surface.
++- Menus use a shared glass surface and readable original labels. Never scale text into compressed overlapping rows. Do not use a native select popup for a glass control.
++- Keep the mobile dock substrate visible over text/charts; the active lens and substrate have distinct roles.
++- Keep graphs linear and overlays compact. Motion must not obscure numerical comparisons.
++- Use concise interface copy. Do not add explanatory filler to every card.
++
++## Evidence boundaries
++These rules record explicit owner corrections, not universal Apple specifications. Desktop snapshots do not establish touch behavior, optical correctness, hardware GPU speed or Safari parity. Track those separately.
++
++## Engineering review policy
++Direct pointer tracking and release settling are different phases. Retarget from the current presentation; preserve release velocity where meaningful. One controller owns each animated property. Keep labels sharp and preserve keyboard/focus/cancel paths. Under reduced motion, retain direct manipulation and remove decorative overshoot.
++
++External skills are references, not instructions to rewrite the product or install every library. SwiftUI spring response/damping values must not be pasted into a JavaScript spring without accounting for the different parameterization.
+diff --git a/MOTION_RESEARCH.md b/MOTION_RESEARCH.md
+new file mode 100644
+index 0000000..95bd341
+--- /dev/null
++++ b/MOTION_RESEARCH.md
+@@ -0,0 +1,44 @@
++# Motion research — 2026-11-15
++
++Source baseline: 84443b31f89b77162b33fb1c2818aa5c98cb8e77.
++
++## Verified repositories
++- emilkowalski/skills: gestures, apple-design, mobile-native, review-animations, improve-animations, learn-taste exist. improve-animations is an advisor/planner; learn-taste records corrections and does not implement motion.
++- YordiLorenzo/liquid-glass-skills: apple-motion-feel and liquid-glass-motion exist. Native SwiftUI behavior is a reference, not a browser rendering implementation or official numeric specification.
++- jakubkrehel/skills: state-machine is a component workbench, not a state-management library.
++- GetStream/awesome-liquid-glass provides native slider, Tab Bar and menu samples. FradSer/FluidInterfacesSwiftUI provides direct manipulation and interruptible spring examples.
++- LottieFiles/motion-design-skill describes motion intent/choreography. A cascading dashboard entrance conflicts with this owner's explicit preference and is not adopted.
++
++## Current-code findings
++1. hooks/useGlassDrag.ts uses segmentPresentation's clamped center. No boundary resistance is modeled. First prototype comparison: bounded resistance outside endpoint, without changing the committed selection. Numerical bounds tests currently test the hard clamp; do not silently invalidate them.
++2. The hook releases to the nearest current center; velocity is passed to the spring but does not affect target selection. A projected endpoint may suit navigation, but the journal/demo data switch needs an explicit comparison before adopting flick-to-switch.
++3. lib/animate-glass-menu.ts avoids scaling foreground labels but animates layout bounds. This trades typography correctness for layout cost. Profile it rather than claiming it is compositor-only. A separate transformed material sibling with a clipped, unscaled foreground is the next candidate.
++4. Menu shell and content use separate timing/opacity animations. Interruption samples current state, but a single progress driver would make them easier to keep synchronized. No claim that changing opacity reproduces native materialize.
++5. useGlassDrag and GlassNavigation still have separate gesture controllers. Reconcile cancel, resize, release velocity and stale-speed handling before sharing code; preserve distinct selection policies.
++
++## Prototype workbench
++/interaction-lab imports real GlassSegment, GlassNavigation and GlassSelect. One family is shown at a time. Local state and commit count make unintended data changes observable without touching the diary database. This is a baseline harness, not an improved Apple-equivalent renderer.
++
++## Acceptance
++Record identical slow/fast/reversed gestures, hold-then-drag, cancel, interrupted release, Escape/outside click, light/dark and reduced-motion scenarios. Measure frame intervals and layout cost independently. Phone hardware/GPU and Safari/Telegram observations are separate from desktop execution. No physical-device result is claimed here.
++
++## References
++https://github.com/emilkowalski/skills
++https://github.com/YordiLorenzo/liquid-glass-skills
++https://github.com/jakubkrehel/skills
++https://github.com/GetStream/awesome-liquid-glass
++https://github.com/FradSer/FluidInterfacesSwiftUI
++https://github.com/LottieFiles/motion-design-skill
++
++## Pinned source revisions
++- emilkowalski/skills: 0f2e23b32bb1265e84cff8d3e75785fec953fb1b
++- YordiLorenzo/liquid-glass-skills: a6bac94c5a7a65ac42207452e3e63bb4eb7518e8
++- jakubkrehel/skills: a72290d140249813898ba8648becf6415abcb059
++- GetStream/awesome-liquid-glass: a797c7a1c78373005961ad73e05d378f4dcb4b34
++- FradSer/FluidInterfacesSwiftUI: 26d9220318944cdd37c18c2a8c59e5872bd3f7fc
++- LottieFiles/motion-design-skill: f9a8a041b85185ee4881b3471d3415e939aac772
++
++GetStream's Tab Bar and menu samples delegate rendering/interaction to SwiftUI TabView/Menu. They are native-reference examples, not a portable spring/morph algorithm to copy into React.
++
++
++Desktop preview: candidate checkbox and segment value/commit count updated; real menu opened and selected 30 days; navigation keyboard selection updated the local route state. This checks plumbing, not continuous gesture smoothness, edge resistance feel or physical-device performance. No new continuous video recorded.
+diff --git a/app/interaction-lab/page.tsx b/app/interaction-lab/page.tsx
+new file mode 100644
+index 0000000..81811f5
+--- /dev/null
++++ b/app/interaction-lab/page.tsx
+@@ -0,0 +1,11 @@
++'use client';
++import {useState} from 'react';
++import GlassSegment from '../../components/GlassSegment';
++import GlassNavigation from '../../components/GlassNavigation';
++import GlassSelect from '../../components/GlassSelect';
++import GlassAppearance from '../../components/GlassAppearance';
++export default function InteractionLab(){
++ const [elastic,setElastic]=useState(false);
++ const [kind,setKind]=useState('segment'),[segment,setSegment]=useState('journal'),[tab,setTab]=useState('Обзор'),[period,setPeriod]=useState('Все время'),[commits,setCommits]=useState(0);
++ return <div className="app"><main style={{margin:0,width:'100%',maxWidth:800,padding:24}}><header><div><a href="/">← Runflow</a><h1>Проверка взаимодействий</h1><p>Изолированные экземпляры рабочих компонентов. Демо не меняет тренировки.</p></div><GlassAppearance/></header><div role="group" aria-label="Компонент" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24}}>{[['segment','Переключатель'],['navigation','Навигация'],['menu','Меню']].map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><section className="panel" style={{minHeight:400}}><h2>{kind==='segment'?'Переключатель':kind==='navigation'?'Навигация':'Меню'}</h2>{kind==='segment'?<><label style={{marginBottom:16}}>Кандидат: сопротивление на границах<input type="checkbox" checked={elastic} onChange={e=>setElastic(e.target.checked)}/></label><GlassSegment elastic={elastic} value={segment} onChange={v=>{setSegment(v);setCommits(n=>n+1)}} label="Источник в лаборатории" options={[{value:'journal',label:'Мой журнал'},{value:'demo',label:'Демо'}]}/><p role="status">Выбрано: {segment}. Изменений значения: {commits}.</p><p>Удерживай две секунды, веди медленно, разверни движение и отпусти. Счётчик должен измениться только после отпускания в другом сегменте.</p></>:kind==='navigation'?<><GlassNavigation active={tab} count={7} onChange={setTab}/><p role="status">Раздел: {tab}</p><p>Проверь перехват движущейся линзы и отмену жеста. Положение Dock сохраняет реальные responsive-правила приложения.</p></>:<><GlassSelect label="Период в лаборатории" value={period} options={['Все время','30 дней','7 дней']} onChange={setPeriod}/><p role="status">Период: {period}</p><p>Проверь открытие, Escape, повторное раскрытие во время закрытия и выбор стрелками. Буквы не должны сжиматься.</p></>}<div aria-hidden="true" style={{marginTop:40,height:120,background:'repeating-linear-gradient(90deg,transparent 0 23px,#8883 23px 24px)'}}>0123456789 · тестовая детализация за поверхностью</div></section><p>Физический iPhone и непрерывная запись остаются обязательными отдельными проверками.</p></main></div>
++}
+diff --git a/components/GlassSegment.tsx b/components/GlassSegment.tsx
+index 55b49f0..b5f4b43 100644
+--- a/components/GlassSegment.tsx
++++ b/components/GlassSegment.tsx
+@@ -6,11 +6,11 @@ import {useLensShape} from '../hooks/useLensShape';
+ import {useFrameSpring} from '../hooks/useFrameSpring';
+ import {motion,useReducedMotion,useMotionValue,useTransform,type MotionStyle} from 'motion/react';
+ type Option={value:string;label:string};
+-export default function GlassSegment({value,onChange,options,label,className=''}:{value:string;onChange:(value:string)=>void;options:Option[];label:string;className?:string}){
++export default function GlassSegment({value,onChange,options,label,className='',elastic=false}:{value:string;onChange:(value:string)=>void;options:Option[];label:string;className?:string;elastic?:boolean}){
+  const root=useRef<HTMLDivElement>(null),started=useRef(false),reduce=useReducedMotion();
+  const x=useFrameSpring(0,{stiffness:330,damping:30}),width=useFrameSpring(0,{stiffness:330,damping:30});
+  const baseH=useMotionValue(0),axis=useMotionValue(1),drive=useFrameSpring(0,{stiffness:240,damping:23}),press=useFrameSpring(0,{stiffness:350,damping:25});
+- const drag=useGlassDrag({root,x,width,press,drive,reduce,value,options,onChange});
++ const drag=useGlassDrag({root,x,width,press,drive,reduce,value,options,onChange,elastic});
+  const surface=useRef<HTMLDivElement>(null);useGlassMotion(surface,drive.value,press.value);
+  const shape=useLensShape(width.value,baseH,drive.value,press.value,axis),renderX=useTransform(()=>x.get()+shape.offsetX.get()),opacity=useTransform(width.value,w=>w>0?1:0);
+  useEffect(()=>x.on('change',()=>{if(!drag.gesture.current)drive.set(reduce?0:Math.max(-18,Math.min(18,x.getVelocity()*.02)))}),[x,drive,reduce]);
+diff --git a/hooks/useGlassDrag.ts b/hooks/useGlassDrag.ts
+index 9a2078c..8d10650 100644
+--- a/hooks/useGlassDrag.ts
++++ b/hooks/useGlassDrag.ts
+@@ -1,14 +1,14 @@
+ 'use client';
+ import {useRef,type PointerEvent,type RefObject} from 'react';
+-import {segmentPresentation} from '../lib/segment-geometry';
++import {segmentPresentation,segmentResistance} from '../lib/segment-geometry';
+ type Spring={get:()=>number;jump:(n:number)=>void;set:(n:number)=>void;release:(n:number,v:number)=>void};
+-type Props={root:RefObject<HTMLDivElement|null>;x:Spring;width:Spring;press:Spring;drive:Spring;reduce:boolean|null;value:string;options:{value:string}[];onChange:(v:string)=>void};
+-export function useGlassDrag({root,x,width,press,drive,reduce,value,options,onChange}:Props){
++type Props={root:RefObject<HTMLDivElement|null>;x:Spring;width:Spring;press:Spring;drive:Spring;reduce:boolean|null;value:string;options:{value:string}[];onChange:(v:string)=>void;elastic?:boolean};
++export function useGlassDrag({root,x,width,press,drive,reduce,value,options,onChange,elastic=false}:Props){
+  const gesture=useRef<{id:number;start:number;origin:number;last:number;time:number;velocity:number;moved:boolean}|null>(null),suppress=useRef(0);
+  const buttons=()=>Array.from(root.current?.querySelectorAll<HTMLButtonElement>(':scope > button')??[]);
+  function settle(index:number,velocity=0){const b=buttons()[index];if(!b)return;if(reduce){x.jump(b.offsetLeft);width.jump(b.offsetWidth)}else{x.release(b.offsetLeft,velocity);width.set(b.offsetWidth)}}
+  function end(e:PointerEvent<HTMLDivElement>,cancel=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;gesture.current=null;press.set(0);drive.set(0);let index=options.findIndex(o=>o.value===value);const bs=buttons();if(!cancel){if(g.moved){const center=x.get()+width.get()/2;index=bs.reduce((best,b,i)=>Math.abs(b.offsetLeft+b.offsetWidth/2-center)<Math.abs(bs[best].offsetLeft+bs[best].offsetWidth/2-center)?i:best,0)}else{const hit=document.elementFromPoint(e.clientX,e.clientY)?.closest('button');const hitIndex=bs.indexOf(hit as HTMLButtonElement);if(hitIndex>=0)index=hitIndex}}
+  settle(index,!reduce&&!cancel&&g.moved&&performance.now()-g.time<100?g.velocity:0);suppress.current=performance.now()+500;if(root.current?.hasPointerCapture(e.pointerId))root.current.releasePointerCapture(e.pointerId);if(!cancel&&index>=0&&options[index].value!==value)onChange(options[index].value);
+  }
+- return {gesture,onPointerDown:(e:PointerEvent<HTMLDivElement>)=>{if(!e.isPrimary||e.button!==0||gesture.current)return;const bs=buttons();if(!bs.length)return;x.jump(x.get());gesture.current={id:e.pointerId,start:e.clientX,origin:x.get()+width.get()/2,last:e.clientX,time:performance.now(),velocity:0,moved:false};root.current?.setPointerCapture(e.pointerId);if(!reduce)press.set(1);e.preventDefault()},onPointerMove:(e:PointerEvent<HTMLDivElement>)=>{const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=e.clientX-g.start;g.moved ||= Math.abs(delta)>3;const now=performance.now();g.velocity=Math.max(-1000,Math.min(1000,(e.clientX-g.last)*1000/Math.max(8,now-g.time)));g.last=e.clientX;g.time=now;const bs=buttons();if(!bs.length)return;const next=segmentPresentation(bs.map(b=>({left:b.offsetLeft,width:b.offsetWidth})),g.origin+delta);width.jump(next.width);x.jump(next.left);if(!reduce)drive.set(g.velocity*.016);e.preventDefault()},onPointerUp:(e:PointerEvent<HTMLDivElement>)=>end(e),onPointerCancel:(e:PointerEvent<HTMLDivElement>)=>end(e,true),onLostPointerCapture:(e:PointerEvent<HTMLDivElement>)=>end(e,true),onClickCapture:(e:React.MouseEvent)=>{if(e.detail>0&&performance.now()<suppress.current){e.preventDefault();e.stopPropagation()}},cancel:()=>{const g=gesture.current;if(!g)return;gesture.current=null;press.set(0);drive.set(0);settle(options.findIndex(o=>o.value===value));if(root.current?.hasPointerCapture(g.id))root.current.releasePointerCapture(g.id)}};
++ return {gesture,onPointerDown:(e:PointerEvent<HTMLDivElement>)=>{if(!e.isPrimary||e.button!==0||gesture.current)return;const bs=buttons();if(!bs.length)return;x.jump(x.get());gesture.current={id:e.pointerId,start:e.clientX,origin:x.get()+width.get()/2,last:e.clientX,time:performance.now(),velocity:0,moved:false};root.current?.setPointerCapture(e.pointerId);if(!reduce)press.set(1);e.preventDefault()},onPointerMove:(e:PointerEvent<HTMLDivElement>)=>{const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=e.clientX-g.start;g.moved ||= Math.abs(delta)>3;const now=performance.now();g.velocity=Math.max(-1000,Math.min(1000,(e.clientX-g.last)*1000/Math.max(8,now-g.time)));g.last=e.clientX;g.time=now;const bs=buttons();if(!bs.length)return;const next=segmentPresentation(bs.map(b=>({left:b.offsetLeft,width:b.offsetWidth})),g.origin+delta);const center=g.origin+delta,first=bs[0].offsetLeft+bs[0].offsetWidth/2,last=bs[bs.length-1].offsetLeft+bs[bs.length-1].offsetWidth/2;const offset=elastic?segmentResistance(center,first,last)-Math.max(first,Math.min(last,center)):0;width.jump(next.width);x.jump(next.left+offset);if(!reduce)drive.set(g.velocity*.016);e.preventDefault()},onPointerUp:(e:PointerEvent<HTMLDivElement>)=>end(e),onPointerCancel:(e:PointerEvent<HTMLDivElement>)=>end(e,true),onLostPointerCapture:(e:PointerEvent<HTMLDivElement>)=>end(e,true),onClickCapture:(e:React.MouseEvent)=>{if(e.detail>0&&performance.now()<suppress.current){e.preventDefault();e.stopPropagation()}},cancel:()=>{const g=gesture.current;if(!g)return;gesture.current=null;press.set(0);drive.set(0);settle(options.findIndex(o=>o.value===value));if(root.current?.hasPointerCapture(g.id))root.current.releasePointerCapture(g.id)}};
+ }
+diff --git a/lib/segment-geometry.ts b/lib/segment-geometry.ts
+index 6acec84..e99a28e 100644
+--- a/lib/segment-geometry.ts
++++ b/lib/segment-geometry.ts
+@@ -5,3 +5,10 @@ export function segmentPresentation(items:{left:number;width:number}[],center:nu
+  const width=items[i].width+(items[j].width-items[i].width)*t;
+  return {left:c-width/2,width};
+ }
++
++// Candidate boundary resistance, isolated behind the workbench opt-in.
++export function segmentResistance(center:number,first:number,last:number){
++ const edge=center<first?first:center>last?last:center;
++ const excess=center-edge;
++ return edge+excess*.45/(1+Math.abs(excess)/48);
++}
+diff --git a/tests/segment-geometry.test.ts b/tests/segment-geometry.test.ts
+index 03e37fe..ef66325 100644
+--- a/tests/segment-geometry.test.ts
++++ b/tests/segment-geometry.test.ts
+@@ -1,5 +1,7 @@
+ import assert from 'node:assert/strict';
+ import test from 'node:test';
+-import {segmentPresentation} from '../lib/segment-geometry.ts';
++import {segmentPresentation,segmentResistance} from '../lib/segment-geometry.ts';
+ test('unequal segment widths remain inside track for all pointer positions',()=>{const items=[{left:4,width:140},{left:146,width:80}];for(let c=-200;c<500;c++){const p=segmentPresentation(items,c);assert.ok(p.left>=4);assert.ok(p.left+p.width<=226);assert.ok(p.width>=80&&p.width<=140)}assert.deepEqual(segmentPresentation(items,74),{left:4,width:140});assert.deepEqual(segmentPresentation(items,186),{left:146,width:80})});
+ test('reversal is continuous and single segment is stable',()=>{const items=[{left:4,width:140},{left:146,width:80}];for(let c=75;c<186;c++){const a=segmentPresentation(items,c),b=segmentPresentation(items,c-.01);assert.ok(Math.abs(a.left-b.left)<.1);assert.ok(Math.abs(a.width-b.width)<.1)}assert.deepEqual(segmentPresentation([{left:4,width:80}],900),{left:4,width:80})});
++
++test('candidate resistance is continuous, bounded and does not change interior tracking',()=>{for(let c=0;c<200;c++)assert.equal(segmentResistance(c,0,200),c);for(const d of [1,20,100,1e6]){const r=segmentResistance(200+d,0,200);assert.ok(r>200&&r<222);assert.ok(r<200+d)}assert.ok(Math.abs(segmentResistance(200.001,0,200)-200)<.001)});
