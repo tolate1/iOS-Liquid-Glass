@@ -1,0 +1,361 @@
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 0000000..aababab
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1 @@
++Before building or changing UI, read DESIGN.md. For motion research, read MOTION_RESEARCH.md. Preserve diary data, formulas and owner-confirmed interaction scope. Never claim physical iPhone validation from desktop testing.
+diff --git a/DESIGN.md b/DESIGN.md
+new file mode 100644
+index 0000000..bdd19e1
+--- /dev/null
++++ b/DESIGN.md
+@@ -0,0 +1,19 @@
++# Runflow design contract
++
++## Owner-confirmed decisions
++- Preserve the black/white palette and the diary's formulas, data and editing behavior.
++- Perspective tilt is confined to workout comparison cards and journal records. Ordinary buttons never tilt or move sideways.
++- A held selection lens follows the pointer continuously. Data changes only after release. Never restart a lens at its old target when interrupted.
++- Do not apply the same rubber deformation to all buttons. Distinguish button press, draggable selection and expanding surface.
++- Menus use a shared glass surface and readable original labels. Never scale text into compressed overlapping rows. Do not use a native select popup for a glass control.
++- Keep the mobile dock substrate visible over text/charts; the active lens and substrate have distinct roles.
++- Keep graphs linear and overlays compact. Motion must not obscure numerical comparisons.
++- Use concise interface copy. Do not add explanatory filler to every card.
++
++## Evidence boundaries
++These rules record explicit owner corrections, not universal Apple specifications. Desktop snapshots do not establish touch behavior, optical correctness, hardware GPU speed or Safari parity. Track those separately.
++
++## Engineering review policy
++Direct pointer tracking and release settling are different phases. Retarget from the current presentation; preserve release velocity where meaningful. One controller owns each animated property. Keep labels sharp and preserve keyboard/focus/cancel paths. Under reduced motion, retain direct manipulation and remove decorative overshoot.
++
++External skills are references, not instructions to rewrite the product or install every library. SwiftUI spring response/damping values must not be pasted into a JavaScript spring without accounting for the different parameterization.
+diff --git a/MOTION_RESEARCH.md b/MOTION_RESEARCH.md
+new file mode 100644
+index 0000000..3e176f7
+--- /dev/null
++++ b/MOTION_RESEARCH.md
+@@ -0,0 +1,50 @@
++# Motion research — 2026-11-15
++
++Source baseline: 84443b31f89b77162b33fb1c2818aa5c98cb8e77.
++
++## Verified repositories
++- emilkowalski/skills: gestures, apple-design, mobile-native, review-animations, improve-animations, learn-taste exist. improve-animations is an advisor/planner; learn-taste records corrections and does not implement motion.
++- YordiLorenzo/liquid-glass-skills: apple-motion-feel and liquid-glass-motion exist. Native SwiftUI behavior is a reference, not a browser rendering implementation or official numeric specification.
++- jakubkrehel/skills: state-machine is a component workbench, not a state-management library.
++- GetStream/awesome-liquid-glass provides native slider, Tab Bar and menu samples. FradSer/FluidInterfacesSwiftUI provides direct manipulation and interruptible spring examples.
++- LottieFiles/motion-design-skill describes motion intent/choreography. A cascading dashboard entrance conflicts with this owner's explicit preference and is not adopted.
++
++## Current-code findings
++1. hooks/useGlassDrag.ts uses segmentPresentation's clamped center. No boundary resistance is modeled. First prototype comparison: bounded resistance outside endpoint, without changing the committed selection. Numerical bounds tests currently test the hard clamp; do not silently invalidate them.
++2. The hook releases to the nearest current center; velocity is passed to the spring but does not affect target selection. A projected endpoint may suit navigation, but the journal/demo data switch needs an explicit comparison before adopting flick-to-switch.
++3. lib/animate-glass-menu.ts avoids scaling foreground labels but animates layout bounds. This trades typography correctness for layout cost. Profile it rather than claiming it is compositor-only. A separate transformed material sibling with a clipped, unscaled foreground is the next candidate.
++4. Menu shell and content use separate timing/opacity animations. Interruption samples current state, but a single progress driver would make them easier to keep synchronized. No claim that changing opacity reproduces native materialize.
++5. useGlassDrag and GlassNavigation still have separate gesture controllers. Reconcile cancel, resize, release velocity and stale-speed handling before sharing code; preserve distinct selection policies.
++
++## Prototype workbench
++/interaction-lab imports real GlassSegment, GlassNavigation and GlassSelect. One family is shown at a time. Local state and commit count make unintended data changes observable without touching the diary database. This is a baseline harness, not an improved Apple-equivalent renderer.
++
++## Acceptance
++Record identical slow/fast/reversed gestures, hold-then-drag, cancel, interrupted release, Escape/outside click, light/dark and reduced-motion scenarios. Measure frame intervals and layout cost independently. Phone hardware/GPU and Safari/Telegram observations are separate from desktop execution. No physical-device result is claimed here.
++
++## References
++https://github.com/emilkowalski/skills
++https://github.com/YordiLorenzo/liquid-glass-skills
++https://github.com/jakubkrehel/skills
++https://github.com/GetStream/awesome-liquid-glass
++https://github.com/FradSer/FluidInterfacesSwiftUI
++https://github.com/LottieFiles/motion-design-skill
++
++## Pinned source revisions
++- emilkowalski/skills: 0f2e23b32bb1265e84cff8d3e75785fec953fb1b
++- YordiLorenzo/liquid-glass-skills: a6bac94c5a7a65ac42207452e3e63bb4eb7518e8
++- jakubkrehel/skills: a72290d140249813898ba8648becf6415abcb059
++- GetStream/awesome-liquid-glass: a797c7a1c78373005961ad73e05d378f4dcb4b34
++- FradSer/FluidInterfacesSwiftUI: 26d9220318944cdd37c18c2a8c59e5872bd3f7fc
++- LottieFiles/motion-design-skill: f9a8a041b85185ee4881b3471d3415e939aac772
++
++GetStream's Tab Bar and menu samples delegate rendering/interaction to SwiftUI TabView/Menu. They are native-reference examples, not a portable spring/morph algorithm to copy into React.
++
++
++Desktop preview: candidate checkbox and segment value/commit count updated; real menu opened and selected 30 days; navigation keyboard selection updated the local route state. This checks plumbing, not continuous gesture smoothness, edge resistance feel or physical-device performance. No new continuous video recorded.
++
++## Experiment iteration — separate material plane
++- GlassSelect motionMode=layer keeps final-size panel/labels fixed and transforms a separate backdrop shell. One progress spring controls shell transform, content clip/opacity and shadow. Bounds mode remains the default baseline. These are two experiments, not a native Apple implementation.
++- Segment and optional navigation candidate share velocity sampling/release freshness conventions; navigation retains its own tab choice policy. Candidate navigation adds bounded boundary resistance. Lifecycle ownership remains per component; this is not a claim that both complete controllers have been unified.
++- InteractionMetrics samples 240 RAF intervals, p50/p95 and >25ms counts; optional long-animation-frame records report only forced style/layout attributed in slow frames. It is not total layout cost, GPU time or hardware proof. Compare on one device with identical gestures. Zero does not establish absence of layout.
++- Six numerical tests cover menu endpoints, interrupted progress spring continuity/settling, stale/cancel/reduced velocity and segment geometry bounds. TypeScript passes. Local preview infrastructure refused the connection despite stale dev-server registration, so the current iteration requires published-page verification. No iPhone acceptance or continuous recording is claimed.
+diff --git a/app/functional-glass.css b/app/functional-glass.css
+index d068a3c..e2538a7 100644
+--- a/app/functional-glass.css
++++ b/app/functional-glass.css
+@@ -43,3 +43,10 @@ html[data-theme=dark]{--control-density:.19;--menu-density:.48;--edge-light:#fff
+ @media(max-width:850px){.app nav.motion-glass[data-material]{--material-density:.38}.app nav.motion-glass[data-rf-glass=svg]::before{backdrop-filter:var(--rf-backdrop) blur(2px);-webkit-backdrop-filter:var(--rf-backdrop) blur(2px)}.app nav.motion-glass[data-rf-glass=frosted]::before{backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}}
+ 
+ .app .liquid-segment>button:active{transform:none;background:none;box-shadow:none}
++
++/* Experimental material sibling: stable final-size foreground, no scaled glyphs. */
++.glass-menu-layer[data-motion-mode=layer]{isolation:isolate;background:none!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
++.glass-menu-layer[data-motion-mode=layer]>.glass-menu-options{position:relative;z-index:1;animation:none;will-change:clip-path,opacity;}
++.glass-menu-shell{position:absolute;inset:0;border:1px solid var(--edge-light);border-radius:22px;background:linear-gradient(145deg,#ffffff26,#ffffff03),rgb(var(--surface-transmission-tint)/.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transform-origin:0 0;pointer-events:none;will-change:transform;z-index:0;}
++.glass-menu-shell[data-rf-glass=svg]{backdrop-filter:var(--rf-backdrop);-webkit-backdrop-filter:var(--rf-backdrop)}
++@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.glass-menu-shell{background:var(--surface)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+diff --git a/app/interaction-lab/page.tsx b/app/interaction-lab/page.tsx
+new file mode 100644
+index 0000000..9173a16
+--- /dev/null
++++ b/app/interaction-lab/page.tsx
+@@ -0,0 +1,12 @@
++'use client';
++import InteractionMetrics from '../../components/InteractionMetrics';
++import {useState} from 'react';
++import GlassSegment from '../../components/GlassSegment';
++import GlassNavigation from '../../components/GlassNavigation';
++import GlassSelect from '../../components/GlassSelect';
++import GlassAppearance from '../../components/GlassAppearance';
++export default function InteractionLab(){
++ const [elastic,setElastic]=useState(false),[navCandidate,setNavCandidate]=useState(false),[menuCandidate,setMenuCandidate]=useState(false);
++ const [kind,setKind]=useState('segment'),[segment,setSegment]=useState('journal'),[tab,setTab]=useState('Обзор'),[period,setPeriod]=useState('Все время'),[commits,setCommits]=useState(0);
++ return <div className="app"><main style={{margin:0,width:'100%',maxWidth:800,padding:24}}><header><div><a href="/">← Runflow</a><h1>Проверка взаимодействий</h1><p>Изолированные экземпляры рабочих компонентов. Демо не меняет тренировки.</p></div><GlassAppearance/></header><div role="group" aria-label="Компонент" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24}}>{[['segment','Переключатель'],['navigation','Навигация'],['menu','Меню']].map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><section className="panel" style={{minHeight:400}}><h2>{kind==='segment'?'Переключатель':kind==='navigation'?'Навигация':'Меню'}</h2>{kind==='segment'?<><label style={{marginBottom:16}}>Кандидат: сопротивление на границах<input type="checkbox" checked={elastic} onChange={e=>setElastic(e.target.checked)}/></label><GlassSegment elastic={elastic} value={segment} onChange={v=>{setSegment(v);setCommits(n=>n+1)}} label="Источник в лаборатории" options={[{value:'journal',label:'Мой журнал'},{value:'demo',label:'Демо'}]}/><p role="status">Выбрано: {segment}. Изменений значения: {commits}.</p><p>Удерживай две секунды, веди медленно, разверни движение и отпусти. Счётчик должен измениться только после отпускания в другом сегменте.</p></>:kind==='navigation'?<><label>Кандидат: общий расчёт скорости и сопротивление<input type="checkbox" checked={navCandidate} onChange={e=>setNavCandidate(e.target.checked)}/></label><GlassNavigation experimental={navCandidate} active={tab} count={7} onChange={setTab}/><p role="status">Раздел: {tab}</p><p>Проверь перехват движущейся линзы и отмену жеста. Положение Dock сохраняет реальные responsive-правила приложения.</p></>:<><label>Кандидат: отдельная оболочка, единый прогресс<input type="checkbox" checked={menuCandidate} onChange={e=>setMenuCandidate(e.target.checked)}/></label><GlassSelect key={String(menuCandidate)} motionMode={menuCandidate?'layer':'bounds'} label="Период в лаборатории" value={period} options={['Все время','30 дней','7 дней']} onChange={setPeriod}/><p role="status">Период: {period}</p><p>Проверь открытие, Escape, повторное раскрытие во время закрытия и выбор стрелками. Буквы не должны сжиматься.</p></>}<div aria-hidden="true" style={{marginTop:40,height:120,background:'repeating-linear-gradient(90deg,transparent 0 23px,#8883 23px 24px)'}}>0123456789 · тестовая детализация за поверхностью</div></section><InteractionMetrics variant={kind+':'+(kind==='segment'?elastic:kind==='navigation'?navCandidate:menuCandidate)}/><p>Физический iPhone и непрерывная запись остаются обязательными отдельными проверками.</p></main></div>
++}
+diff --git a/components/GlassNavigation.tsx b/components/GlassNavigation.tsx
+index 9e9faf8..7f569dc 100644
+--- a/components/GlassNavigation.tsx
++++ b/components/GlassNavigation.tsx
+@@ -1,12 +1,14 @@
+ 'use client';
+ import {useEffect,useLayoutEffect,useRef,useState,type PointerEvent} from 'react';
++import {segmentResistance} from '../lib/segment-geometry';
++import {sampleVelocity,releaseVelocity} from '../lib/gesture-sampling';
+ import {useGlassMotion} from '../hooks/useGlassMotion';
+ import {useLensShape} from '../hooks/useLensShape';
+ import {useFrameSpring} from '../hooks/useFrameSpring';
+ import {motion,useMotionValue,useTransform,useReducedMotion,type MotionStyle} from 'motion/react';
+ import {LayoutDashboard,List,TrendingUp,GitCompareArrows,Target} from 'lucide-react';
+ const items=[{Icon:LayoutDashboard,value:'Обзор',label:'Сегодня'},{Icon:List,value:'Тренировки',label:'Журнал'},{Icon:TrendingUp,value:'Прогресс',label:'Прогресс'},{Icon:GitCompareArrows,value:'Сравнение',label:'Сравнить'},{Icon:Target,value:'Цели и уровни',label:'Цели'}];
+-export default function GlassNavigation({active,onChange,count}:{active:string,onChange:(tab:string)=>void,count:number}){
++export default function GlassNavigation({active,onChange,count,experimental=false}:{active:string,onChange:(tab:string)=>void,count:number;experimental?:boolean}){
+  const [visualActive,setVisualActive]=useState(active);
+  useEffect(()=>setVisualActive(active),[active]);
+  const nav=useRef<HTMLElement>(null),buttons=useRef<Record<string,HTMLButtonElement|null>>({}),initialized=useRef(false);
+@@ -26,8 +28,8 @@ export default function GlassNavigation({active,onChange,count}:{active:string,o
+  const [box,setBox]=useState({w:0,h:0,sceneW:0,sceneH:0});
+  useLayoutEffect(()=>{const measure=()=>{const root=nav.current,button=buttons.current[visualActive];if(!root||!button)return;if(gesture.current){const g=gesture.current;gesture.current=null;if(root.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.set(0);stretch.set(0);setDragging(false);suppressClick.current=performance.now()+400}const nextX=button.offsetLeft,nextY=button.offsetTop;horizontal.current=items.length>1&&buttons.current[items[4].value]?.offsetLeft!==buttons.current[items[0].value]?.offsetLeft;axis.set(horizontal.current?1:0);for(const item of items){const b=buttons.current[item.value];if(b){b.style.setProperty('--item-x',b.offsetLeft+'px');b.style.setProperty('--item-y',b.offsetTop+'px')}}baseW.set(button.offsetWidth+(horizontal.current?12:0));baseH.set(button.offsetHeight-(horizontal.current?8:0));setBox({w:button.offsetWidth,h:button.offsetHeight,sceneW:root.clientWidth,sceneH:root.clientHeight});if(!initialized.current||reduce){x.jump(nextX);y.jump(nextY);initialized.current=true}x.set(nextX);y.set(nextY)};measure();const observer=new ResizeObserver(measure);if(nav.current)observer.observe(nav.current);window.addEventListener('resize',measure);return()=>{observer.disconnect();window.removeEventListener('resize',measure)}},[visualActive,reduce,x,y]);
+  useEffect(()=>{if(process.env.NODE_ENV!=='development')return;const samples:number[][]=[];const record=()=>{samples.push([Math.round(x.get()*100)/100,Math.round(y.get()*100)/100]);if(samples.length>40)samples.shift();if(nav.current)nav.current.dataset.motionSamples=JSON.stringify(samples)};const offX=x.on('change',record),offY=y.on('change',record);return()=>{offX();offY()}},[x,y]);
+- function beginDrag(e:PointerEvent<HTMLElement>){if(!e.isPrimary||e.button!==0)return;const root=nav.current;if(!root)return;const first=buttons.current[items[0].value],last=buttons.current[items[4].value];if(!first||!last)return;const isHorizontal=last.offsetLeft!==first.offsetLeft;horizontal.current=isHorizontal;axis.set(isHorizontal?1:0);x.jump(x.get());y.jump(y.get());lastPointer.current={position:isHorizontal?e.clientX:e.clientY,time:performance.now(),speed:0};if(!reduce)pressed.set(1);gesture.current={id:e.pointerId,start:isHorizontal?e.clientX:e.clientY,origin:isHorizontal?x.get():y.get(),offset:0,horizontal:isHorizontal,moved:false};root.setPointerCapture(e.pointerId);setDragging(true);e.preventDefault()}
+- function moveDrag(e:PointerEvent<HTMLElement>){const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=(g.horizontal?e.clientX:e.clientY)-g.start;if(Math.abs(delta)>3)g.moved=true;const position=g.horizontal?e.clientX:e.clientY,now=performance.now(),speed=(position-lastPointer.current.position)/Math.max(8,now-lastPointer.current.time);lastPointer.current={position,time:now,speed};if(!reduce)stretch.set(Math.max(-18,Math.min(18,speed*18)));if(nav.current){const rect=nav.current.getBoundingClientRect();nav.current.style.setProperty('--touch-x',`${e.clientX-rect.left}px`);nav.current.style.setProperty('--touch-y',`${e.clientY-rect.top}px`);}const coordinates=items.map(i=>buttons.current[i.value]).filter((b):b is HTMLButtonElement=>!!b).map(b=>g.horizontal?b.offsetLeft:b.offsetTop);const value=Math.max(Math.min(...coordinates),Math.min(Math.max(...coordinates),g.origin+delta));if(g.horizontal){x.set(value);x.jump(value)}else{y.set(value);y.jump(value)}e.preventDefault()}
+- function finishDrag(e:PointerEvent<HTMLElement>,cancelled=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;gesture.current=null;pressed.set(0);stretch.set(0);setDragging(false);if(nav.current?.hasPointerCapture(e.pointerId))nav.current.releasePointerCapture(e.pointerId);let next=visualActive;if(g.moved&&!cancelled){const position=g.horizontal?x.get():y.get();next=items.reduce((best,item)=>{const a=buttons.current[best.value],b=buttons.current[item.value];return a&&b&&Math.abs((g.horizontal?b.offsetLeft:b.offsetTop)-position)<Math.abs((g.horizontal?a.offsetLeft:a.offsetTop)-position)?item:best},items[0]).value}else if(!cancelled){const root=nav.current;const hit=root?.ownerDocument.elementFromPoint(e.clientX,e.clientY)?.closest('button');next=items.find(item=>buttons.current[item.value]===hit)?.value||visualActive}const button=buttons.current[next];if(button){const velocity=!reduce&&g.moved&&!cancelled&&performance.now()-lastPointer.current.time<100?lastPointer.current.speed*1000:0;if(g.horizontal){x.release(button.offsetLeft,velocity);y.set(button.offsetTop)}else{y.release(button.offsetTop,velocity);x.set(button.offsetLeft)}}suppressClick.current=performance.now()+400;setVisualActive(next);if(!cancelled)onChange(next)}
++ function beginDrag(e:PointerEvent<HTMLElement>){if(!e.isPrimary||e.button!==0||gesture.current)return;const root=nav.current;if(!root)return;const first=buttons.current[items[0].value],last=buttons.current[items[4].value];if(!first||!last)return;const isHorizontal=last.offsetLeft!==first.offsetLeft;horizontal.current=isHorizontal;axis.set(isHorizontal?1:0);x.jump(x.get());y.jump(y.get());lastPointer.current={position:isHorizontal?e.clientX:e.clientY,time:performance.now(),speed:0};if(!reduce)pressed.set(1);gesture.current={id:e.pointerId,start:isHorizontal?e.clientX:e.clientY,origin:isHorizontal?x.get():y.get(),offset:0,horizontal:isHorizontal,moved:false};root.setPointerCapture(e.pointerId);setDragging(true);e.preventDefault()}
++ function moveDrag(e:PointerEvent<HTMLElement>){const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=(g.horizontal?e.clientX:e.clientY)-g.start;if(Math.abs(delta)>3)g.moved=true;const position=g.horizontal?e.clientX:e.clientY,now=performance.now(),speed=experimental?sampleVelocity(position,lastPointer.current.position,now,lastPointer.current.time)/1000:(position-lastPointer.current.position)/Math.max(8,now-lastPointer.current.time);lastPointer.current={position,time:now,speed};if(!reduce)stretch.set(Math.max(-18,Math.min(18,speed*18)));if(nav.current){const rect=nav.current.getBoundingClientRect();nav.current.style.setProperty('--touch-x',`${e.clientX-rect.left}px`);nav.current.style.setProperty('--touch-y',`${e.clientY-rect.top}px`);}const coordinates=items.map(i=>buttons.current[i.value]).filter((b):b is HTMLButtonElement=>!!b).map(b=>g.horizontal?b.offsetLeft:b.offsetTop);const value=experimental?segmentResistance(g.origin+delta,Math.min(...coordinates),Math.max(...coordinates)):Math.max(Math.min(...coordinates),Math.min(Math.max(...coordinates),g.origin+delta));if(g.horizontal){x.set(value);x.jump(value)}else{y.set(value);y.jump(value)}e.preventDefault()}
++ function finishDrag(e:PointerEvent<HTMLElement>,cancelled=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;gesture.current=null;pressed.set(0);stretch.set(0);setDragging(false);if(nav.current?.hasPointerCapture(e.pointerId))nav.current.releasePointerCapture(e.pointerId);let next=visualActive;if(g.moved&&!cancelled){const position=g.horizontal?x.get():y.get();next=items.reduce((best,item)=>{const a=buttons.current[best.value],b=buttons.current[item.value];return a&&b&&Math.abs((g.horizontal?b.offsetLeft:b.offsetTop)-position)<Math.abs((g.horizontal?a.offsetLeft:a.offsetTop)-position)?item:best},items[0]).value}else if(!cancelled){const root=nav.current;const hit=root?.ownerDocument.elementFromPoint(e.clientX,e.clientY)?.closest('button');next=items.find(item=>buttons.current[item.value]===hit)?.value||visualActive}const button=buttons.current[next];if(button){const velocity=experimental?releaseVelocity(lastPointer.current.speed*1000,lastPointer.current.time,performance.now(),cancelled||!g.moved,!!reduce):!reduce&&g.moved&&!cancelled&&performance.now()-lastPointer.current.time<100?lastPointer.current.speed*1000:0;if(g.horizontal){x.release(button.offsetLeft,velocity);y.set(button.offsetTop)}else{y.release(button.offsetTop,velocity);x.set(button.offsetLeft)}}suppressClick.current=performance.now()+400;setVisualActive(next);if(!cancelled)onChange(next)}
+  return <nav ref={nav} className={"glass-navigation motion-glass"+(dragging?' is-dragging':'')} onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={e=>finishDrag(e)} onPointerCancel={e=>finishDrag(e,true)} onLostPointerCapture={e=>finishDrag(e,true)} onClickCapture={e=>{if(e.detail>0&&performance.now()<suppressClick.current){e.preventDefault();e.stopPropagation()}}} data-lg-role="dock" aria-label="Разделы дневника">{items.map(({Icon,value,label})=><button ref={el=>{buttons.current[value]=el}} key={value} aria-current={visualActive===value?'page':undefined} className={visualActive===value?'active':''} onClick={()=>{setVisualActive(value);onChange(value)}}><span className="nav-visual"><Icon size={19}/><span>{label}</span>{value==='Тренировки'&&<small>{count}</small>}</span></button>)}<motion.div className="glass-lens is-ready" aria-hidden="true" style={{x:renderX,y:renderY,width,height,borderRadius:shape.radius,skewX:shape.skewX,skewY:shape.skewY,opacity:box.w?1:0}}><motion.div ref={surface} className="glass-lens-surface" style={{scale:shape.scale,'--light-angle':shape.angle,'--rf-light-x':shape.lightX,'--rf-light-y':shape.lightY} as MotionStyle}><div className="lens-caustic"/><div className="lens-touch-light"/></motion.div></motion.div></nav>
+ }
+diff --git a/components/GlassSegment.tsx b/components/GlassSegment.tsx
+index 55b49f0..b5f4b43 100644
+--- a/components/GlassSegment.tsx
++++ b/components/GlassSegment.tsx
+@@ -6,11 +6,11 @@ import {useLensShape} from '../hooks/useLensShape';
+ import {useFrameSpring} from '../hooks/useFrameSpring';
+ import {motion,useReducedMotion,useMotionValue,useTransform,type MotionStyle} from 'motion/react';
+ type Option={value:string;label:string};
+-export default function GlassSegment({value,onChange,options,label,className=''}:{value:string;onChange:(value:string)=>void;options:Option[];label:string;className?:string}){
++export default function GlassSegment({value,onChange,options,label,className='',elastic=false}:{value:string;onChange:(value:string)=>void;options:Option[];label:string;className?:string;elastic?:boolean}){
+  const root=useRef<HTMLDivElement>(null),started=useRef(false),reduce=useReducedMotion();
+  const x=useFrameSpring(0,{stiffness:330,damping:30}),width=useFrameSpring(0,{stiffness:330,damping:30});
+  const baseH=useMotionValue(0),axis=useMotionValue(1),drive=useFrameSpring(0,{stiffness:240,damping:23}),press=useFrameSpring(0,{stiffness:350,damping:25});
+- const drag=useGlassDrag({root,x,width,press,drive,reduce,value,options,onChange});
++ const drag=useGlassDrag({root,x,width,press,drive,reduce,value,options,onChange,elastic});
+  const surface=useRef<HTMLDivElement>(null);useGlassMotion(surface,drive.value,press.value);
+  const shape=useLensShape(width.value,baseH,drive.value,press.value,axis),renderX=useTransform(()=>x.get()+shape.offsetX.get()),opacity=useTransform(width.value,w=>w>0?1:0);
+  useEffect(()=>x.on('change',()=>{if(!drag.gesture.current)drive.set(reduce?0:Math.max(-18,Math.min(18,x.getVelocity()*.02)))}),[x,drive,reduce]);
+diff --git a/components/GlassSelect.tsx b/components/GlassSelect.tsx
+index 60f2294..544095d 100644
+--- a/components/GlassSelect.tsx
++++ b/components/GlassSelect.tsx
+@@ -1,9 +1,11 @@
+ 'use client';
+ import {useEffect,useId,useLayoutEffect,useRef,useState} from 'react';
+ import {createPortal} from 'react-dom';
++import {useMenuLayer} from '../hooks/useMenuLayer';
+ import {animateGlassMenu} from '../lib/animate-glass-menu';
+ import {ChevronDown,Check} from 'lucide-react';
+-export default function GlassSelect({value,onChange,options,label}:{value:string;onChange:(v:string)=>void;options:string[];label:string}){
++export default function GlassSelect({value,onChange,options,label,motionMode='bounds'}:{value:string;onChange:(v:string)=>void;options:string[];label:string;motionMode?:'bounds'|'layer'}){
++ const layer=useMenuLayer();
+  const anchor=useRef<HTMLButtonElement>(null),menu=useRef<HTMLDivElement>(null),animation=useRef<Animation|null>(null),opening=useRef(false),id=useId();
+  const [open,setOpen]=useState(false),[present,setPresent]=useState(false);
+  function show(){opening.current=true;setPresent(true);setOpen(true)}
+@@ -12,16 +14,16 @@ export default function GlassSelect({value,onChange,options,label}:{value:string
+   const previous=animation.current;
+   const r=button.getBoundingClientRect(),width=Math.min(innerWidth-20,Math.max(190,r.width));
+   panel.style.width=width+'px';panel.style.maxHeight=Math.max(60,innerHeight-20)+'px';
+-  const content=panel.firstElementChild as HTMLElement|null;if(content)content.style.width=Math.max(0,width-16)+'px';
++  const content=panel.querySelector<HTMLElement>('.glass-menu-options');if(content)content.style.width=Math.max(0,width-16)+'px';
+   const height=Math.min(innerHeight-20,(content?.scrollHeight??panel.scrollHeight)+16),left=Math.max(10,Math.min(innerWidth-width-10,r.right-width));
+   const below=innerHeight-r.bottom>=Math.min(height+10,210)||r.top<height+20;
+   const top=Math.max(10,Math.min(innerHeight-height-10,below?r.bottom+8:r.top-height-8));
+   panel.style.left=left+'px';panel.style.top=top+'px';
+   panel.dataset.expanded=String(open);
+-  animation.current=animateGlassMenu(panel,button,open,width,height,left,top,previous,()=>{if(!open){animation.current=null;setPresent(false)}});
++  if(motionMode==='layer'){previous?.cancel();animation.current=null;layer.start(panel,{left:r.left,top:r.top,width:r.width,height:r.height},{left,top,width,height},open,()=>setPresent(false));}else animation.current=animateGlassMenu(panel,button,open,width,height,left,top,previous,()=>{if(!open){animation.current=null;setPresent(false)}});
+   if(open&&opening.current){opening.current=false;panel.querySelector<HTMLElement>('[aria-selected=true]')?.focus()}
+- },[open,present]);
++ },[open,present,motionMode]);
+  useEffect(()=>()=>animation.current?.cancel(),[]);
+  useEffect(()=>{if(!open)return;const close=(e:PointerEvent)=>{if(!anchor.current?.contains(e.target as Node)&&!menu.current?.contains(e.target as Node))setOpen(false)},scroll=(e:Event)=>{if(!menu.current?.contains(e.target as Node))setOpen(false)};document.addEventListener('pointerdown',close);window.addEventListener('resize',scroll);window.addEventListener('scroll',scroll,true);return()=>{document.removeEventListener('pointerdown',close);window.removeEventListener('resize',scroll);window.removeEventListener('scroll',scroll,true)}},[open]);
+- return <><button ref={anchor} type="button" className="glass-select-trigger" aria-label={label} aria-haspopup="listbox" aria-expanded={open} aria-controls={present?id:undefined} onClick={()=>open?setOpen(false):show()} onKeyDown={e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();show()}}}>{value}<ChevronDown size={14}/></button>{present&&createPortal(<div id={id} ref={menu} className="glass-menu-layer" role="listbox" aria-label={label} aria-hidden={!open} inert={!open} style={{transformOrigin:'top left',pointerEvents:open?'auto':'none'}} onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();setOpen(false);anchor.current?.focus()}if(e.key==='Tab'){setOpen(false);anchor.current?.focus()}if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const all=Array.from(menu.current!.querySelectorAll<HTMLElement>('[role=option]')),i=all.indexOf(document.activeElement as HTMLElement);all[e.key==='Home'?0:e.key==='End'?all.length-1:(i+(e.key==='ArrowDown'?1:-1)+all.length)%all.length]?.focus()}}}><div className="glass-menu-options">{options.map(v=><button role="option" aria-selected={value===v} tabIndex={-1} key={v} onClick={()=>{onChange(v);setOpen(false);anchor.current?.focus()}}>{v}{value===v&&<Check size={15}/>}</button>)}</div></div>,document.body)}</>
++ return <><button ref={anchor} type="button" className="glass-select-trigger" aria-label={label} aria-haspopup="listbox" aria-expanded={open} aria-controls={present?id:undefined} onClick={()=>open?setOpen(false):show()} onKeyDown={e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();show()}}}>{value}<ChevronDown size={14}/></button>{present&&createPortal(<div id={id} ref={menu} className="glass-menu-layer" data-motion-mode={motionMode} role="listbox" aria-label={label} aria-hidden={!open} inert={!open} style={{transformOrigin:'top left',pointerEvents:open?'auto':'none'}} onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();setOpen(false);anchor.current?.focus()}if(e.key==='Tab'){setOpen(false);anchor.current?.focus()}if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const all=Array.from(menu.current!.querySelectorAll<HTMLElement>('[role=option]')),i=all.indexOf(document.activeElement as HTMLElement);all[e.key==='Home'?0:e.key==='End'?all.length-1:(i+(e.key==='ArrowDown'?1:-1)+all.length)%all.length]?.focus()}}}><div className="glass-menu-options">{options.map(v=><button role="option" aria-selected={value===v} tabIndex={-1} key={v} onClick={()=>{onChange(v);setOpen(false);anchor.current?.focus()}}>{v}{value===v&&<Check size={15}/>}</button>)}</div>{motionMode==='layer'&&<div className="glass-menu-shell" aria-hidden="true"/>}</div>,document.body)}</>
+ }
+diff --git a/components/InteractionMetrics.tsx b/components/InteractionMetrics.tsx
+new file mode 100644
+index 0000000..c65c5b6
+--- /dev/null
++++ b/components/InteractionMetrics.tsx
+@@ -0,0 +1,13 @@
++'use client';
++import {useEffect,useRef,useState} from 'react';
++export default function InteractionMetrics({variant}:{variant:string}){
++ const [running,setRunning]=useState(false),[reports,setReports]=useState<string[]>([]);const revision=useRef(variant);revision.current=variant;
++ useEffect(()=>{if(!running)return;const label=revision.current;let raf=0,last=0,frames:number[]=[],slow=0,forced=0;
++ const supported=typeof PerformanceObserver!=='undefined'&&PerformanceObserver.supportedEntryTypes.includes('long-animation-frame');
++ const observer=supported?new PerformanceObserver(list=>{for(const entry of list.getEntries()){slow++;for(const script of (entry as any).scripts??[])forced+=script.forcedStyleAndLayoutDuration??0}}):null;
++ observer?.observe({type:'long-animation-frame',buffered:false});
++ const tick=(now:number)=>{if(last)frames.push(now-last);last=now;if(frames.length<240){raf=requestAnimationFrame(tick);return}const sorted=[...frames].sort((a,b)=>a-b);setReports(prev=>[`${label}: p50 ${sorted[120].toFixed(1)} ms; p95 ${sorted[228].toFixed(1)} ms; >25 ms ${frames.filter(x=>x>25).length}/${frames.length}; ${supported?`slow-frame entries ${slow}; reported forced style/layout ${forced.toFixed(2)} ms`:'forced style/layout unavailable'}`,...prev].slice(0,6));setRunning(false)};
++ raf=requestAnimationFrame(tick);return()=>{cancelAnimationFrame(raf);observer?.disconnect()};
++ },[running]);
++ return <section className="panel"><h2>Замер текущего варианта</h2><button disabled={running} onClick={()=>setRunning(true)}>{running?'Выполняй жест или открывай меню…':'Записать 240 интервалов кадров'}</button><p>Сравнивай на одном устройстве. RAF — интервалы вызовов, не GPU-время. Forced style/layout учитывается только в поддерживаемых записях медленных кадров; ноль не доказывает отсутствие layout. Во время замера не меняй вариант.</p>{reports.map((r,i)=><p key={i} style={{fontVariantNumeric:'tabular-nums'}}>{r}</p>)}</section>
++}
+diff --git a/components/RunflowGlass.tsx b/components/RunflowGlass.tsx
+index 9bd439e..0c418dc 100644
+--- a/components/RunflowGlass.tsx
++++ b/components/RunflowGlass.tsx
+@@ -29,7 +29,7 @@ export default function RunflowGlass(){
+    filter?.querySelectorAll('feDisplacementMap').forEach(node=>node.setAttribute('scale',String(Math.min(GLASS_PROFILES[materialLevel(el)].maxScale,scale)*gain*strength/100)));
+   };
+   function sync(el:HTMLElement,settled=false){
+-   const rect=el.getBoundingClientRect();if(rect.width<2||rect.height<2)return;
++   const raw=el.getBoundingClientRect();const rect=el.matches('.glass-menu-shell')?{width:el.offsetWidth,height:el.offsetHeight}:raw;if(rect.width<2||rect.height<2)return;
+    const level=materialLevel(el),profile=GLASS_PROFILES[level];el.dataset.glassLevel=level;
+    if(level==='surface'||el.matches('.app>aside'))el.dataset.glassPlane='background';
+    el.dataset.material=el.matches('.glass-settings,.glass-menu-layer,.glass-action-menu')?'transient':el.matches('nav.motion-glass,.segment-lens,.glass-lens-surface')?'clear':'regular';
+@@ -54,7 +54,7 @@ export default function RunflowGlass(){
+    entry.filter.replaceChildren(...nodes);entry.key=key;entry.scale=map.scale;scaleFor(el,map.scale);el.style.setProperty('--rf-backdrop',`url("#${entry.filter.id}")`);
+   }
+   function scan(){frame=0;for(const [el,e]of entries)if(!el.isConnected){resize.unobserve(el);e.filter?.remove();entries.delete(el)}
+-   document.querySelectorAll<HTMLElement>('.app nav.motion-glass,.app .headeractions,.app .toolbar>.live,.app .toolbar>select,.app .glass-settings,.app .scalecontrol select,.app .comparequick button,.app .glassbutton,.app .heroactions>button,.app .choices,.app .modalfoot,.app .segment-lens,.app .glass-lens-surface,.app .progress-series-controls button,.app .chartcontrols select,.app .glass-select-trigger,.glass-menu-layer,.glass-action-menu').forEach(el=>sync(el));
++   document.querySelectorAll<HTMLElement>('.app nav.motion-glass,.app .headeractions,.app .toolbar>.live,.app .toolbar>select,.app .glass-settings,.app .scalecontrol select,.app .comparequick button,.app .glassbutton,.app .heroactions>button,.app .choices,.app .modalfoot,.app .segment-lens,.app .glass-lens-surface,.app .progress-series-controls button,.app .chartcontrols select,.app .glass-select-trigger,.glass-menu-layer,.glass-action-menu,.glass-menu-shell').forEach(el=>sync(el));
+    document.querySelector('.app')?.setAttribute('data-lg-role','stage');scrollMaterial();
+   }
+   function scrollMaterial(){scrollFrame=0;
+diff --git a/hooks/useGlassDrag.ts b/hooks/useGlassDrag.ts
+index 9a2078c..b9680fd 100644
+--- a/hooks/useGlassDrag.ts
++++ b/hooks/useGlassDrag.ts
+@@ -1,14 +1,15 @@
+ 'use client';
+ import {useRef,type PointerEvent,type RefObject} from 'react';
+-import {segmentPresentation} from '../lib/segment-geometry';
++import {sampleVelocity,releaseVelocity} from '../lib/gesture-sampling';
++import {segmentPresentation,segmentResistance} from '../lib/segment-geometry';
+ type Spring={get:()=>number;jump:(n:number)=>void;set:(n:number)=>void;release:(n:number,v:number)=>void};
+-type Props={root:RefObject<HTMLDivElement|null>;x:Spring;width:Spring;press:Spring;drive:Spring;reduce:boolean|null;value:string;options:{value:string}[];onChange:(v:string)=>void};
+-export function useGlassDrag({root,x,width,press,drive,reduce,value,options,onChange}:Props){
++type Props={root:RefObject<HTMLDivElement|null>;x:Spring;width:Spring;press:Spring;drive:Spring;reduce:boolean|null;value:string;options:{value:string}[];onChange:(v:string)=>void;elastic?:boolean};
++export function useGlassDrag({root,x,width,press,drive,reduce,value,options,onChange,elastic=false}:Props){
+  const gesture=useRef<{id:number;start:number;origin:number;last:number;time:number;velocity:number;moved:boolean}|null>(null),suppress=useRef(0);
+  const buttons=()=>Array.from(root.current?.querySelectorAll<HTMLButtonElement>(':scope > button')??[]);
+  function settle(index:number,velocity=0){const b=buttons()[index];if(!b)return;if(reduce){x.jump(b.offsetLeft);width.jump(b.offsetWidth)}else{x.release(b.offsetLeft,velocity);width.set(b.offsetWidth)}}
+  function end(e:PointerEvent<HTMLDivElement>,cancel=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;gesture.current=null;press.set(0);drive.set(0);let index=options.findIndex(o=>o.value===value);const bs=buttons();if(!cancel){if(g.moved){const center=x.get()+width.get()/2;index=bs.reduce((best,b,i)=>Math.abs(b.offsetLeft+b.offsetWidth/2-center)<Math.abs(bs[best].offsetLeft+bs[best].offsetWidth/2-center)?i:best,0)}else{const hit=document.elementFromPoint(e.clientX,e.clientY)?.closest('button');const hitIndex=bs.indexOf(hit as HTMLButtonElement);if(hitIndex>=0)index=hitIndex}}
+- settle(index,!reduce&&!cancel&&g.moved&&performance.now()-g.time<100?g.velocity:0);suppress.current=performance.now()+500;if(root.current?.hasPointerCapture(e.pointerId))root.current.releasePointerCapture(e.pointerId);if(!cancel&&index>=0&&options[index].value!==value)onChange(options[index].value);
++ settle(index,releaseVelocity(g.velocity,g.time,performance.now(),cancel||!g.moved,!!reduce));suppress.current=performance.now()+500;if(root.current?.hasPointerCapture(e.pointerId))root.current.releasePointerCapture(e.pointerId);if(!cancel&&index>=0&&options[index].value!==value)onChange(options[index].value);
+  }
+- return {gesture,onPointerDown:(e:PointerEvent<HTMLDivElement>)=>{if(!e.isPrimary||e.button!==0||gesture.current)return;const bs=buttons();if(!bs.length)return;x.jump(x.get());gesture.current={id:e.pointerId,start:e.clientX,origin:x.get()+width.get()/2,last:e.clientX,time:performance.now(),velocity:0,moved:false};root.current?.setPointerCapture(e.pointerId);if(!reduce)press.set(1);e.preventDefault()},onPointerMove:(e:PointerEvent<HTMLDivElement>)=>{const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=e.clientX-g.start;g.moved ||= Math.abs(delta)>3;const now=performance.now();g.velocity=Math.max(-1000,Math.min(1000,(e.clientX-g.last)*1000/Math.max(8,now-g.time)));g.last=e.clientX;g.time=now;const bs=buttons();if(!bs.length)return;const next=segmentPresentation(bs.map(b=>({left:b.offsetLeft,width:b.offsetWidth})),g.origin+delta);width.jump(next.width);x.jump(next.left);if(!reduce)drive.set(g.velocity*.016);e.preventDefault()},onPointerUp:(e:PointerEvent<HTMLDivElement>)=>end(e),onPointerCancel:(e:PointerEvent<HTMLDivElement>)=>end(e,true),onLostPointerCapture:(e:PointerEvent<HTMLDivElement>)=>end(e,true),onClickCapture:(e:React.MouseEvent)=>{if(e.detail>0&&performance.now()<suppress.current){e.preventDefault();e.stopPropagation()}},cancel:()=>{const g=gesture.current;if(!g)return;gesture.current=null;press.set(0);drive.set(0);settle(options.findIndex(o=>o.value===value));if(root.current?.hasPointerCapture(g.id))root.current.releasePointerCapture(g.id)}};
++ return {gesture,onPointerDown:(e:PointerEvent<HTMLDivElement>)=>{if(!e.isPrimary||e.button!==0||gesture.current)return;const bs=buttons();if(!bs.length)return;x.jump(x.get());gesture.current={id:e.pointerId,start:e.clientX,origin:x.get()+width.get()/2,last:e.clientX,time:performance.now(),velocity:0,moved:false};root.current?.setPointerCapture(e.pointerId);if(!reduce)press.set(1);e.preventDefault()},onPointerMove:(e:PointerEvent<HTMLDivElement>)=>{const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=e.clientX-g.start;g.moved ||= Math.abs(delta)>3;const now=performance.now();g.velocity=sampleVelocity(e.clientX,g.last,now,g.time);g.last=e.clientX;g.time=now;const bs=buttons();if(!bs.length)return;const next=segmentPresentation(bs.map(b=>({left:b.offsetLeft,width:b.offsetWidth})),g.origin+delta);const center=g.origin+delta,first=bs[0].offsetLeft+bs[0].offsetWidth/2,last=bs[bs.length-1].offsetLeft+bs[bs.length-1].offsetWidth/2;const offset=elastic?segmentResistance(center,first,last)-Math.max(first,Math.min(last,center)):0;width.jump(next.width);x.jump(next.left+offset);if(!reduce)drive.set(g.velocity*.016);e.preventDefault()},onPointerUp:(e:PointerEvent<HTMLDivElement>)=>end(e),onPointerCancel:(e:PointerEvent<HTMLDivElement>)=>end(e,true),onLostPointerCapture:(e:PointerEvent<HTMLDivElement>)=>end(e,true),onClickCapture:(e:React.MouseEvent)=>{if(e.detail>0&&performance.now()<suppress.current){e.preventDefault();e.stopPropagation()}},cancel:()=>{const g=gesture.current;if(!g)return;gesture.current=null;press.set(0);drive.set(0);settle(options.findIndex(o=>o.value===value));if(root.current?.hasPointerCapture(g.id))root.current.releasePointerCapture(g.id)}};
+ }
+diff --git a/hooks/useMenuLayer.ts b/hooks/useMenuLayer.ts
+new file mode 100644
+index 0000000..5632ec4
+--- /dev/null
++++ b/hooks/useMenuLayer.ts
+@@ -0,0 +1,16 @@
++'use client';
++import {useEffect,useRef} from 'react';
++import {useFrameSpring} from './useFrameSpring';
++import {menuMorph,type MenuRect} from '../lib/menu-morph';
++export function useMenuLayer(){
++ const progress=useFrameSpring(0,{stiffness:390,damping:40});
++ const job=useRef<{el:HTMLElement;source:MenuRect;target:MenuRect;open:boolean;done:()=>void}|null>(null);
++ const draw=()=>{const j=job.current;if(!j)return;const start=performance.now(),p=progress.get(),f=menuMorph(p,j.source,j.target),shell=j.el.querySelector<HTMLElement>('.glass-menu-shell'),content=j.el.querySelector<HTMLElement>('.glass-menu-options');
++  if(shell){shell.style.transform=`translate(${f.x}px,${f.y}px) scale(${f.sx},${f.sy})`;shell.style.opacity=String(.78+.22*Math.max(0,Math.min(1,p)));shell.style.boxShadow=`inset 0 1px 1px #ffffff55,0 ${4+p*12}px ${12+p*24}px #00000035`;}
++  if(content){content.style.transform='none';content.style.opacity=String(f.opacity);content.style.clipPath=`inset(${f.clipTop}px ${f.clipRight}px ${f.clipBottom}px ${f.clipLeft}px round 14px)`;}
++  j.el.dataset.menuProgress=p.toFixed(3);j.el.dataset.menuWriteMs=(performance.now()-start).toFixed(3);
++  if(!j.open&&p===0){job.current=null;j.done()}
++ };
++ useEffect(()=>progress.on('change',draw),[progress]);
++ return {start(el:HTMLElement,source:MenuRect,target:MenuRect,open:boolean,done:()=>void){const fresh=job.current?.el!==el;job.current={el,source,target,open,done};el.style.transform='none';el.style.opacity='1';el.style.overflow='visible';if(fresh)progress.jump(0);if(matchMedia('(prefers-reduced-motion: reduce)').matches)progress.jump(open?1:0);else progress.set(open?1:0);draw()},stop(){job.current=null;progress.jump(0)}};
++}
+diff --git a/lib/gesture-sampling.ts b/lib/gesture-sampling.ts
+new file mode 100644
+index 0000000..14a57da
+--- /dev/null
++++ b/lib/gesture-sampling.ts
+@@ -0,0 +1,2 @@
++export function sampleVelocity(position:number,last:number,time:number,lastTime:number){return Math.max(-1000,Math.min(1000,(position-last)*1000/Math.max(8,time-lastTime)))}
++export function releaseVelocity(speed:number,lastTime:number,now:number,cancelled:boolean,reduced:boolean){return cancelled||reduced||now-lastTime>=100?0:Math.max(-1000,Math.min(1000,speed))}
+diff --git a/lib/menu-morph.ts b/lib/menu-morph.ts
+new file mode 100644
+index 0000000..c9a749c
+--- /dev/null
++++ b/lib/menu-morph.ts
+@@ -0,0 +1,7 @@
++export type MenuRect={left:number;top:number;width:number;height:number};
++export function menuMorph(p:number,source:MenuRect,target:MenuRect){
++ const t=Math.max(0,Math.min(1,p)),mix=(a:number,b:number)=>a+(b-a)*t;
++ const width=mix(source.width,target.width),height=mix(source.height,target.height);
++ const x=mix(source.left,target.left)-target.left,y=mix(source.top,target.top)-target.top;
++ return {x,y,sx:width/target.width,sy:height/target.height,clipLeft:Math.max(0,x),clipTop:Math.max(0,y),clipRight:Math.max(0,target.width-x-width),clipBottom:Math.max(0,target.height-y-height),opacity:Math.max(0,Math.min(1,(t-.22)/.55))};
++}
+diff --git a/lib/segment-geometry.ts b/lib/segment-geometry.ts
+index 6acec84..e99a28e 100644
+--- a/lib/segment-geometry.ts
++++ b/lib/segment-geometry.ts
+@@ -5,3 +5,10 @@ export function segmentPresentation(items:{left:number;width:number}[],center:nu
+  const width=items[i].width+(items[j].width-items[i].width)*t;
+  return {left:c-width/2,width};
+ }
++
++// Candidate boundary resistance, isolated behind the workbench opt-in.
++export function segmentResistance(center:number,first:number,last:number){
++ const edge=center<first?first:center>last?last:center;
++ const excess=center-edge;
++ return edge+excess*.45/(1+Math.abs(excess)/48);
++}
+diff --git a/tests/menu-morph.test.ts b/tests/menu-morph.test.ts
+new file mode 100644
+index 0000000..1dc47be
+--- /dev/null
++++ b/tests/menu-morph.test.ts
+@@ -0,0 +1,9 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {menuMorph} from '../lib/menu-morph.ts';
++import {SpringValue} from '../research/liquid-glass/GlassPhysics.ts';
++import {sampleVelocity,releaseVelocity} from '../lib/gesture-sampling.ts';
++const source={left:150,top:20,width:100,height:44},target={left:60,top:72,width:190,height:150};
++test('material endpoints and unscaled foreground reveal are finite and bounded',()=>{assert.equal(menuMorph(1,source,target).sx,1);assert.equal(menuMorph(1,source,target).sy,1);assert.equal(menuMorph(0,source,target).opacity,0);for(let p=-.1;p<1.2;p+=.01){const f=menuMorph(p,source,target);for(const n of Object.values(f))assert.ok(Number.isFinite(n));assert.ok(f.opacity>=0&&f.opacity<=1);assert.ok(f.sx>0&&f.sy>0)}});
++test('retargeting a moving progress spring preserves presentation and settles',()=>{const spring=new SpringValue(0,{stiffness:390,damping:40});spring.setTarget(1);for(let i=0;i<7;i++)spring.step(1/60);const before=menuMorph(spring.current,source,target);spring.setTarget(0);assert.deepEqual(menuMorph(spring.current,source,target),before);for(let i=0;i<240;i++)spring.step(1/60);assert.equal(spring.current,0);assert.equal(menuMorph(spring.current,source,target).opacity,0)});
++test('stale hold velocity, cancel and reduced-motion release are suppressed',()=>{assert.equal(releaseVelocity(900,0,150,false,false),0);assert.equal(releaseVelocity(900,0,20,true,false),0);assert.equal(releaseVelocity(900,0,20,false,true),0);assert.equal(releaseVelocity(-900,0,20,false,false),-900);assert.equal(sampleVelocity(10,0,2000,0),5);assert.equal(sampleVelocity(100,0,1,0),1000)});
+diff --git a/tests/segment-geometry.test.ts b/tests/segment-geometry.test.ts
+index 03e37fe..ef66325 100644
+--- a/tests/segment-geometry.test.ts
++++ b/tests/segment-geometry.test.ts
+@@ -1,5 +1,7 @@
+ import assert from 'node:assert/strict';
+ import test from 'node:test';
+-import {segmentPresentation} from '../lib/segment-geometry.ts';
++import {segmentPresentation,segmentResistance} from '../lib/segment-geometry.ts';
+ test('unequal segment widths remain inside track for all pointer positions',()=>{const items=[{left:4,width:140},{left:146,width:80}];for(let c=-200;c<500;c++){const p=segmentPresentation(items,c);assert.ok(p.left>=4);assert.ok(p.left+p.width<=226);assert.ok(p.width>=80&&p.width<=140)}assert.deepEqual(segmentPresentation(items,74),{left:4,width:140});assert.deepEqual(segmentPresentation(items,186),{left:146,width:80})});
+ test('reversal is continuous and single segment is stable',()=>{const items=[{left:4,width:140},{left:146,width:80}];for(let c=75;c<186;c++){const a=segmentPresentation(items,c),b=segmentPresentation(items,c-.01);assert.ok(Math.abs(a.left-b.left)<.1);assert.ok(Math.abs(a.width-b.width)<.1)}assert.deepEqual(segmentPresentation([{left:4,width:80}],900),{left:4,width:80})});
++
++test('candidate resistance is continuous, bounded and does not change interior tracking',()=>{for(let c=0;c<200;c++)assert.equal(segmentResistance(c,0,200),c);for(const d of [1,20,100,1e6]){const r=segmentResistance(200+d,0,200);assert.ok(r>200&&r<222);assert.ok(r<200+d)}assert.ok(Math.abs(segmentResistance(200.001,0,200)-200)<.001)});

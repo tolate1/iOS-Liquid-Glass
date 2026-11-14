@@ -42,3 +42,9 @@ GetStream's Tab Bar and menu samples delegate rendering/interaction to SwiftUI T
 
 
 Desktop preview: candidate checkbox and segment value/commit count updated; real menu opened and selected 30 days; navigation keyboard selection updated the local route state. This checks plumbing, not continuous gesture smoothness, edge resistance feel or physical-device performance. No new continuous video recorded.
+
+## Experiment iteration — separate material plane
+- GlassSelect motionMode=layer keeps final-size panel/labels fixed and transforms a separate backdrop shell. One progress spring controls shell transform, content clip/opacity and shadow. Bounds mode remains the default baseline. These are two experiments, not a native Apple implementation.
+- Segment and optional navigation candidate share velocity sampling/release freshness conventions; navigation retains its own tab choice policy. Candidate navigation adds bounded boundary resistance. Lifecycle ownership remains per component; this is not a claim that both complete controllers have been unified.
+- InteractionMetrics samples 240 RAF intervals, p50/p95 and >25ms counts; optional long-animation-frame records report only forced style/layout attributed in slow frames. It is not total layout cost, GPU time or hardware proof. Compare on one device with identical gestures. Zero does not establish absence of layout.
+- Six numerical tests cover menu endpoints, interrupted progress spring continuity/settling, stale/cancel/reduced velocity and segment geometry bounds. TypeScript passes. Local preview infrastructure refused the connection despite stale dev-server registration, so the current iteration requires published-page verification. No iPhone acceptance or continuous recording is claimed.
