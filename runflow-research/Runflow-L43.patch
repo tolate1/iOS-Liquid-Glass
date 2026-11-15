@@ -1,0 +1,254 @@
+diff --git a/IMPLEMENTATION_PLAN.md b/IMPLEMENTATION_PLAN.md
+new file mode 100644
+index 0000000..1baeadd
+--- /dev/null
++++ b/IMPLEMENTATION_PLAN.md
+@@ -0,0 +1,12 @@
++# L43 — interaction repair plan and delivery
++
++1. Restore canonical L42 source and preserve diary formulas/data. Done.
++2. Replace the hand-managed RAF spring driver with the existing Motion engine. Keep direct tracking, release velocity and uninterrupted current presentation. Add blur/background cancellation for navigation. Implemented; Chromium selection/drag verified. Original phone stall cause not isolated.
++3. Remove cursor-following radial light, remove width-amplified vertical skew, constrain desktop lab navigation to sidebar proportions. Implemented; vertical drag verified.
++4. Replace the experimental transformed backdrop sibling with one clipped material viewport driven by one progress spring. Original labels do not scale. Implemented; selection, Escape and immediate reopening verified in Chromium. Bounds baseline remains available; new variant stays opt-in in the lab.
++5. Add a horizontal workbench switch to exercise the same navigation controller without claiming physical iPhone emulation. Implemented; horizontal selection and drag verified in Chromium.
++6. Run TypeScript, numerical regressions and production build. Publish, save source ZIP and application patch. See VERIFICATION_L43.md.
++7. Device gate: repeat the owner's Telegram iPhone hold/reverse/background-return gesture and menu interruptions. Still open. Then decide whether to adopt the experimental menu as the default.
++
++## Material boundary
++The change removes distracting effects; it does not implement or prove native Apple Liquid Glass. Known Safari SVG-backdrop fallback remains. No WebGL renderer or hardware GPU claim is added. Further optical work needs device evidence of the actual rendering path and live backdrop deformation.
+diff --git a/MOTION_RESEARCH.md b/MOTION_RESEARCH.md
+index 617892b..a2e5f76 100644
+--- a/MOTION_RESEARCH.md
++++ b/MOTION_RESEARCH.md
+@@ -54,3 +54,8 @@ The owner reports the lab Dock was nonfunctional on the phone; the recording is
+ 
+ ## Follow-up: owner still cannot see the mobile specimen
+ The previous portal-based repair failed the owner's phone check. Remove it rather than mark it successful. The lab now renders one unconditional navigation specimen in normal document flow at every viewport. Route-scoped CSS overrides inherited fixed positioning and translation on the specimen only. On mobile it remains a five-column row; on desktop it retains the vertical layout. L42 is a visible lab marker to distinguish this revision. This deliberately tests the component inside the workbench, not the production Dock's viewport anchoring. The original cause is not established; fresh phone visibility/touch confirmation remains required.
++
++## L43 — reduce effects and consolidate motion ownership
++The owner confirmed L42 visibility and supplied phone/desktop failure recordings. Phone selected-state/lens mismatch is confirmed; the exact runtime scheduler failure is not isolated. The shared custom RAF spring wrapper is replaced by the already installed Motion engine, preserving its consumer API, release velocity and current position. Navigation also resets on blur/background if a pointer-up is lost. Chromium selection/retarget/vertical and horizontal drag were exercised; device acceptance remains open.
++
++Remove global pointer-following radial lighting. Vertical skew is zero rather than an angle amplified by a wide row; desktop specimen width is constrained to sidebar proportions. The new optional menu has one clipped material viewport with bounds driven by one spring and unscaled foreground. This accepts layout work for a small menu instead of transforming a filtered sibling with WebKit occlusion artifacts. It is not compositor-only and no performance improvement is claimed. Chromium menu selection, Escape and interrupted closing/reopening succeeded. Actual iPhone fallback rendering and new gesture behavior require a new device recording.
+diff --git a/VERIFICATION_L43.md b/VERIFICATION_L43.md
+new file mode 100644
+index 0000000..005abe1
+--- /dev/null
++++ b/VERIFICATION_L43.md
+@@ -0,0 +1,7 @@
++# L43 evidence
++
++Passed: TypeScript; ten numerical regression tests (including legacy menu math, not a new-driver device test); Chromium preview navigation selection, rapid retargeting, vertical drag, horizontal drag, menu selection, Escape and immediate reopening after selecting a menu item. Read-only DOM observations confirmed the settled lens at the selected target and an overflow-hidden menu with no sibling backdrop shell.
++
++Implemented beyond that observed set: navigation cancels an active gesture on browser blur or document hiding. Background-return and physical touch remain unverified. No new physical iPhone acceptance, interaction video or GPU performance measurement was produced. No exact diagnosis of the original phone stall is claimed.
++
++Production defaults: shared spring scheduling and restrained light/shape repairs apply to existing consumers. Experimental menu remains opt-in in /interaction-lab. Diary data, formulas and workout entry remain unchanged. Desktop workbench offers a horizontal layout switch; this is not iPhone emulation.
+diff --git a/app/functional-glass.css b/app/functional-glass.css
+index e2538a7..7a601e9 100644
+--- a/app/functional-glass.css
++++ b/app/functional-glass.css
+@@ -44,9 +44,14 @@ html[data-theme=dark]{--control-density:.19;--menu-density:.48;--edge-light:#fff
+ 
+ .app .liquid-segment>button:active{transform:none;background:none;box-shadow:none}
+ 
+-/* Experimental material sibling: stable final-size foreground, no scaled glyphs. */
+-.glass-menu-layer[data-motion-mode=layer]{isolation:isolate;background:none!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+-.glass-menu-layer[data-motion-mode=layer]>.glass-menu-options{position:relative;z-index:1;animation:none;will-change:clip-path,opacity;}
+-.glass-menu-shell{position:absolute;inset:0;border:1px solid var(--edge-light);border-radius:22px;background:linear-gradient(145deg,#ffffff26,#ffffff03),rgb(var(--surface-transmission-tint)/.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transform-origin:0 0;pointer-events:none;will-change:transform;z-index:0;}
+-.glass-menu-shell[data-rf-glass=svg]{backdrop-filter:var(--rf-backdrop);-webkit-backdrop-filter:var(--rf-backdrop)}
+-@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.glass-menu-shell{background:var(--surface)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
++/* L43: one clipped material viewport; labels remain at their final size. */
++.glass-menu-layer[data-motion-mode=layer]{isolation:isolate;overflow:hidden;will-change:width,height,left,top;}
++.glass-menu-layer[data-motion-mode=layer]>.glass-menu-options{z-index:1;animation:none;transition:none;}
++/* Light is tied to contact/shape rather than ordinary cursor travel. */
++nav.glass-navigation:before{opacity:0!important}
++.app nav.motion-glass .lens-touch-light{display:none}
++.app nav.motion-glass .lens-caustic{opacity:.16}
++.app nav.motion-glass.is-dragging .lens-caustic{opacity:.24}
++
++.glass-menu-layer[data-motion-mode=layer]{background:linear-gradient(150deg,#ffffff12,#ffffff02),rgb(var(--surface-transmission-tint)/.58);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);box-shadow:inset 0 1px 1px #ffffff55,0 12px 30px #0003}
++.glass-menu-layer[data-motion-mode=layer][data-rf-glass=svg]{backdrop-filter:var(--rf-backdrop);-webkit-backdrop-filter:var(--rf-backdrop)}
+diff --git a/app/interaction-lab/lab.css b/app/interaction-lab/lab.css
+index 5817fa5..a995196 100644
+--- a/app/interaction-lab/lab.css
++++ b/app/interaction-lab/lab.css
+@@ -13,3 +13,10 @@
+  .interaction-lab .lab-navigation-specimen nav.glass-navigation button{min-width:0;min-height:60px;padding:6px 0}
+  .interaction-lab .lab-navigation-specimen nav.glass-navigation button>.nav-visual{padding:6px 0;font-size:9px}
+ }
++/* Match sidebar proportions instead of stretching a desktop lens across a card. */
++@media(min-width:851px){.interaction-lab .lab-navigation-specimen{max-width:270px}}
++.interaction-lab .lab-navigation-specimen.is-horizontal{max-width:480px}
++.interaction-lab .lab-navigation-specimen.is-horizontal nav.glass-navigation{grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;padding:5px}
++.interaction-lab .lab-navigation-specimen.is-horizontal nav.glass-navigation button{min-width:0;min-height:60px;padding:6px 0}
++.interaction-lab .lab-navigation-specimen.is-horizontal nav.glass-navigation button>.nav-visual{flex-direction:column;justify-content:center;padding:6px 0;gap:4px;font-size:10px}
++.interaction-lab .lab-navigation-specimen.is-horizontal nav small{display:none}
+diff --git a/app/interaction-lab/page.tsx b/app/interaction-lab/page.tsx
+index 0ad749e..6dee0ab 100644
+--- a/app/interaction-lab/page.tsx
++++ b/app/interaction-lab/page.tsx
+@@ -7,8 +7,8 @@ import GlassNavigation from '../../components/GlassNavigation';
+ import GlassSelect from '../../components/GlassSelect';
+ import GlassAppearance from '../../components/GlassAppearance';
+ export default function InteractionLab(){
+- const [navCommits,setNavCommits]=useState(0);
++ const [navCommits,setNavCommits]=useState(0),[horizontalTest,setHorizontalTest]=useState(false);
+  const [elastic,setElastic]=useState(false),[navCandidate,setNavCandidate]=useState(false),[menuCandidate,setMenuCandidate]=useState(false);
+  const [kind,setKind]=useState('segment'),[segment,setSegment]=useState('journal'),[tab,setTab]=useState('Обзор'),[period,setPeriod]=useState('Все время'),[commits,setCommits]=useState(0);
+- return <div className="app interaction-lab"><main style={{margin:0,width:'100%',maxWidth:800,padding:24}}><header><div><a href="/">← Runflow</a><h1>Проверка взаимодействий</h1><p>Изолированные экземпляры рабочих компонентов. Демо не меняет тренировки.</p></div><GlassAppearance/></header><div role="group" aria-label="Компонент" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24}}>{[['segment','Переключатель'],['navigation','Навигация'],['menu','Меню']].map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><section className="panel" style={{minHeight:400}}><h2>{kind==='segment'?'Переключатель':kind==='navigation'?'Навигация':'Меню'}</h2>{kind==='segment'?<><label style={{marginBottom:16}}>Кандидат: сопротивление на границах<input type="checkbox" checked={elastic} onChange={e=>setElastic(e.target.checked)}/></label><GlassSegment elastic={elastic} value={segment} onChange={v=>{setSegment(v);setCommits(n=>n+1)}} label="Источник в лаборатории" options={[{value:'journal',label:'Мой журнал'},{value:'demo',label:'Демо'}]}/><p role="status">Выбрано: {segment}. Изменений значения: {commits}.</p><p>Удерживай две секунды, веди медленно, разверни движение и отпусти. Счётчик должен измениться только после отпускания в другом сегменте.</p></>:kind==='navigation'?<><label>Кандидат: общий расчёт скорости и сопротивление<input type="checkbox" checked={navCandidate} onChange={e=>setNavCandidate(e.target.checked)}/></label><div className="lab-navigation-specimen"><GlassNavigation experimental={navCandidate} active={tab} count={7} onChange={v=>{setTab(v);setNavCommits(n=>n+1)}}/></div><p role="status">Версия L42. Раздел: {tab}. Принято переключений: {navCommits}.</p><p>Проверь перехват движущейся линзы и отмену жеста. Навигация находится здесь, внутри тестовой карточки.</p></>:<><label>Кандидат: отдельная оболочка, единый прогресс<input type="checkbox" checked={menuCandidate} onChange={e=>setMenuCandidate(e.target.checked)}/></label><GlassSelect key={String(menuCandidate)} motionMode={menuCandidate?'layer':'bounds'} label="Период в лаборатории" value={period} options={['Все время','30 дней','7 дней']} onChange={setPeriod}/><p role="status">Период: {period}</p><p>Проверь открытие, Escape, повторное раскрытие во время закрытия и выбор стрелками. Буквы не должны сжиматься.</p></>}<div aria-hidden="true" style={{marginTop:40,height:120,background:'repeating-linear-gradient(90deg,transparent 0 23px,#8883 23px 24px)'}}>0123456789 · тестовая детализация за поверхностью</div></section><InteractionMetrics variant={kind+':'+(kind==='segment'?elastic:kind==='navigation'?navCandidate:menuCandidate)}/><p>Физический iPhone и непрерывная запись остаются обязательными отдельными проверками.</p></main></div>
++ return <div className="app interaction-lab"><main style={{margin:0,width:'100%',maxWidth:800,padding:24}}><header><div><a href="/">← Runflow</a><h1>Проверка взаимодействий</h1><p>Жесты, движение и материал. Тренировки не меняются.</p></div><GlassAppearance/></header><div role="group" aria-label="Компонент" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24}}>{[['segment','Переключатель'],['navigation','Навигация'],['menu','Меню']].map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><section className="panel" style={{minHeight:400}}><h2>{kind==='segment'?'Переключатель':kind==='navigation'?'Навигация':'Меню'}</h2>{kind==='segment'?<><label style={{marginBottom:16}}>Кандидат: сопротивление на границах<input type="checkbox" checked={elastic} onChange={e=>setElastic(e.target.checked)}/></label><GlassSegment elastic={elastic} value={segment} onChange={v=>{setSegment(v);setCommits(n=>n+1)}} label="Источник в лаборатории" options={[{value:'journal',label:'Мой журнал'},{value:'demo',label:'Демо'}]}/><p role="status">Выбрано: {segment}. Изменений значения: {commits}.</p><p>Удерживай две секунды, веди медленно, разверни движение и отпусти. Счётчик должен измениться только после отпускания в другом сегменте.</p></>:kind==='navigation'?<><label>Кандидат: общий расчёт скорости и сопротивление<input type="checkbox" checked={navCandidate} onChange={e=>setNavCandidate(e.target.checked)}/></label><button type="button" aria-pressed={horizontalTest} onClick={()=>setHorizontalTest(v=>!v)}>Горизонтальная панель</button><div className={"lab-navigation-specimen"+(horizontalTest?" is-horizontal":"")}><GlassNavigation experimental={navCandidate} active={tab} count={7} onChange={v=>{setTab(v);setNavCommits(n=>n+1)}}/></div><p role="status">Версия L43. Раздел: {tab}. Принято переключений: {navCommits}.</p><p>Проверь перехват движущейся линзы и отмену жеста. Навигация находится здесь, внутри тестовой карточки.</p></>:<><label>Новый вариант: единая поверхность меню<input type="checkbox" checked={menuCandidate} onChange={e=>setMenuCandidate(e.target.checked)}/></label><GlassSelect key={String(menuCandidate)} motionMode={menuCandidate?'layer':'bounds'} label="Период в лаборатории" value={period} options={['Все время','30 дней','7 дней']} onChange={setPeriod}/><p role="status">Период: {period}</p><p>Проверь открытие, Escape, повторное раскрытие во время закрытия и выбор стрелками. Буквы не должны сжиматься.</p></>}<div aria-hidden="true" style={{marginTop:40,height:120,background:'repeating-linear-gradient(90deg,transparent 0 23px,#8883 23px 24px)'}}>0123456789 · тестовая детализация за поверхностью</div></section><InteractionMetrics variant={kind+':'+(kind==='segment'?elastic:kind==='navigation'?navCandidate:menuCandidate)}/><p>Физический iPhone и непрерывная запись остаются обязательными отдельными проверками.</p></main></div>
+ }
+diff --git a/components/GlassNavigation.tsx b/components/GlassNavigation.tsx
+index ef66a1a..64876c6 100644
+--- a/components/GlassNavigation.tsx
++++ b/components/GlassNavigation.tsx
+@@ -26,11 +26,13 @@ export default function GlassNavigation({active,onChange,count,experimental=fals
+  // Explicit development-only inspection state for screenshots; never enabled in production.
+  useEffect(()=>{if(process.env.NODE_ENV==='development'&&new URLSearchParams(location.search).get('glass-inspect')==='held'){pressed.set(1);stretch.set(12);setDragging(true)}},[pressed,stretch]);
+  useEffect(()=>{if(reduce){pressed.jump(0);stretch.jump(0)}},[reduce,pressed,stretch]);
++ // A WebView can lose a pointer-up when its app/browser chrome takes focus.
++ useEffect(()=>{const cancel=()=>{const g=gesture.current;if(!g)return;gesture.current=null;const root=nav.current;if(root?.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.jump(0);stretch.jump(0);setDragging(false);const b=buttons.current[visualActive];if(b){x.set(b.offsetLeft);y.set(b.offsetTop)}suppressClick.current=performance.now()+400};const visibility=()=>{if(document.hidden)cancel()};window.addEventListener('blur',cancel);document.addEventListener('visibilitychange',visibility);return()=>{window.removeEventListener('blur',cancel);document.removeEventListener('visibilitychange',visibility)}},[visualActive,x,y,pressed,stretch]);
+  const [box,setBox]=useState({w:0,h:0,sceneW:0,sceneH:0});
+  useLayoutEffect(()=>{const measure=()=>{const root=nav.current,button=buttons.current[visualActive];if(!root||!button)return;const measured=[root.clientWidth,root.clientHeight,...items.flatMap(i=>{const b=buttons.current[i.value];return b?[b.offsetLeft,b.offsetTop,b.offsetWidth,b.offsetHeight]:[]})];if(gesture.current&&sameNavigationGeometry(geometry.current,measured))return;geometry.current=measured;if(gesture.current){const g=gesture.current;gesture.current=null;if(root.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.set(0);stretch.set(0);setDragging(false);suppressClick.current=performance.now()+400}const nextX=button.offsetLeft,nextY=button.offsetTop;horizontal.current=items.length>1&&buttons.current[items[4].value]?.offsetLeft!==buttons.current[items[0].value]?.offsetLeft;axis.set(horizontal.current?1:0);for(const item of items){const b=buttons.current[item.value];if(b){b.style.setProperty('--item-x',b.offsetLeft+'px');b.style.setProperty('--item-y',b.offsetTop+'px')}}baseW.set(button.offsetWidth+(horizontal.current?12:0));baseH.set(button.offsetHeight-(horizontal.current?8:0));setBox({w:button.offsetWidth,h:button.offsetHeight,sceneW:root.clientWidth,sceneH:root.clientHeight});if(!initialized.current||reduce){x.jump(nextX);y.jump(nextY);initialized.current=true}x.set(nextX);y.set(nextY)};measure();const observer=new ResizeObserver(measure);if(nav.current)observer.observe(nav.current);window.addEventListener('resize',measure);return()=>{observer.disconnect();window.removeEventListener('resize',measure)}},[visualActive,reduce,x,y]);
+  useEffect(()=>{if(process.env.NODE_ENV!=='development')return;const samples:number[][]=[];const record=()=>{samples.push([Math.round(x.get()*100)/100,Math.round(y.get()*100)/100]);if(samples.length>40)samples.shift();if(nav.current)nav.current.dataset.motionSamples=JSON.stringify(samples)};const offX=x.on('change',record),offY=y.on('change',record);return()=>{offX();offY()}},[x,y]);
+  function beginDrag(e:PointerEvent<HTMLElement>){if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||gesture.current)return;const root=nav.current;if(!root)return;const first=buttons.current[items[0].value],last=buttons.current[items[4].value];if(!first||!last)return;const isHorizontal=last.offsetLeft!==first.offsetLeft;horizontal.current=isHorizontal;axis.set(isHorizontal?1:0);x.jump(x.get());y.jump(y.get());lastPointer.current={position:isHorizontal?e.clientX:e.clientY,time:performance.now(),speed:0};if(!reduce)pressed.set(1);gesture.current={id:e.pointerId,start:isHorizontal?e.clientX:e.clientY,origin:isHorizontal?x.get():y.get(),offset:0,horizontal:isHorizontal,moved:false};root.setPointerCapture(e.pointerId);setDragging(true);e.preventDefault()}
+  function moveDrag(e:PointerEvent<HTMLElement>){const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=(g.horizontal?e.clientX:e.clientY)-g.start;if(Math.abs(delta)>3)g.moved=true;const position=g.horizontal?e.clientX:e.clientY,now=performance.now(),speed=experimental?sampleVelocity(position,lastPointer.current.position,now,lastPointer.current.time)/1000:(position-lastPointer.current.position)/Math.max(8,now-lastPointer.current.time);lastPointer.current={position,time:now,speed};if(!reduce)stretch.set(Math.max(-18,Math.min(18,speed*18)));if(nav.current){const rect=nav.current.getBoundingClientRect();nav.current.style.setProperty('--touch-x',`${e.clientX-rect.left}px`);nav.current.style.setProperty('--touch-y',`${e.clientY-rect.top}px`);}const coordinates=items.map(i=>buttons.current[i.value]).filter((b):b is HTMLButtonElement=>!!b).map(b=>g.horizontal?b.offsetLeft:b.offsetTop);const value=experimental?segmentResistance(g.origin+delta,Math.min(...coordinates),Math.max(...coordinates)):Math.max(Math.min(...coordinates),Math.min(Math.max(...coordinates),g.origin+delta));if(g.horizontal){x.set(value);x.jump(value)}else{y.set(value);y.jump(value)}e.preventDefault()}
+- function finishDrag(e:PointerEvent<HTMLElement>,cancelled=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;gesture.current=null;pressed.set(0);stretch.set(0);setDragging(false);if(nav.current?.hasPointerCapture(e.pointerId))nav.current.releasePointerCapture(e.pointerId);let next=visualActive;if(g.moved&&!cancelled){const position=g.horizontal?x.get():y.get();next=items.reduce((best,item)=>{const a=buttons.current[best.value],b=buttons.current[item.value];return a&&b&&Math.abs((g.horizontal?b.offsetLeft:b.offsetTop)-position)<Math.abs((g.horizontal?a.offsetLeft:a.offsetTop)-position)?item:best},items[0]).value}else if(!cancelled){next=navigationHit(e.clientX,e.clientY,items.flatMap(item=>{const b=buttons.current[item.value];return b?[{value:item.value,...b.getBoundingClientRect().toJSON()}]:[]}))||visualActive}const button=buttons.current[next];if(button){const velocity=experimental?releaseVelocity(lastPointer.current.speed*1000,lastPointer.current.time,performance.now(),cancelled||!g.moved,!!reduce):!reduce&&g.moved&&!cancelled&&performance.now()-lastPointer.current.time<100?lastPointer.current.speed*1000:0;if(g.horizontal){x.release(button.offsetLeft,velocity);y.set(button.offsetTop)}else{y.release(button.offsetTop,velocity);x.set(button.offsetLeft)}}suppressClick.current=performance.now()+400;setVisualActive(next);if(!cancelled)onChange(next)}
++ function finishDrag(e:PointerEvent<HTMLElement>,cancelled=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;gesture.current=null;pressed.set(0);stretch.set(0);setDragging(false);if(nav.current?.hasPointerCapture(e.pointerId))nav.current.releasePointerCapture(e.pointerId);let next=visualActive;if(g.moved&&!cancelled){const position=g.horizontal?x.get():y.get();next=items.reduce((best,item)=>{const a=buttons.current[best.value],b=buttons.current[item.value];return a&&b&&Math.abs((g.horizontal?b.offsetLeft:b.offsetTop)-position)<Math.abs((g.horizontal?a.offsetLeft:a.offsetTop)-position)?item:best},items[0]).value}else if(!cancelled){next=navigationHit(e.clientX,e.clientY,items.flatMap(item=>{const b=buttons.current[item.value];return b?[{value:item.value,...b.getBoundingClientRect().toJSON()}]:[]}))||visualActive}const button=buttons.current[next];if(button){const velocity=experimental?releaseVelocity(lastPointer.current.speed*1000,lastPointer.current.time,performance.now(),cancelled||!g.moved,!!reduce):!reduce&&g.moved&&!cancelled&&performance.now()-lastPointer.current.time<100?lastPointer.current.speed*1000:0;if(g.horizontal){x.release(button.offsetLeft,velocity);y.set(button.offsetTop)}else{y.release(button.offsetTop,velocity);x.set(button.offsetLeft)}}suppressClick.current=performance.now()+400;setVisualActive(next);if(!cancelled&&next!==visualActive)onChange(next)}
+  return <nav ref={nav} className={"glass-navigation motion-glass"+(dragging?' is-dragging':'')} onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={e=>finishDrag(e)} onPointerCancel={e=>finishDrag(e,true)} onLostPointerCapture={e=>finishDrag(e,true)} onClickCapture={e=>{if(e.detail>0&&performance.now()<suppressClick.current){e.preventDefault();e.stopPropagation()}}} data-lg-role="dock" aria-label="Разделы дневника">{items.map(({Icon,value,label})=><button ref={el=>{buttons.current[value]=el}} key={value} aria-current={visualActive===value?'page':undefined} className={visualActive===value?'active':''} onClick={()=>{setVisualActive(value);onChange(value)}}><span className="nav-visual"><Icon size={19}/><span>{label}</span>{value==='Тренировки'&&<small>{count}</small>}</span></button>)}<motion.div className="glass-lens is-ready" aria-hidden="true" style={{x:renderX,y:renderY,width,height,borderRadius:shape.radius,skewX:shape.skewX,skewY:shape.skewY,opacity:box.w?1:0}}><motion.div ref={surface} className="glass-lens-surface" style={{scale:shape.scale,'--light-angle':shape.angle,'--rf-light-x':shape.lightX,'--rf-light-y':shape.lightY} as MotionStyle}><div className="lens-caustic"/><div className="lens-touch-light"/></motion.div></motion.div></nav>
+ }
+diff --git a/components/GlassSelect.tsx b/components/GlassSelect.tsx
+index 544095d..e7e8408 100644
+--- a/components/GlassSelect.tsx
++++ b/components/GlassSelect.tsx
+@@ -18,12 +18,12 @@ export default function GlassSelect({value,onChange,options,label,motionMode='bo
+   const height=Math.min(innerHeight-20,(content?.scrollHeight??panel.scrollHeight)+16),left=Math.max(10,Math.min(innerWidth-width-10,r.right-width));
+   const below=innerHeight-r.bottom>=Math.min(height+10,210)||r.top<height+20;
+   const top=Math.max(10,Math.min(innerHeight-height-10,below?r.bottom+8:r.top-height-8));
+-  panel.style.left=left+'px';panel.style.top=top+'px';
++  if(motionMode!=='layer'){panel.style.left=left+'px';panel.style.top=top+'px';}
+   panel.dataset.expanded=String(open);
+   if(motionMode==='layer'){previous?.cancel();animation.current=null;layer.start(panel,{left:r.left,top:r.top,width:r.width,height:r.height},{left,top,width,height},open,()=>setPresent(false));}else animation.current=animateGlassMenu(panel,button,open,width,height,left,top,previous,()=>{if(!open){animation.current=null;setPresent(false)}});
+-  if(open&&opening.current){opening.current=false;panel.querySelector<HTMLElement>('[aria-selected=true]')?.focus()}
++  if(open&&opening.current){opening.current=false;panel.querySelector<HTMLElement>('[aria-selected=true]')?.focus({preventScroll:true})}
+  },[open,present,motionMode]);
+  useEffect(()=>()=>animation.current?.cancel(),[]);
+  useEffect(()=>{if(!open)return;const close=(e:PointerEvent)=>{if(!anchor.current?.contains(e.target as Node)&&!menu.current?.contains(e.target as Node))setOpen(false)},scroll=(e:Event)=>{if(!menu.current?.contains(e.target as Node))setOpen(false)};document.addEventListener('pointerdown',close);window.addEventListener('resize',scroll);window.addEventListener('scroll',scroll,true);return()=>{document.removeEventListener('pointerdown',close);window.removeEventListener('resize',scroll);window.removeEventListener('scroll',scroll,true)}},[open]);
+- return <><button ref={anchor} type="button" className="glass-select-trigger" aria-label={label} aria-haspopup="listbox" aria-expanded={open} aria-controls={present?id:undefined} onClick={()=>open?setOpen(false):show()} onKeyDown={e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();show()}}}>{value}<ChevronDown size={14}/></button>{present&&createPortal(<div id={id} ref={menu} className="glass-menu-layer" data-motion-mode={motionMode} role="listbox" aria-label={label} aria-hidden={!open} inert={!open} style={{transformOrigin:'top left',pointerEvents:open?'auto':'none'}} onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();setOpen(false);anchor.current?.focus()}if(e.key==='Tab'){setOpen(false);anchor.current?.focus()}if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const all=Array.from(menu.current!.querySelectorAll<HTMLElement>('[role=option]')),i=all.indexOf(document.activeElement as HTMLElement);all[e.key==='Home'?0:e.key==='End'?all.length-1:(i+(e.key==='ArrowDown'?1:-1)+all.length)%all.length]?.focus()}}}><div className="glass-menu-options">{options.map(v=><button role="option" aria-selected={value===v} tabIndex={-1} key={v} onClick={()=>{onChange(v);setOpen(false);anchor.current?.focus()}}>{v}{value===v&&<Check size={15}/>}</button>)}</div>{motionMode==='layer'&&<div className="glass-menu-shell" aria-hidden="true"/>}</div>,document.body)}</>
++ return <><button ref={anchor} type="button" className="glass-select-trigger" aria-label={label} aria-haspopup="listbox" aria-expanded={open} aria-controls={present?id:undefined} onClick={()=>open?setOpen(false):show()} onKeyDown={e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();show()}}}>{value}<ChevronDown size={14}/></button>{present&&createPortal(<div id={id} ref={menu} className="glass-menu-layer" data-motion-mode={motionMode} role="listbox" aria-label={label} aria-hidden={!open} inert={!open} style={{transformOrigin:'top left',pointerEvents:open?'auto':'none'}} onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();setOpen(false);anchor.current?.focus({preventScroll:true})}if(e.key==='Tab'){setOpen(false);anchor.current?.focus({preventScroll:true})}if(['ArrowDown','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const all=Array.from(menu.current!.querySelectorAll<HTMLElement>('[role=option]')),i=all.indexOf(document.activeElement as HTMLElement);all[e.key==='Home'?0:e.key==='End'?all.length-1:(i+(e.key==='ArrowDown'?1:-1)+all.length)%all.length]?.focus({preventScroll:true})}}}><div className="glass-menu-options">{options.map(v=><button role="option" aria-selected={value===v} tabIndex={-1} key={v} onClick={()=>{onChange(v);setOpen(false);anchor.current?.focus({preventScroll:true})}}>{v}{value===v&&<Check size={15}/>}</button>)}</div></div>,document.body)}</>
+ }
+diff --git a/components/RunflowGlass.tsx b/components/RunflowGlass.tsx
+index 0c418dc..f47cf61 100644
+--- a/components/RunflowGlass.tsx
++++ b/components/RunflowGlass.tsx
+@@ -68,7 +68,7 @@ export default function RunflowGlass(){
+   }
+   function scrolling(){if(!scrollFrame)scrollFrame=requestAnimationFrame(scrollMaterial);clearTimeout(scrollTimer);document.documentElement.dataset.glassScrolling='true';scrollTimer=window.setTimeout(()=>{delete document.documentElement.dataset.glassScrolling;scrollMaterial()},140)}
+   function schedule(){if(!frame)frame=requestAnimationFrame(scan)}
+-  function light(e:PointerEvent){const el=(e.target as Element)?.closest<HTMLElement>('[data-rf-glass]');if(!el)return;const r=el.getBoundingClientRect();el.style.setProperty('--rf-light-x',`${(e.clientX-r.left)/r.width*100}%`);el.style.setProperty('--rf-light-y',`${(e.clientY-r.top)/r.height*100}%`)}
++
+   function motion(e:Event){const el=e.target as HTMLElement,entry=entries.get(el);if(!entry)return;const d=(e as CustomEvent<{drive:number;press:number}>).detail;entry.drive=Number.isFinite(d.drive)?d.drive:0;entry.press=Number.isFinite(d.press)?d.press:0;scaleFor(el,entry.scale)}
+   function settings(e:Event){strength=(e as CustomEvent<number>).detail;for(const [el,v]of entries)scaleFor(el,v.scale)}
+   // During a lens spring only its dimensions change. Avoid rescanning every
+@@ -87,7 +87,7 @@ export default function RunflowGlass(){
+     if(refreshDepth)scrollMaterial();
+    });
+   }),mutation=new MutationObserver(schedule);mutation.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['open','aria-expanded']});
+-  transparency.addEventListener('change',schedule);contrast.addEventListener('change',schedule);window.addEventListener('scroll',scrolling,{passive:true,capture:true});window.addEventListener('resize',schedule);window.addEventListener('runflow:glass',settings);document.addEventListener('runflow:glass-motion',motion);document.addEventListener('pointermove',light,{passive:true});schedule();
+-  return()=>{for(const t of pending.values())clearTimeout(t);cancelAnimationFrame(frame);cancelAnimationFrame(scrollFrame);cancelAnimationFrame(resizeFrame);resizeDirty.clear();clearTimeout(scrollTimer);transparency.removeEventListener('change',schedule);contrast.removeEventListener('change',schedule);window.removeEventListener('scroll',scrolling,true);delete document.documentElement.dataset.glassScrolling;resize.disconnect();mutation.disconnect();window.removeEventListener('resize',schedule);window.removeEventListener('runflow:glass',settings);document.removeEventListener('runflow:glass-motion',motion);document.removeEventListener('pointermove',light);for(const el of entries.keys()){delete el.dataset.rfGlass;delete el.dataset.material;delete el.dataset.glassLevel;delete el.dataset.glassPlane;el.style.removeProperty('--rf-backdrop')}svg.remove()};
++  transparency.addEventListener('change',schedule);contrast.addEventListener('change',schedule);window.addEventListener('scroll',scrolling,{passive:true,capture:true});window.addEventListener('resize',schedule);window.addEventListener('runflow:glass',settings);document.addEventListener('runflow:glass-motion',motion);schedule();
++  return()=>{for(const t of pending.values())clearTimeout(t);cancelAnimationFrame(frame);cancelAnimationFrame(scrollFrame);cancelAnimationFrame(resizeFrame);resizeDirty.clear();clearTimeout(scrollTimer);transparency.removeEventListener('change',schedule);contrast.removeEventListener('change',schedule);window.removeEventListener('scroll',scrolling,true);delete document.documentElement.dataset.glassScrolling;resize.disconnect();mutation.disconnect();window.removeEventListener('resize',schedule);window.removeEventListener('runflow:glass',settings);document.removeEventListener('runflow:glass-motion',motion);for(const el of entries.keys()){delete el.dataset.rfGlass;delete el.dataset.material;delete el.dataset.glassLevel;delete el.dataset.glassPlane;el.style.removeProperty('--rf-backdrop')}svg.remove()};
+  },[]);return null;
+ }
+diff --git a/hooks/useFrameSpring.ts b/hooks/useFrameSpring.ts
+index b806ff3..f90752e 100644
+--- a/hooks/useFrameSpring.ts
++++ b/hooks/useFrameSpring.ts
+@@ -1,17 +1,13 @@
+ 'use client';
+ import {useEffect,useMemo,useRef} from 'react';
+-import {useMotionValue} from 'motion/react';
+-import {SpringValue,type SpringOptions} from '../research/liquid-glass/GlassPhysics';
+-// Sleep at equilibrium; retargeting wakes the same model without resetting velocity.
++import {animate,useMotionValue,type AnimationPlaybackControls} from 'motion/react';
++import type {SpringOptions} from '../research/liquid-glass/GlassPhysics';
++// One Motion driver owns presentation and scheduling, including tab visibility changes.
+ export function useFrameSpring(initial:number,options:SpringOptions={}){
+- const model=useRef(new SpringValue(initial,options)),value=useMotionValue(initial);
+- const clock=useRef({frame:0,last:0,active:false});
+- const wake=useRef<()=>void>(()=>{});
+- useEffect(()=>{
+-  const state=clock.current;state.active=true;
+-  const step=(now:number)=>{state.frame=0;const moving=model.current.step((now-state.last)/1000);state.last=now;value.set(model.current.current);if(moving&&state.active&&!state.frame)state.frame=requestAnimationFrame(step)};
+-  wake.current=()=>{if(!state.active||state.frame)return;state.last=performance.now();state.frame=requestAnimationFrame(step)};
+-  wake.current();return()=>{state.active=false;cancelAnimationFrame(state.frame);state.frame=0};
++ const value=useMotionValue(initial),animation=useRef<AnimationPlaybackControls|null>(null),target=useRef(initial),config=useRef(options);
++ useEffect(()=>()=>{animation.current?.stop()},[]);
++ return useMemo(()=>{
++  const run=(n:number,velocity?:number)=>{if(target.current===n&&velocity===undefined)return;target.current=n;animation.current?.stop();animation.current=animate(value,n,{type:'spring',stiffness:config.current.stiffness??210,damping:config.current.damping??21,mass:config.current.mass??1,...(velocity===undefined?{}:{velocity:Math.max(-1000,Math.min(1000,velocity))}),restDelta:.01,restSpeed:.05})};
++  return {value,get:()=>value.get(),getVelocity:()=>value.getVelocity(),on:value.on.bind(value),set:(n:number)=>run(n),release:(n:number,v:number)=>run(n,v),jump:(n:number)=>{animation.current?.stop();animation.current=null;target.current=n;value.jump(n)}};
+  },[value]);
+- return useMemo(()=>({value,get:()=>value.get(),getVelocity:()=>model.current.velocity,on:value.on.bind(value),set:(n:number)=>{if(n===model.current.target&&model.current.velocity===0&&n===model.current.current)return;model.current.setTarget(n);wake.current()},release:(target:number,velocity:number)=>{model.current.velocity=Math.max(-1000,Math.min(1000,velocity));model.current.setTarget(target);wake.current()},jump:(n:number)=>{model.current.set(n);value.set(n)}}),[value]);
+ }
+diff --git a/hooks/useMenuLayer.ts b/hooks/useMenuLayer.ts
+index 5632ec4..54f3ac6 100644
+--- a/hooks/useMenuLayer.ts
++++ b/hooks/useMenuLayer.ts
+@@ -1,16 +1,20 @@
+ 'use client';
+ import {useEffect,useRef} from 'react';
+ import {useFrameSpring} from './useFrameSpring';
+-import {menuMorph,type MenuRect} from '../lib/menu-morph';
++import type {MenuRect} from '../lib/menu-morph';
++// Animate a bounded material viewport. Foreground glyphs never scale and no
++// transformed backdrop plane extends beyond the visible menu on WebKit.
+ export function useMenuLayer(){
+- const progress=useFrameSpring(0,{stiffness:390,damping:40});
++ const progress=useFrameSpring(0,{stiffness:460,damping:42});
+  const job=useRef<{el:HTMLElement;source:MenuRect;target:MenuRect;open:boolean;done:()=>void}|null>(null);
+- const draw=()=>{const j=job.current;if(!j)return;const start=performance.now(),p=progress.get(),f=menuMorph(p,j.source,j.target),shell=j.el.querySelector<HTMLElement>('.glass-menu-shell'),content=j.el.querySelector<HTMLElement>('.glass-menu-options');
+-  if(shell){shell.style.transform=`translate(${f.x}px,${f.y}px) scale(${f.sx},${f.sy})`;shell.style.opacity=String(.78+.22*Math.max(0,Math.min(1,p)));shell.style.boxShadow=`inset 0 1px 1px #ffffff55,0 ${4+p*12}px ${12+p*24}px #00000035`;}
+-  if(content){content.style.transform='none';content.style.opacity=String(f.opacity);content.style.clipPath=`inset(${f.clipTop}px ${f.clipRight}px ${f.clipBottom}px ${f.clipLeft}px round 14px)`;}
+-  j.el.dataset.menuProgress=p.toFixed(3);j.el.dataset.menuWriteMs=(performance.now()-start).toFixed(3);
++ const draw=()=>{const j=job.current;if(!j)return;const p=Math.max(0,Math.min(1,progress.get())),mix=(a:number,b:number)=>a+(b-a)*p;
++  const left=mix(j.source.left,j.target.left),top=mix(j.source.top,j.target.top);
++  Object.assign(j.el.style,{left:left+'px',top:top+'px',width:mix(j.source.width,j.target.width)+'px',height:mix(j.source.height,j.target.height)+'px',borderRadius:mix(j.source.height/2,22)+'px',opacity:String(Math.min(1,p*4)),overflow:'hidden',transform:'none'});
++  const content=j.el.querySelector<HTMLElement>('.glass-menu-options');
++  if(content)Object.assign(content.style,{position:'absolute',left:(j.target.left-left+7)+'px',top:(j.target.top-top+7)+'px',width:(j.target.width-16)+'px',opacity:String(Math.max(0,Math.min(1,(p-.32)/.55))),clipPath:'none',transform:'none'});
++  j.el.dataset.menuProgress=p.toFixed(3);
+   if(!j.open&&p===0){job.current=null;j.done()}
+  };
+  useEffect(()=>progress.on('change',draw),[progress]);
+- return {start(el:HTMLElement,source:MenuRect,target:MenuRect,open:boolean,done:()=>void){const fresh=job.current?.el!==el;job.current={el,source,target,open,done};el.style.transform='none';el.style.opacity='1';el.style.overflow='visible';if(fresh)progress.jump(0);if(matchMedia('(prefers-reduced-motion: reduce)').matches)progress.jump(open?1:0);else progress.set(open?1:0);draw()},stop(){job.current=null;progress.jump(0)}};
++ return {start(el:HTMLElement,source:MenuRect,target:MenuRect,open:boolean,done:()=>void){const fresh=job.current?.el!==el;job.current={el,source,target,open,done};if(fresh)progress.jump(0);if(matchMedia('(prefers-reduced-motion: reduce)').matches)progress.jump(open?1:0);else progress.set(open?1:0);draw()},stop(){job.current=null;progress.jump(0)}};
+ }
+diff --git a/lib/lens-shape.ts b/lib/lens-shape.ts
+index 98872dd..a6a8109 100644
+--- a/lib/lens-shape.ts
++++ b/lib/lens-shape.ts
+@@ -8,5 +8,5 @@ export function lensShape(w:number,h:number,drive:number,pressure:number,horizon
+  // not a circular bubble. The leading corners expand as the lens is pulled.
+  const r=Math.min(width,height)*(cornerStyle==='rounded'?.34:.5);
+  const lead=Math.max(5,r+d*.34),trail=Math.max(5,r-d*.34);
+- return {width,height,offsetX:-(width-w)/2+(horizontal?d*.28:0),offsetY:-(height-h)/2+(horizontal?0:d*.28),skewX:horizontal?d*.24:0,skewY:horizontal?0:-d*.24,radius:horizontal?`${trail}px ${lead}px ${lead}px ${trail}px`:`${trail}px ${trail}px ${lead}px ${lead}px`,scale:1+p*.035,lightAngle:135+(horizontal?d*2:-d*2),lightX:50+(horizontal?d*1.8:0),lightY:35+(horizontal?0:d*1.8)};
++ return {width,height,offsetX:-(width-w)/2+(horizontal?d*.28:0),offsetY:-(height-h)/2+(horizontal?0:d*.28),skewX:horizontal?d*.08:0,skewY:0,radius:horizontal?`${trail}px ${lead}px ${lead}px ${trail}px`:`${trail}px ${trail}px ${lead}px ${lead}px`,scale:1+p*.035,lightAngle:135+(horizontal?d*2:-d*2),lightX:50+(horizontal?d*1.8:0),lightY:35+(horizontal?0:d*1.8)};
+ }
+diff --git a/tests/lens-shape-regression.test.ts b/tests/lens-shape-regression.test.ts
+new file mode 100644
+index 0000000..cd07f06
+--- /dev/null
++++ b/tests/lens-shape-regression.test.ts
+@@ -0,0 +1,14 @@
++import {test} from 'node:test';
++import assert from 'node:assert/strict';
++import {lensShape} from '../lib/lens-shape.ts';
++test('vertical selection remains level across sidebar and oversized workbench widths',()=>{
++ for(const w of [170,270,700])for(const drive of [-18,-9,0,9,18]){
++  const s=lensShape(w,54,drive,1,false,'rounded');
++  assert.equal(s.skewY,0);
++  assert.ok(s.height<85&&s.width<=w+9);
++ }
++});
++test('release restores original geometry without leaving a held lens',()=>{
++ const s=lensShape(70,52,0,0,true,'rounded');
++ assert.equal(s.width,70);assert.equal(s.height,52);assert.equal(s.scale,1);assert.equal(s.offsetX,0);assert.equal(s.offsetY,0);
++});
