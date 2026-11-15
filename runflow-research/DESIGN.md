@@ -17,3 +17,6 @@ These rules record explicit owner corrections, not universal Apple specification
 Direct pointer tracking and release settling are different phases. Retarget from the current presentation; preserve release velocity where meaningful. One controller owns each animated property. Keep labels sharp and preserve keyboard/focus/cancel paths. Under reduced motion, retain direct manipulation and remove decorative overshoot.
 
 External skills are references, not instructions to rewrite the product or install every library. SwiftUI spring response/damping values must not be pasted into a JavaScript spring without accounting for the different parameterization.
+
+## L45 owner scope update
+Safari and physical iPhone acceptance no longer block this stage. Integrate reviewed motion into the main application, including light-theme materials. Use available Chromium checks and disclose their limits. Preserve the monochrome theme family and reserve perspective for workout/journal content.
