@@ -1,6 +1,6 @@
-# Mobile navigation correction
-Owner video confirms a nonfunctional lab Dock on phone. Desktop success does not overrule it.
+# L42 — visible in-flow navigation specimen
+The owner reports the previous portal repair still did not show navigation on the phone. Treat that repair as failed on device.
 
-Implemented: isolated mobile Dock portal outside the lab card; one mounted navigation specimen; geometry-based pointer-up hit testing; unchanged resize notifications preserve an active gesture; accepted-selection counter.
+The lab now renders a single navigation specimen unconditionally inside its card. It does not use matchMedia to mount navigation, a body portal, or fixed positioning. Route-scoped mobile CSS retains five horizontal tabs. Desktop remains vertical. A visible L42 status marker distinguishes the revision. Production Dock placement is unchanged by this iteration.
 
-Checked: TypeScript and two numerical regression tests. Production build recorded separately by the delivery workflow. No browser gesture run or new iPhone acceptance is claimed. Exact original runtime cause remains unconfirmed. Menu occlusion and excessive segment deformation are still open.
+Passed: TypeScript, production build and whitespace checks. No browser or new physical-device verification was available. Phone visibility and interaction acceptance remain open. Original runtime cause remains unknown. The menu occlusion and segment deformation remain open separately.

@@ -1,0 +1,71 @@
+diff --git a/MOTION_RESEARCH.md b/MOTION_RESEARCH.md
+index a8a7148..617892b 100644
+--- a/MOTION_RESEARCH.md
++++ b/MOTION_RESEARCH.md
+@@ -51,3 +51,6 @@ Desktop preview: candidate checkbox and segment value/commit count updated; real
+ 
+ ## Mobile navigation correction after owner video
+ The owner reports the lab Dock was nonfunctional on the phone; the recording is failure evidence, not an inconclusive acceptance. The desktop screenshot only establishes desktop selection. Changes: move the mobile specimen into a body portal outside its panel, keep exactly one mounted specimen, resolve pointer-up taps by button rectangles rather than elementFromPoint after capture, and cancel a held gesture only for a real geometry change (not an unchanged ResizeObserver notification). A local accepted-selection counter makes subsequent video actionable. Two numerical tests cover five mobile hit regions and unchanged/changed geometry. These changes address fragile code paths; the exact original runtime cause and successful phone repair remain unverified until a new device recording. The menu occlusion and segment deformation reported in the previous audit remain open.
++
++## Follow-up: owner still cannot see the mobile specimen
++The previous portal-based repair failed the owner's phone check. Remove it rather than mark it successful. The lab now renders one unconditional navigation specimen in normal document flow at every viewport. Route-scoped CSS overrides inherited fixed positioning and translation on the specimen only. On mobile it remains a five-column row; on desktop it retains the vertical layout. L42 is a visible lab marker to distinguish this revision. This deliberately tests the component inside the workbench, not the production Dock's viewport anchoring. The original cause is not established; fresh phone visibility/touch confirmation remains required.
+diff --git a/NAVIGATION_VERIFICATION.md b/NAVIGATION_VERIFICATION.md
+index 3f31667..0867b4d 100644
+--- a/NAVIGATION_VERIFICATION.md
++++ b/NAVIGATION_VERIFICATION.md
+@@ -1,6 +1,6 @@
+-# Mobile navigation correction
+-Owner video confirms a nonfunctional lab Dock on phone. Desktop success does not overrule it.
++# L42 — visible in-flow navigation specimen
++The owner reports the previous portal repair still did not show navigation on the phone. Treat that repair as failed on device.
+ 
+-Implemented: isolated mobile Dock portal outside the lab card; one mounted navigation specimen; geometry-based pointer-up hit testing; unchanged resize notifications preserve an active gesture; accepted-selection counter.
++The lab now renders a single navigation specimen unconditionally inside its card. It does not use matchMedia to mount navigation, a body portal, or fixed positioning. Route-scoped mobile CSS retains five horizontal tabs. Desktop remains vertical. A visible L42 status marker distinguishes the revision. Production Dock placement is unchanged by this iteration.
+ 
+-Checked: TypeScript and two numerical regression tests. Production build recorded separately by the delivery workflow. No browser gesture run or new iPhone acceptance is claimed. Exact original runtime cause remains unconfirmed. Menu occlusion and excessive segment deformation are still open.
++Passed: TypeScript, production build and whitespace checks. No browser or new physical-device verification was available. Phone visibility and interaction acceptance remain open. Original runtime cause remains unknown. The menu occlusion and segment deformation remain open separately.
+diff --git a/app/interaction-lab/lab.css b/app/interaction-lab/lab.css
+new file mode 100644
+index 0000000..5817fa5
+--- /dev/null
++++ b/app/interaction-lab/lab.css
+@@ -0,0 +1,15 @@
++/* Keep the specimen in normal flow. No portal, viewport-dependent mounting or
++   fixed positioning underneath mobile browser chrome. Production Dock is unchanged. */
++.interaction-lab .lab-navigation-specimen{position:relative;margin:18px 0 24px;width:100%;min-width:0}
++.interaction-lab .lab-navigation-specimen nav.glass-navigation{
++ position:relative!important;inset:auto!important;transform:none!important;
++ display:grid!important;width:100%!important;max-width:100%;z-index:1;
++ visibility:visible;opacity:1;
++}
++@media(max-width:850px){
++ .interaction-lab .lab-navigation-specimen nav.glass-navigation{
++  grid-template-columns:repeat(5,minmax(0,1fr));gap:0;padding:4px;
++ }
++ .interaction-lab .lab-navigation-specimen nav.glass-navigation button{min-width:0;min-height:60px;padding:6px 0}
++ .interaction-lab .lab-navigation-specimen nav.glass-navigation button>.nav-visual{padding:6px 0;font-size:9px}
++}
+diff --git a/app/interaction-lab/page.tsx b/app/interaction-lab/page.tsx
+index c93dfca..0ad749e 100644
+--- a/app/interaction-lab/page.tsx
++++ b/app/interaction-lab/page.tsx
+@@ -1,15 +1,14 @@
+ 'use client';
+ import InteractionMetrics from '../../components/InteractionMetrics';
+-import {useState,useEffect} from 'react';
+-import {createPortal} from 'react-dom';
++import {useState} from 'react';
++import './lab.css';
+ import GlassSegment from '../../components/GlassSegment';
+ import GlassNavigation from '../../components/GlassNavigation';
+ import GlassSelect from '../../components/GlassSelect';
+ import GlassAppearance from '../../components/GlassAppearance';
+ export default function InteractionLab(){
+- const [mobile,setMobile]=useState(false),[navCommits,setNavCommits]=useState(0);
+- useEffect(()=>{const mq=matchMedia('(max-width:850px)');const update=()=>setMobile(mq.matches);update();mq.addEventListener('change',update);return()=>mq.removeEventListener('change',update)},[]);
++ const [navCommits,setNavCommits]=useState(0);
+  const [elastic,setElastic]=useState(false),[navCandidate,setNavCandidate]=useState(false),[menuCandidate,setMenuCandidate]=useState(false);
+  const [kind,setKind]=useState('segment'),[segment,setSegment]=useState('journal'),[tab,setTab]=useState('Обзор'),[period,setPeriod]=useState('Все время'),[commits,setCommits]=useState(0);
+- return <div className="app"><style>{`.app.lab-mobile-navigation{display:none;min-height:0}@media(max-width:850px){.lab-desktop-navigation{display:none}.app.lab-mobile-navigation{display:block}.lab-mobile-navigation .glass-navigation{z-index:60}.app>main{padding-bottom:140px!important}}`}</style>{mobile&&kind==='navigation'&&createPortal(<div className="app lab-mobile-navigation"><GlassNavigation experimental={navCandidate} active={tab} count={7} onChange={v=>{setTab(v);setNavCommits(n=>n+1)}}/></div>,document.body)}<main style={{margin:0,width:'100%',maxWidth:800,padding:24}}><header><div><a href="/">← Runflow</a><h1>Проверка взаимодействий</h1><p>Изолированные экземпляры рабочих компонентов. Демо не меняет тренировки.</p></div><GlassAppearance/></header><div role="group" aria-label="Компонент" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24}}>{[['segment','Переключатель'],['navigation','Навигация'],['menu','Меню']].map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><section className="panel" style={{minHeight:400}}><h2>{kind==='segment'?'Переключатель':kind==='navigation'?'Навигация':'Меню'}</h2>{kind==='segment'?<><label style={{marginBottom:16}}>Кандидат: сопротивление на границах<input type="checkbox" checked={elastic} onChange={e=>setElastic(e.target.checked)}/></label><GlassSegment elastic={elastic} value={segment} onChange={v=>{setSegment(v);setCommits(n=>n+1)}} label="Источник в лаборатории" options={[{value:'journal',label:'Мой журнал'},{value:'demo',label:'Демо'}]}/><p role="status">Выбрано: {segment}. Изменений значения: {commits}.</p><p>Удерживай две секунды, веди медленно, разверни движение и отпусти. Счётчик должен измениться только после отпускания в другом сегменте.</p></>:kind==='navigation'?<><label>Кандидат: общий расчёт скорости и сопротивление<input type="checkbox" checked={navCandidate} onChange={e=>setNavCandidate(e.target.checked)}/></label>{!mobile&&<div className="lab-desktop-navigation"><GlassNavigation experimental={navCandidate} active={tab} count={7} onChange={v=>{setTab(v);setNavCommits(n=>n+1)}}/></div>}<p role="status">Раздел: {tab}. Принято переключений: {navCommits}.</p><p>Проверь перехват движущейся линзы и отмену жеста. На телефоне Dock вынесен за пределы карточки.</p></>:<><label>Кандидат: отдельная оболочка, единый прогресс<input type="checkbox" checked={menuCandidate} onChange={e=>setMenuCandidate(e.target.checked)}/></label><GlassSelect key={String(menuCandidate)} motionMode={menuCandidate?'layer':'bounds'} label="Период в лаборатории" value={period} options={['Все время','30 дней','7 дней']} onChange={setPeriod}/><p role="status">Период: {period}</p><p>Проверь открытие, Escape, повторное раскрытие во время закрытия и выбор стрелками. Буквы не должны сжиматься.</p></>}<div aria-hidden="true" style={{marginTop:40,height:120,background:'repeating-linear-gradient(90deg,transparent 0 23px,#8883 23px 24px)'}}>0123456789 · тестовая детализация за поверхностью</div></section><InteractionMetrics variant={kind+':'+(kind==='segment'?elastic:kind==='navigation'?navCandidate:menuCandidate)}/><p>Физический iPhone и непрерывная запись остаются обязательными отдельными проверками.</p></main></div>
++ return <div className="app interaction-lab"><main style={{margin:0,width:'100%',maxWidth:800,padding:24}}><header><div><a href="/">← Runflow</a><h1>Проверка взаимодействий</h1><p>Изолированные экземпляры рабочих компонентов. Демо не меняет тренировки.</p></div><GlassAppearance/></header><div role="group" aria-label="Компонент" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24}}>{[['segment','Переключатель'],['navigation','Навигация'],['menu','Меню']].map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><section className="panel" style={{minHeight:400}}><h2>{kind==='segment'?'Переключатель':kind==='navigation'?'Навигация':'Меню'}</h2>{kind==='segment'?<><label style={{marginBottom:16}}>Кандидат: сопротивление на границах<input type="checkbox" checked={elastic} onChange={e=>setElastic(e.target.checked)}/></label><GlassSegment elastic={elastic} value={segment} onChange={v=>{setSegment(v);setCommits(n=>n+1)}} label="Источник в лаборатории" options={[{value:'journal',label:'Мой журнал'},{value:'demo',label:'Демо'}]}/><p role="status">Выбрано: {segment}. Изменений значения: {commits}.</p><p>Удерживай две секунды, веди медленно, разверни движение и отпусти. Счётчик должен измениться только после отпускания в другом сегменте.</p></>:kind==='navigation'?<><label>Кандидат: общий расчёт скорости и сопротивление<input type="checkbox" checked={navCandidate} onChange={e=>setNavCandidate(e.target.checked)}/></label><div className="lab-navigation-specimen"><GlassNavigation experimental={navCandidate} active={tab} count={7} onChange={v=>{setTab(v);setNavCommits(n=>n+1)}}/></div><p role="status">Версия L42. Раздел: {tab}. Принято переключений: {navCommits}.</p><p>Проверь перехват движущейся линзы и отмену жеста. Навигация находится здесь, внутри тестовой карточки.</p></>:<><label>Кандидат: отдельная оболочка, единый прогресс<input type="checkbox" checked={menuCandidate} onChange={e=>setMenuCandidate(e.target.checked)}/></label><GlassSelect key={String(menuCandidate)} motionMode={menuCandidate?'layer':'bounds'} label="Период в лаборатории" value={period} options={['Все время','30 дней','7 дней']} onChange={setPeriod}/><p role="status">Период: {period}</p><p>Проверь открытие, Escape, повторное раскрытие во время закрытия и выбор стрелками. Буквы не должны сжиматься.</p></>}<div aria-hidden="true" style={{marginTop:40,height:120,background:'repeating-linear-gradient(90deg,transparent 0 23px,#8883 23px 24px)'}}>0123456789 · тестовая детализация за поверхностью</div></section><InteractionMetrics variant={kind+':'+(kind==='segment'?elastic:kind==='navigation'?navCandidate:menuCandidate)}/><p>Физический iPhone и непрерывная запись остаются обязательными отдельными проверками.</p></main></div>
+ }
