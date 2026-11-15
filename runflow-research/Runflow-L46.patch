@@ -1,0 +1,480 @@
+diff --git a/DESIGN.md b/DESIGN.md
+index 4796720..4d393f3 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -20,3 +20,9 @@ External skills are references, not instructions to rewrite the product or insta
+ 
+ ## L45 owner scope update
+ Safari and physical iPhone acceptance no longer block this stage. Integrate reviewed motion into the main application, including light-theme materials. Use available Chromium checks and disclose their limits. Preserve the monochrome theme family and reserve perspective for workout/journal content.
++
++## L46 Dock geometry/material contract
++- Anchor the lens to real button centres. Constrain the deformed silhouette, not merely its resting coordinate; maintain an internal perimeter at both ends of the Dock.
++- Keep substrate and selected lens visually related but optically distinct. Avoid stacking a dense preblurred substrate beneath another refractive layer; share actual geometry with an opening in the substrate where supported.
++- Verify computed backdrop-filter and a visual contrast pattern. A data attribute and an SVG definition do not prove that the CSS cascade applies refraction.
++- Keep the baseline component for A/B diagnosis. Do not replace actual content behind glass with a decorative background to make an effect look stronger.
+diff --git a/MOTION_RESEARCH.md b/MOTION_RESEARCH.md
+index dd222d2..e309d28 100644
+--- a/MOTION_RESEARCH.md
++++ b/MOTION_RESEARCH.md
+@@ -67,3 +67,8 @@ Pointer-down used jump(current) before detecting drag, stopping a travelling len
+ The owner removed the physical Safari/iPhone gate for this stage. The reviewed resistance and bounded menu driver are now main-app defaults. Action menus use the same driver; trigger opacity and menu depth follow its progress without scaling labels. A dedicated dock-material sibling supplies the mobile substrate without filtering the navigation parent. Directional deformation is smaller and shear is zero.
+ 
+ Material colour, tint and shadows now live in material-system.css, with legacy paint/token declarations removed from seven style files. Content remains solid, ambient lighting is an independent noninteractive element and controls/transients have explicit layer roles. Light-theme primary-action text must retain accentink rather than inherit generic glass-control ink; a stale high-specificity rule was removed. Section transitions are a single brief, reduced-motion-aware content animation, not a cascade. Chromium desktop and a true narrow iframe rendering of the main app checked both themes, menus, charts, journal and the unsaved entry sheet. No hardware or timing benchmark is claimed.
++
++## L46 — Dock correction after box-like final tab
++The L45 horizontal lens used button width+12, left−6 and radius .34 of its short side, yielding a 2 px right gap in the 390 px diagnostic scene. L46 uses button centres, a capsule profile and a presentation boundary that includes directional deformation; the resting gap is 8 px and the minimum silhouette inset is 6 px. The substrate is masked out beneath the moving lens, retaining a small overlap at its rim. Both masks and position use the same presentation values.
++
++A concrete optical bug was established through computed CSS: L45's navigation rule overrode the generic SVG selector, leaving blur(1px) even when the data attribute said svg. The L46 horizontal selector applies its actual URL filter. Chromium contrasting-line screenshots show a changed line path; forced fallback reports frosted/blur(.6px). This does not establish Safari, GPU or native material parity. No frame/layout benchmark or continuous touch recording was made. Four repeated taps committed once, two directional desktop drags completed and narrow main-app layout/scroll/keyboard checks succeeded. The detailed evidence and untested gesture paths are in RELEASE_L46.md.
+diff --git a/RELEASE_L46.md b/RELEASE_L46.md
+new file mode 100644
+index 0000000..7c98ce9
+--- /dev/null
++++ b/RELEASE_L46.md
+@@ -0,0 +1,31 @@
++# L46 — нижний Dock: согласованная геометрия и один оптический проход
++
++## Что изменено в основном Runflow
++- Индикатор привязан к центрам реальных кнопок. Убраны горизонтальные +12 px ширины и −6 px позиции. Покой — капсульная форма; геометрия задаётся в lens-shape, а не только CSS.
++- Deformed presentation ограничена шестипиксельным внутренним полем Dock, включая расширение/смещение при движении и release overshoot. В диагностическом образце 390 px у последней вкладки отступ справа вырос с 2 до 8 px. На основном узком приложении измерено около 8 px.
++- Добавлен отдельный небольшой профиль формы Dock: направленное изменение углов и ширины, scale=1, без shear и 3D. Вертикальный sidebar сохраняет прежний профиль.
++- Подложка сохраняется, её базовая плотность снижена с .78 до .60 в светлой и .58 в тёмной теме. Корень навигации не фильтруется. В подложке вырезается окно по текущей геометрии линзы; небольшой перехлёст скрывает шов. Это не дополнительная копия фона и не дублирование текста.
++- Линза имеет более прозрачную середину, тонкий неравномерный краевой блик и слабую контактную тень. Свет получает энергию от тех же пружин движения/касания, включая settling; обычное перемещение мыши не управляет свечением.
++- Исправлен реальный дефект каскада L45: несмотря на data-rf-glass=svg и подготовленный фильтр, computed backdrop-filter нижней линзы был blur(1px). Теперь SVG-путь действительно применяется к горизонтальной L46-линзе; в принудительном fallback вычисляется blur(.6px). Атрибут режима сам по себе не доказывает работу фильтра.
++- Сохранены Pointer Events/capture, порог захвата 3 px, перехват текущей позиции, release velocity, отмена/resize/blur и L44-защита от повторных нажатий. Данные раздела меняются на отпускании. Иконки и подписи остаются одним оригинальным передним слоем.
++
++## Сравнение
++`/interaction-lab/dock` содержит A=L45 (сохранённый прежний компонент) и B=L46, режимы по одному/рядом, первую/центральную/последнюю вкладки и пять диагностических фонов. Образцы не обращаются к дневнику. L45 намеренно сохраняет прежний фактический blur-путь для честного сравнения.
++
++В ZIP в evidence/ лежат сравнения последней вкладки на чёрном, белом фоне и линиях. Это скриншоты Chromium, не нативного iOS. Основной фон приложения не изменён ради демонстрации.
++
++## Проверено
++- TypeScript, production build, git diff --check; 14 численных/контрастных проверок (геометрия Dock на четырёх ширинах, крайние и средняя позиции, деформация/выход за границы, прежние проверки сегмента/навигации/меню/тем).
++- Chromium: A/B на чёрном и белом фоне, над текстом, карточкой и контрастными линиями; фактический computed SVG-filter и принудительный frosted fallback.
++- Перетаскивание L46 в обе стороны, первая/средняя/последняя позиции. Четыре повторных нажатия на последнюю вкладку дали одно принятое переключение; индикатор дошёл до цели. Сохраняются промежуточные позиции, а не создание новой линзы.
++- Основное приложение внутри 390 px iframe: обе темы, demo overview/progress/goals/journal, клавиатурная активация, пять видимых оригинальных иконок. Dock fixed: top 744 / bottom 830 до и после прокрутки; нижний запас контента 145 px. Реальные записи не менялись.
++- Исправлен только QA-экран viewport: его main теперь расположен выше фонового ambient-слоя, который ранее осветлял снимок iframe. Это не изменение фонового оформления продукта.
++
++## Границы результата
++Не проверялись физические iPhone/Safari/GPU, длительное touch-удержание с разворотом, системная отмена жеста и reduced-motion в браузере. Эти пути сохранены в коде, но не объявлены аппаратно принятыми. Непрерывное видео и сравнительный frame/layout benchmark не записаны. Карта преломления остаётся браузерной аппроксимацией, не материалом Apple; наличие url-фильтра проверено вместе с визуальным изменением линий. Плотность материала на однородном фоне не означает динамическую рефракцию.
++
++## Официальные ориентиры
++- https://developer.apple.com/design/human-interface-guidelines/tab-bars
++- https://developer.apple.com/videos/play/wwdc2025/219/
++
++Числа радиусов, непрозрачности и пружин здесь — параметры проекта, не константы Apple. Формулы, записи, API, названия вкладок и верхние контролы не изменены.
+diff --git a/START_HERE_RU.md b/START_HERE_RU.md
+index e922453..545f0be 100644
+--- a/START_HERE_RU.md
++++ b/START_HERE_RU.md
+@@ -1,6 +1,6 @@
+ # Runflow — начните здесь
+ 
+-Срез исходников: 11 ноября 2026. Точная версия и коммит — в EXPORT_STATE.json внутри ZIP.
++Срез исходников: L46, 15 ноября 2026. Точная версия и коммит — в EXPORT_STATE.json внутри ZIP.
+ 
+ 1. Прочитайте `RUNFLOW_CONTEXT.md` — архитектура, требования, ограничения и незавершённые задачи.
+ 2. Прочитайте `README.md` — технический запуск Vinext/Cloudflare.
+@@ -14,3 +14,5 @@
+ `.openai/hosting.json` сохраняет идентификатор существующего Runflow. Не подменяйте его и не публикуйте в другой проект случайно. Для создания независимой копии используйте отдельный процесс создания сайта.
+ 
+ В `agent-skills/layered-liquid-glass/` вложен переносимый скилл с инструкциями, материалами и MIT-ядром карты преломления. Скилл не является зависимостью приложения. Установленный личный вариант доступен отдельно в каталоге Skills.
++
++Последнее изменение: `RELEASE_L46.md`. Сравнение Dock: `/interaction-lab/dock`.
+diff --git a/app/interaction-lab/dock/dock.css b/app/interaction-lab/dock/dock.css
+new file mode 100644
+index 0000000..467704e
+--- /dev/null
++++ b/app/interaction-lab/dock/dock.css
+@@ -0,0 +1,18 @@
++.dock-review>main{margin:0;width:100%;max-width:980px;padding:24px;min-height:100vh}
++.dock-review h1{margin:20px 0}.dock-review p{font-size:13px;line-height:1.6;color:var(--muted)}
++.dock-review-controls{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}
++.dock-review-controls>[role=group]{display:flex;gap:4px;flex-wrap:wrap}
++.dock-review-controls button{font-size:12px;padding:8px 12px;background:var(--surface2)}
++.dock-review-controls button[aria-pressed=true]{background:var(--accent);color:var(--accentink)}
++.dock-review-pair{display:flex;flex-wrap:wrap;gap:24px}.dock-review-pair>section{width:390px;max-width:100%}.dock-review-pair h2{font-size:16px;margin-bottom:12px}
++.dock-review-scene{position:relative;height:300px;border-radius:24px;background:var(--bg);color:var(--ink);border:1px solid var(--line);overflow:hidden}
++.dock-review-content{position:absolute;inset:0;overflow:hidden;padding:12px;font-size:13px;line-height:1.8}
++.dock-review-content p{margin:0 0 8px;line-height:1.6;color:inherit}.dock-review-content svg{width:100%;height:100%}
++.dock-review-content article{position:absolute;inset:40px 14px 5px;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px}
++.backdrop-black{background:#070707;color:#f3f3f3}.backdrop-white{background:#fff;color:#181818}
++.app.dock-review nav.glass-navigation{position:absolute;bottom:24px;left:10px;transform:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));width:calc(100% - 20px);padding:8px;gap:3px;border-radius:36px;isolation:isolate}
++.app.dock-review nav .dock-material{display:block}
++.app.dock-review nav.glass-navigation[data-dock-version=l46]{border-radius:var(--dock-radius,43px)}
++.app.dock-review nav.glass-navigation button{min-width:0;min-height:70px;padding:8px 0}
++.app.dock-review nav.glass-navigation button>.nav-visual{flex-direction:column;justify-content:center;gap:4px;padding:8px 1px;font-size:11px;line-height:1.2;letter-spacing:-.015em}
++.app.dock-review nav small{display:none}
+diff --git a/app/interaction-lab/dock/page.tsx b/app/interaction-lab/dock/page.tsx
+new file mode 100644
+index 0000000..a51e980
+--- /dev/null
++++ b/app/interaction-lab/dock/page.tsx
+@@ -0,0 +1,31 @@
++'use client';
++import {useEffect,useState} from 'react';
++import GlassNavigation from '../../../components/GlassNavigation';
++import LegacyGlassNavigation from '../../../components/LegacyGlassNavigation';
++import RunflowGlass from '../../../components/RunflowGlass';
++import './dock.css';
++const tabs=[['Обзор','Первая'],['Прогресс','Центральная'],['Цели и уровни','Последняя']];
++export default function DockReview(){
++ const [variant,setVariant]=useState('both'),[tab,setTab]=useState('Цели и уровни'),[backdrop,setBackdrop]=useState('lines'),[theme,setTheme]=useState('dark'),[commits,setCommits]=useState(0);
++ useEffect(()=>{document.documentElement.dataset.theme=theme},[theme]);
++ const change=(value:string)=>{setTab(value);setCommits(n=>n+1)};
++ return <div className="app dock-review"><RunflowGlass/><main>
++  <a href="/interaction-lab">← Проверка взаимодействий</a><h1>Dock · L45 / L46</h1>
++  <div className="dock-review-controls">
++   <div role="group" aria-label="Версия">{[['l45','A · L45'],['l46','B · L46'],['both','Рядом']].map(([v,l])=><button key={v} aria-pressed={variant===v} onClick={()=>setVariant(v)}>{l}</button>)}</div>
++   <div role="group" aria-label="Тема">{[['dark','Тёмная'],['light','Светлая']].map(([v,l])=><button key={v} aria-pressed={theme===v} onClick={()=>setTheme(v)}>{l}</button>)}</div>
++   <div role="group" aria-label="Положение">{tabs.map(([v,l])=><button key={v} aria-pressed={tab===v} onClick={()=>setTab(v)}>{l}</button>)}</div>
++   <div role="group" aria-label="Фон">{[['lines','Линии'],['text','Текст'],['card','Карточка'],['black','Чёрный'],['white','Белый']].map(([v,l])=><button key={v} aria-pressed={backdrop===v} onClick={()=>setBackdrop(v)}>{l}</button>)}</div>
++  </div>
++  <div className="dock-review-pair">{(variant==='both'?['l45','l46']:[variant]).map(v=><section key={v}>
++   <h2>{v==='l45'?'A · L45':'B · L46'}</h2>
++   <div className={'dock-review-scene backdrop-'+backdrop}>
++    <div className="dock-review-content" aria-hidden="true">{backdrop==='text'?Array.from({length:9},(_,i)=><p key={i}>Runflow 0123456789 · Темп · круги · 0123456789<br/>Дистанция · стабильность · Runflow 0123456789</p>):backdrop==='lines'?<svg viewBox="0 0 370 260" preserveAspectRatio="none"><path d="M0 200 L60 140 L120 180 L180 80 L240 130 L300 50 L370 100 M0 50 L370 250 M0 250 L370 50" fill="none" stroke="currentColor" strokeWidth="2"/>{[20,60,100,140,180,220].map(y=><path key={y} d={`M0 ${y}H370`} stroke="currentColor" strokeWidth=".5"/>)}</svg>:backdrop==='card'?<article><b>Вечерний стадион</b><p>2,40 км · 13:39</p><strong>10,55 км/ч</strong></article>:null}</div>
++    {v==='l45'?<LegacyGlassNavigation active={tab} count={7} onChange={change}/>:<GlassNavigation active={tab} count={7} onChange={change}/>}
++   </div>
++  </section>)}</div>
++  <p role="status">Раздел: {tab}. Принято переключений: {commits}.</p>
++  <p>Удерживай, веди к краю, меняй направление и отпускай. Во время перетаскивания раздел не меняется. Оба образца используют рабочие компоненты; данные тренировок не затрагиваются.</p>
++  <p>SVG displacement проверяется отдельно от размытия. При неподдерживаемом фильтре используется прозрачный материал с blur; это не нативный рендерер Apple.</p>
++ </main></div>;
++}
+diff --git a/app/interaction-lab/page.tsx b/app/interaction-lab/page.tsx
+index d895ef8..0dc0b0b 100644
+--- a/app/interaction-lab/page.tsx
++++ b/app/interaction-lab/page.tsx
+@@ -10,5 +10,5 @@ export default function InteractionLab(){
+  const [navCommits,setNavCommits]=useState(0),[horizontalTest,setHorizontalTest]=useState(false);
+  const [elastic,setElastic]=useState(false),[navCandidate,setNavCandidate]=useState(false),[menuCandidate,setMenuCandidate]=useState(false);
+  const [kind,setKind]=useState('segment'),[segment,setSegment]=useState('journal'),[tab,setTab]=useState('Обзор'),[period,setPeriod]=useState('Все время'),[commits,setCommits]=useState(0);
+- return <div className="app interaction-lab"><main style={{margin:0,width:'100%',maxWidth:800,padding:24}}><header><div><a href="/">← Runflow</a><h1>Проверка взаимодействий</h1><p>Жесты, движение и материал. Тренировки не меняются.</p></div><GlassAppearance/></header><div role="group" aria-label="Компонент" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24}}>{[['segment','Переключатель'],['navigation','Навигация'],['menu','Меню']].map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><section className="panel" style={{minHeight:400}}><h2>{kind==='segment'?'Переключатель':kind==='navigation'?'Навигация':'Меню'}</h2>{kind==='segment'?<><label style={{marginBottom:16}}>Кандидат: сопротивление на границах<input type="checkbox" checked={elastic} onChange={e=>setElastic(e.target.checked)}/></label><GlassSegment elastic={elastic} value={segment} onChange={v=>{setSegment(v);setCommits(n=>n+1)}} label="Источник в лаборатории" options={[{value:'journal',label:'Мой журнал'},{value:'demo',label:'Демо'}]}/><p role="status">Выбрано: {segment}. Изменений значения: {commits}.</p><p>Удерживай две секунды, веди медленно, разверни движение и отпусти. Счётчик должен измениться только после отпускания в другом сегменте.</p></>:kind==='navigation'?<><label>Кандидат: общий расчёт скорости и сопротивление<input type="checkbox" checked={navCandidate} onChange={e=>setNavCandidate(e.target.checked)}/></label><button type="button" aria-pressed={horizontalTest} onClick={()=>setHorizontalTest(v=>!v)}>Горизонтальная панель</button><div className={"lab-navigation-specimen"+(horizontalTest?" is-horizontal":"")}><GlassNavigation experimental={navCandidate} active={tab} count={7} onChange={v=>{setTab(v);setNavCommits(n=>n+1)}}/></div><p role="status">Версия L45. Раздел: {tab}. Принято переключений: {navCommits}.</p><p>Проверь перехват движущейся линзы и отмену жеста. Навигация находится здесь, внутри тестовой карточки.</p></>:<><label>Новый вариант: единая поверхность меню<input type="checkbox" checked={menuCandidate} onChange={e=>setMenuCandidate(e.target.checked)}/></label><GlassSelect key={String(menuCandidate)} motionMode={menuCandidate?'layer':'bounds'} label="Период в лаборатории" value={period} options={['Все время','30 дней','7 дней']} onChange={setPeriod}/><p role="status">Период: {period}</p><p>Проверь открытие, Escape, повторное раскрытие во время закрытия и выбор стрелками. Буквы не должны сжиматься.</p></>}<div aria-hidden="true" style={{marginTop:40,height:120,background:'repeating-linear-gradient(90deg,transparent 0 23px,#8883 23px 24px)'}}>0123456789 · тестовая детализация за поверхностью</div></section><InteractionMetrics variant={kind+':'+(kind==='segment'?elastic:kind==='navigation'?navCandidate:menuCandidate)}/><p>Физический iPhone и непрерывная запись остаются обязательными отдельными проверками.</p></main></div>
++ return <div className="app interaction-lab"><main style={{margin:0,width:'100%',maxWidth:800,padding:24}}><header><div><a href="/">← Runflow</a><h1>Проверка взаимодействий</h1><a href="/interaction-lab/dock">Сравнение Dock L45 / L46 →</a><p>Жесты, движение и материал. Тренировки не меняются.</p></div><GlassAppearance/></header><div role="group" aria-label="Компонент" style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:24}}>{[['segment','Переключатель'],['navigation','Навигация'],['menu','Меню']].map(([id,label])=><button key={id} aria-pressed={kind===id} onClick={()=>setKind(id)}>{label}</button>)}</div><section className="panel" style={{minHeight:400}}><h2>{kind==='segment'?'Переключатель':kind==='navigation'?'Навигация':'Меню'}</h2>{kind==='segment'?<><label style={{marginBottom:16}}>Кандидат: сопротивление на границах<input type="checkbox" checked={elastic} onChange={e=>setElastic(e.target.checked)}/></label><GlassSegment elastic={elastic} value={segment} onChange={v=>{setSegment(v);setCommits(n=>n+1)}} label="Источник в лаборатории" options={[{value:'journal',label:'Мой журнал'},{value:'demo',label:'Демо'}]}/><p role="status">Выбрано: {segment}. Изменений значения: {commits}.</p><p>Удерживай две секунды, веди медленно, разверни движение и отпусти. Счётчик должен измениться только после отпускания в другом сегменте.</p></>:kind==='navigation'?<><label>Кандидат: общий расчёт скорости и сопротивление<input type="checkbox" checked={navCandidate} onChange={e=>setNavCandidate(e.target.checked)}/></label><button type="button" aria-pressed={horizontalTest} onClick={()=>setHorizontalTest(v=>!v)}>Горизонтальная панель</button><div className={"lab-navigation-specimen"+(horizontalTest?" is-horizontal":"")}><GlassNavigation experimental={navCandidate} active={tab} count={7} onChange={v=>{setTab(v);setNavCommits(n=>n+1)}}/></div><p role="status">Версия L46. Раздел: {tab}. Принято переключений: {navCommits}.</p><p>Проверь перехват движущейся линзы и отмену жеста. Навигация находится здесь, внутри тестовой карточки.</p></>:<><label>Новый вариант: единая поверхность меню<input type="checkbox" checked={menuCandidate} onChange={e=>setMenuCandidate(e.target.checked)}/></label><GlassSelect key={String(menuCandidate)} motionMode={menuCandidate?'layer':'bounds'} label="Период в лаборатории" value={period} options={['Все время','30 дней','7 дней']} onChange={setPeriod}/><p role="status">Период: {period}</p><p>Проверь открытие, Escape, повторное раскрытие во время закрытия и выбор стрелками. Буквы не должны сжиматься.</p></>}<div aria-hidden="true" style={{marginTop:40,height:120,background:'repeating-linear-gradient(90deg,transparent 0 23px,#8883 23px 24px)'}}>0123456789 · тестовая детализация за поверхностью</div></section><InteractionMetrics variant={kind+':'+(kind==='segment'?elastic:kind==='navigation'?navCandidate:menuCandidate)}/><p>Аппаратные проверки iPhone в этом этапе не выполняются.</p></main></div>
+ }
+diff --git a/app/interaction-lab/viewport/page.tsx b/app/interaction-lab/viewport/page.tsx
+index 84e568c..4f7d07f 100644
+--- a/app/interaction-lab/viewport/page.tsx
++++ b/app/interaction-lab/viewport/page.tsx
+@@ -1,3 +1,3 @@
+ 'use client';
+ import {useState} from 'react';
+-export default function ViewportReview(){const [width,setWidth]=useState(390);return <main style={{margin:0,width:'100%',maxWidth:'none',padding:20}}><a href="/">← Runflow</a><h1>Проверка компоновки</h1><p>Основное приложение в узком окне Chromium. Это проверка компоновки, не эмуляция iPhone.</p><div style={{display:'flex',gap:8,marginBottom:20}}>{[390,768].map(w=><button key={w} aria-pressed={width===w} onClick={()=>setWidth(w)}>{w} px</button>)}</div><iframe title="Мобильная компоновка Runflow" src="/" style={{display:'block',width,maxWidth:'100%',height:844,border:'1px solid var(--line)',borderRadius:24,background:'var(--bg)'}}/></main>}
++export default function ViewportReview(){const [width,setWidth]=useState(390);return <main style={{position:'relative',zIndex:1,margin:0,width:'100%',maxWidth:'none',padding:20}}><a href="/">← Runflow</a><h1>Проверка компоновки</h1><p>Основное приложение в узком окне Chromium. Это проверка компоновки, не эмуляция iPhone.</p><div style={{display:'flex',gap:8,marginBottom:20}}>{[390,768].map(w=><button key={w} aria-pressed={width===w} onClick={()=>setWidth(w)}>{w} px</button>)}</div><iframe title="Мобильная компоновка Runflow" src="/" style={{display:'block',width,maxWidth:'100%',height:844,border:'1px solid var(--line)',borderRadius:24,background:'var(--bg)'}}/></main>}
+diff --git a/app/material-system.css b/app/material-system.css
+index 2d5574d..b80e914 100644
+--- a/app/material-system.css
++++ b/app/material-system.css
+@@ -51,4 +51,47 @@ body{background:var(--bg);color:var(--ink)}body::before{display:none}
+ .app .recharts-cartesian-grid line{stroke:var(--line)}
+ .app .glassbutton,.app .comparequick button,.app .progress-series-controls button{background:var(--surface2);border-color:var(--line);box-shadow:inset 0 1px 0 var(--edge-light);backdrop-filter:none}
+ .app [data-rf-glass=svg].segment-lens,.app .glass-lens-surface[data-rf-glass=svg],.glass-menu-layer[data-rf-glass=svg],.glass-action-menu[data-rf-glass=svg],.glass-settings[data-rf-glass=svg]{backdrop-filter:var(--rf-backdrop);-webkit-backdrop-filter:var(--rf-backdrop)}
++/* L46 horizontal Dock: one substrate with a lens opening, one optical surface.
++   A/B L45 keeps the original rules above. Values are web tuning, not Apple constants. */
++.app nav[data-dock-version=l46][data-dock-axis=horizontal]{
++ border-radius:var(--dock-radius);box-shadow:0 6px 20px var(--dock-shadow);--dock-tint:255 255 255;--dock-alpha:.6;
++ --dock-edge:#ffffffbf;--dock-bottom:#00000012;--dock-shadow:#0000001f;
++ --dock-lens-shade:#00000006;--dock-contact-shadow:#0000000d;--dock-lens-sheen:#ffffff24;--dock-lens-center:.42;--dock-lens-edge:.67;--dock-reflection:#ffffffdb;
++}
++html[data-theme=dark] .app nav[data-dock-version=l46][data-dock-axis=horizontal]{
++ --dock-tint:24 24 24;--dock-alpha:.58;--dock-edge:#ffffff2e;--dock-bottom:#00000070;--dock-shadow:#00000066;
++ --dock-lens-shade:#ffffff06;--dock-contact-shadow:#00000022;--dock-lens-sheen:#ffffff0e;--dock-lens-center:.38;--dock-lens-edge:.57;--dock-reflection:#ffffff61;
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .dock-material{
++ background:rgb(var(--dock-tint)/calc(var(--dock-alpha) + var(--rf-scroll-density,0)*.35));
++ border:0;box-shadow:inset 0 1px .5px var(--dock-edge),inset 0 -1px .5px var(--dock-bottom);
++ backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
++ /* The SVG has no viewBox: rx is resolved in the mask's own CSS-sized viewport. */
++ mask-image:linear-gradient(#000 0 0),url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" rx="9999" fill="black"/></svg>');
++ mask-size:100% 100%,calc(var(--dock-lens-w,0px) - 2px) calc(var(--dock-lens-h,0px) - 2px);
++ mask-position:0 0,calc(var(--dock-lens-x,0px) + 1px) calc(var(--dock-lens-y,0px) + 1px);
++ mask-repeat:no-repeat;mask-composite:exclude;
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface{
++ border:0;
++ background:linear-gradient(165deg,var(--dock-lens-sheen),var(--dock-lens-shade) 75%),linear-gradient(165deg,rgb(var(--dock-tint)/var(--dock-lens-edge)),rgb(var(--dock-tint)/var(--dock-lens-center)) 45%,rgb(var(--dock-tint)/var(--dock-lens-edge)));
++ box-shadow:inset 0 1px 1px var(--dock-edge),inset 0 -1px 2px var(--dock-bottom),0 2px 4px var(--dock-contact-shadow);
++ backdrop-filter:blur(.6px);-webkit-backdrop-filter:blur(.6px);transition:none;
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface::before{
++ background:linear-gradient(var(--light-angle,135deg),var(--dock-reflection),transparent 28% 66%,var(--dock-reflection));
++ opacity:calc(.45 + var(--rf-motion-energy,0)*.25 + var(--rf-contact,0)*.25);
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .lens-caustic{
++ opacity:calc(.08 + var(--rf-motion-energy,0)*.18 + var(--rf-contact,0)*.12);transition:none;
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface[data-rf-glass=svg]{
++ backdrop-filter:var(--rf-backdrop);-webkit-backdrop-filter:var(--rf-backdrop);
++}
++.app nav[data-dock-version=l46] button:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
+ @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.app .segment-lens,.app .glass-lens-surface,.app nav .dock-material,.app .headeractions::before,.glass-menu-layer,.glass-action-menu,.glass-settings{background:var(--surface);backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-color:var(--ink)}}
++
++@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
++ .app nav[data-dock-version=l46][data-dock-axis=horizontal] .dock-material{mask-image:none;background:var(--surface)}
++ .app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface{background:var(--surface2);border:1px solid var(--ink)}
++}
+diff --git a/components/GlassNavigation.tsx b/components/GlassNavigation.tsx
+index 01d5209..8188428 100644
+--- a/components/GlassNavigation.tsx
++++ b/components/GlassNavigation.tsx
+@@ -1,6 +1,7 @@
+ 'use client';
+ import {useEffect,useLayoutEffect,useRef,useState,type PointerEvent} from 'react';
+ import {navigationHit,sameNavigationGeometry} from '../lib/navigation-hit';
++import {dockAnchor,dockPresentation} from '../lib/dock-geometry';
+ import {segmentResistance} from '../lib/segment-geometry';
+ import {sampleVelocity,releaseVelocity} from '../lib/gesture-sampling';
+ import {useGlassMotion} from '../hooks/useGlassMotion';
+@@ -9,30 +10,95 @@ import {useFrameSpring} from '../hooks/useFrameSpring';
+ import {motion,useMotionValue,useTransform,useReducedMotion,type MotionStyle} from 'motion/react';
+ import {LayoutDashboard,List,TrendingUp,GitCompareArrows,Target} from 'lucide-react';
+ const items=[{Icon:LayoutDashboard,value:'Обзор',label:'Сегодня'},{Icon:List,value:'Тренировки',label:'Журнал'},{Icon:TrendingUp,value:'Прогресс',label:'Прогресс'},{Icon:GitCompareArrows,value:'Сравнение',label:'Сравнить'},{Icon:Target,value:'Цели и уровни',label:'Цели'}];
+-export default function GlassNavigation({active,onChange,count,experimental=true}:{active:string,onChange:(tab:string)=>void,count:number;experimental?:boolean}){
+- const [visualActive,setVisualActive]=useState(active);
++type Gesture={id:number;start:number;origin:number;horizontal:boolean;moved:boolean};
++export default function GlassNavigation({active,onChange,count,experimental=true}:{active:string;onChange:(tab:string)=>void;count:number;experimental?:boolean}){
++ const [visualActive,setVisualActive]=useState(active),[dragging,setDragging]=useState(false);
+  useEffect(()=>setVisualActive(active),[active]);
+- const nav=useRef<HTMLElement>(null),buttons=useRef<Record<string,HTMLButtonElement|null>>({}),initialized=useRef(false),geometry=useRef<number[]>([]);
+- const gesture=useRef<{id:number,start:number,origin:number,offset:number,horizontal:boolean,moved:boolean}|null>(null),suppressClick=useRef(0);
+- const [dragging,setDragging]=useState(false);
++ const nav=useRef<HTMLElement>(null),buttons=useRef<Record<string,HTMLButtonElement|null>>({});
++ const initialized=useRef(false),geometry=useRef<number[]>([]),gesture=useRef<Gesture|null>(null),suppressClick=useRef(0);
+  const reduce=useReducedMotion();
++ // Coordinates are button centres, not left edges with hard-coded visual offsets.
+  const x=useFrameSpring(0,{stiffness:220,damping:25,mass:1.1}),y=useFrameSpring(0,{stiffness:220,damping:25,mass:1.1});
+- const baseW=useMotionValue(0),baseH=useMotionValue(0),pressed=useFrameSpring(0,{stiffness:350,damping:24}),stretch=useFrameSpring(0,{stiffness:220,damping:20}),horizontal=useRef(true),axis=useMotionValue(1),lastPointer=useRef({position:0,time:0,speed:0});
++ const baseW=useMotionValue(0),baseH=useMotionValue(0),sceneW=useMotionValue(0),sceneH=useMotionValue(0);
++ const pressed=useFrameSpring(0,{stiffness:350,damping:24}),stretch=useFrameSpring(0,{stiffness:220,damping:20});
++ const horizontal=useRef(true),axis=useMotionValue(1),lastPointer=useRef({position:0,time:0,speed:0});
+  const surface=useRef<HTMLDivElement>(null);useGlassMotion(surface,stretch.value,pressed.value);
+- const shape=useLensShape(baseW,baseH,stretch.value,pressed.value,axis,'rounded'),{width,height}=shape;
+- const renderX=useTransform(()=>x.get()+shape.offsetX.get()-(horizontal.current?6:0)),renderY=useTransform(()=>y.get()+shape.offsetY.get()+(horizontal.current?4:0));
+- useEffect(()=>{const update=()=>{if(gesture.current)return;stretch.set(reduce?0:Math.max(-18,Math.min(18,(horizontal.current?x.getVelocity():y.getVelocity())*.065)))};const a=x.on('change',update),b=y.on('change',update);return()=>{a();b()}},[x,y,stretch,reduce]);
+- useEffect(()=>{if(process.env.NODE_ENV!=='development')return;const samples:number[][]=[];const record=()=>{samples.push([Math.round(width.get()*10)/10,Math.round(height.get()*10)/10]);if(samples.length>50)samples.shift();if(nav.current)nav.current.dataset.shapeSamples=JSON.stringify(samples)};const offW=width.on('change',record),offH=height.on('change',record);return()=>{offW();offH()}},[width,height]);
+- // Explicit development-only inspection state for screenshots; never enabled in production.
+- useEffect(()=>{if(process.env.NODE_ENV==='development'&&new URLSearchParams(location.search).get('glass-inspect')==='held'){pressed.set(1);stretch.set(12);setDragging(true)}},[pressed,stretch]);
++ const shape=useLensShape(baseW,baseH,stretch.value,pressed.value,axis,'dock');
++ const presentation=useTransform(()=>{
++  const left=x.get()-baseW.get()/2+shape.offsetX.get(),top=y.get()-baseH.get()/2+shape.offsetY.get();
++  return axis.get()===1?dockPresentation(left,top,shape.width.get(),shape.height.get(),{width:sceneW.get(),height:sceneH.get()}):{left,top,width:shape.width.get(),height:shape.height.get()};
++ });
++ const renderX=useTransform(presentation,p=>p.left),renderY=useTransform(presentation,p=>p.top);
++ const width=useTransform(presentation,p=>p.width),height=useTransform(presentation,p=>p.height);
++ const [ready,setReady]=useState(false);
++ function anchor(button:HTMLButtonElement){const root=nav.current!;return dockAnchor({left:button.offsetLeft,top:button.offsetTop,width:button.offsetWidth,height:button.offsetHeight},{width:root.clientWidth,height:root.clientHeight},horizontal.current)}
++ function settle(value:string,velocity?:number){const b=buttons.current[value];if(!b||!nav.current)return;const a=anchor(b);
++  baseW.set(a.width);baseH.set(a.height);
++  if(reduce){x.jump(a.x);y.jump(a.y)}else if(velocity===undefined){x.set(a.x);y.set(a.y)}else if(horizontal.current){x.release(a.x,velocity);y.set(a.y)}else{y.release(a.y,velocity);x.set(a.x)}
++ }
++ useEffect(()=>{const update=()=>{if(!gesture.current)stretch.set(reduce?0:Math.max(-18,Math.min(18,(horizontal.current?x.getVelocity():y.getVelocity())*.065)))};
++  const a=x.on('change',update),b=y.on('change',update);return()=>{a();b()};
++ },[x,y,stretch,reduce]);
++ // Cut the substrate out under the lens so its filter samples page pixels once.
++ // The same presentation values drive both the silhouette and its opening.
++ useLayoutEffect(()=>{const update=()=>{const root=nav.current;if(!root)return;
++  for(const [k,v] of Object.entries({x:renderX.get(),y:renderY.get(),w:width.get(),h:height.get()}))root.style.setProperty('--dock-lens-'+k,v+'px');
++ };const off=[renderX,renderY,width,height].map(v=>v.on('change',update));update();return()=>off.forEach(f=>f());},[renderX,renderY,width,height]);
+  useEffect(()=>{if(reduce){pressed.jump(0);stretch.jump(0)}},[reduce,pressed,stretch]);
+- // A WebView can lose a pointer-up when its app/browser chrome takes focus.
+- useEffect(()=>{const cancel=()=>{const g=gesture.current;if(!g)return;gesture.current=null;const root=nav.current;if(root?.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.jump(0);stretch.jump(0);setDragging(false);const b=buttons.current[visualActive];if(b){x.set(b.offsetLeft);y.set(b.offsetTop)}suppressClick.current=performance.now()+400};const visibility=()=>{if(document.hidden)cancel()};window.addEventListener('blur',cancel);document.addEventListener('visibilitychange',visibility);return()=>{window.removeEventListener('blur',cancel);document.removeEventListener('visibilitychange',visibility)}},[visualActive,x,y,pressed,stretch]);
+- const [box,setBox]=useState({w:0,h:0,sceneW:0,sceneH:0});
+- useLayoutEffect(()=>{const measure=()=>{const root=nav.current,button=buttons.current[visualActive];if(!root||!button)return;const measured=[root.clientWidth,root.clientHeight,...items.flatMap(i=>{const b=buttons.current[i.value];return b?[b.offsetLeft,b.offsetTop,b.offsetWidth,b.offsetHeight]:[]})];if(gesture.current&&sameNavigationGeometry(geometry.current,measured))return;geometry.current=measured;if(gesture.current){const g=gesture.current;gesture.current=null;if(root.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.set(0);stretch.set(0);setDragging(false);suppressClick.current=performance.now()+400}const nextX=button.offsetLeft,nextY=button.offsetTop;horizontal.current=items.length>1&&buttons.current[items[4].value]?.offsetLeft!==buttons.current[items[0].value]?.offsetLeft;axis.set(horizontal.current?1:0);for(const item of items){const b=buttons.current[item.value];if(b){b.style.setProperty('--item-x',b.offsetLeft+'px');b.style.setProperty('--item-y',b.offsetTop+'px')}}baseW.set(button.offsetWidth+(horizontal.current?12:0));baseH.set(button.offsetHeight-(horizontal.current?8:0));setBox({w:button.offsetWidth,h:button.offsetHeight,sceneW:root.clientWidth,sceneH:root.clientHeight});if(!initialized.current||reduce){x.jump(nextX);y.jump(nextY);initialized.current=true}x.set(nextX);y.set(nextY)};measure();const observer=new ResizeObserver(measure);if(nav.current)observer.observe(nav.current);window.addEventListener('resize',measure);return()=>{observer.disconnect();window.removeEventListener('resize',measure)}},[visualActive,reduce,x,y]);
+- useEffect(()=>{if(process.env.NODE_ENV!=='development')return;const samples:number[][]=[];const record=()=>{samples.push([Math.round(x.get()*100)/100,Math.round(y.get()*100)/100]);if(samples.length>40)samples.shift();if(nav.current)nav.current.dataset.motionSamples=JSON.stringify(samples)};const offX=x.on('change',record),offY=y.on('change',record);return()=>{offX();offY()}},[x,y]);
+- function beginDrag(e:PointerEvent<HTMLElement>){if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||gesture.current)return;const root=nav.current;if(!root)return;const first=buttons.current[items[0].value],last=buttons.current[items[4].value];if(!first||!last)return;const isHorizontal=last.offsetLeft!==first.offsetLeft;horizontal.current=isHorizontal;axis.set(isHorizontal?1:0);lastPointer.current={position:isHorizontal?e.clientX:e.clientY,time:performance.now(),speed:0};if(!reduce)pressed.set(1);gesture.current={id:e.pointerId,start:isHorizontal?e.clientX:e.clientY,origin:isHorizontal?x.get():y.get(),offset:0,horizontal:isHorizontal,moved:false};root.setPointerCapture(e.pointerId);setDragging(true);e.preventDefault()}
+- function moveDrag(e:PointerEvent<HTMLElement>){const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=(g.horizontal?e.clientX:e.clientY)-g.start;if(!g.moved){if(Math.abs(delta)<=3){e.preventDefault();return}g.moved=true;g.origin=(g.horizontal?x.get():y.get())-Math.sign(delta)*3;}const position=g.horizontal?e.clientX:e.clientY,now=performance.now(),speed=experimental?sampleVelocity(position,lastPointer.current.position,now,lastPointer.current.time)/1000:(position-lastPointer.current.position)/Math.max(8,now-lastPointer.current.time);lastPointer.current={position,time:now,speed};if(!reduce)stretch.set(Math.max(-18,Math.min(18,speed*18)));if(nav.current){const rect=nav.current.getBoundingClientRect();nav.current.style.setProperty('--touch-x',`${e.clientX-rect.left}px`);nav.current.style.setProperty('--touch-y',`${e.clientY-rect.top}px`);}const coordinates=items.map(i=>buttons.current[i.value]).filter((b):b is HTMLButtonElement=>!!b).map(b=>g.horizontal?b.offsetLeft:b.offsetTop);const value=experimental?segmentResistance(g.origin+delta,Math.min(...coordinates),Math.max(...coordinates)):Math.max(Math.min(...coordinates),Math.min(Math.max(...coordinates),g.origin+delta));if(g.horizontal){x.set(value);x.jump(value)}else{y.set(value);y.jump(value)}e.preventDefault()}
+- function finishDrag(e:PointerEvent<HTMLElement>,cancelled=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;gesture.current=null;pressed.set(0);stretch.set(0);setDragging(false);if(nav.current?.hasPointerCapture(e.pointerId))nav.current.releasePointerCapture(e.pointerId);let next=visualActive;if(g.moved&&!cancelled){const position=g.horizontal?x.get():y.get();next=items.reduce((best,item)=>{const a=buttons.current[best.value],b=buttons.current[item.value];return a&&b&&Math.abs((g.horizontal?b.offsetLeft:b.offsetTop)-position)<Math.abs((g.horizontal?a.offsetLeft:a.offsetTop)-position)?item:best},items[0]).value}else if(!cancelled){next=navigationHit(e.clientX,e.clientY,items.flatMap(item=>{const b=buttons.current[item.value];return b?[{value:item.value,...b.getBoundingClientRect().toJSON()}]:[]}))||visualActive}const button=buttons.current[next];if(button){const velocity=experimental?releaseVelocity(lastPointer.current.speed*1000,lastPointer.current.time,performance.now(),cancelled||!g.moved,!!reduce):!reduce&&g.moved&&!cancelled&&performance.now()-lastPointer.current.time<100?lastPointer.current.speed*1000:0;if(g.horizontal){if(g.moved)x.release(button.offsetLeft,velocity);else x.set(button.offsetLeft);y.set(button.offsetTop)}else{if(g.moved)y.release(button.offsetTop,velocity);else y.set(button.offsetTop);x.set(button.offsetLeft)}}suppressClick.current=performance.now()+400;setVisualActive(next);if(!cancelled&&next!==visualActive)onChange(next)}
+- return <nav ref={nav} className={"glass-navigation motion-glass"+(dragging?' is-dragging':'')} onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={e=>finishDrag(e)} onPointerCancel={e=>finishDrag(e,true)} onLostPointerCapture={e=>finishDrag(e,true)} onClickCapture={e=>{if(e.detail>0&&performance.now()<suppressClick.current){e.preventDefault();e.stopPropagation()}}} data-lg-role="dock" aria-label="Разделы дневника"><div className="dock-material" aria-hidden="true"/>{items.map(({Icon,value,label})=><button ref={el=>{buttons.current[value]=el}} key={value} aria-current={visualActive===value?'page':undefined} className={visualActive===value?'active':''} onClick={()=>{setVisualActive(value);onChange(value)}}><span className="nav-visual"><Icon size={19}/><span>{label}</span>{value==='Тренировки'&&<small>{count}</small>}</span></button>)}<motion.div className="glass-lens is-ready" aria-hidden="true" style={{x:renderX,y:renderY,width,height,borderRadius:shape.radius,skewX:shape.skewX,skewY:shape.skewY,opacity:box.w?1:0}}><motion.div ref={surface} className="glass-lens-surface" style={{scale:shape.scale,'--light-angle':shape.angle,'--rf-light-x':shape.lightX,'--rf-light-y':shape.lightY} as MotionStyle}><div className="lens-caustic"/><div className="lens-touch-light"/></motion.div></motion.div></nav>
++ useEffect(()=>{const cancel=()=>{const g=gesture.current;if(!g)return;gesture.current=null;const root=nav.current;
++  if(root?.hasPointerCapture(g.id))root.releasePointerCapture(g.id);
++  pressed.set(0);stretch.set(0);setDragging(false);settle(visualActive);suppressClick.current=performance.now()+400;
++ };const visibility=()=>{if(document.hidden)cancel()};window.addEventListener('blur',cancel);document.addEventListener('visibilitychange',visibility);
++ return()=>{window.removeEventListener('blur',cancel);document.removeEventListener('visibilitychange',visibility)};
++ },[visualActive,reduce]);
++ useLayoutEffect(()=>{const measure=()=>{const root=nav.current,button=buttons.current[visualActive];if(!root||!button)return;
++  const measured=[root.clientWidth,root.clientHeight,...items.flatMap(i=>{const b=buttons.current[i.value];return b?[b.offsetLeft,b.offsetTop,b.offsetWidth,b.offsetHeight]:[]})];
++  if(gesture.current&&sameNavigationGeometry(geometry.current,measured))return;
++  const resized=!sameNavigationGeometry(geometry.current,measured);geometry.current=measured;
++  if(gesture.current){const g=gesture.current;gesture.current=null;if(root.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.set(0);stretch.set(0);setDragging(false);suppressClick.current=performance.now()+400;}
++  horizontal.current=buttons.current[items[4].value]?.offsetLeft!==buttons.current[items[0].value]?.offsetLeft;
++  axis.set(horizontal.current?1:0);root.dataset.dockAxis=horizontal.current?'horizontal':'vertical';
++  root.style.setProperty('--dock-radius',horizontal.current?root.clientHeight/2+'px':'24px');
++  sceneW.set(root.clientWidth);sceneH.set(root.clientHeight);const a=anchor(button);baseW.set(a.width);baseH.set(a.height);
++  if(!initialized.current||reduce||resized){x.jump(a.x);y.jump(a.y);initialized.current=true}else{x.set(a.x);y.set(a.y)}
++  setReady(true);
++ };measure();const observer=new ResizeObserver(measure);if(nav.current)observer.observe(nav.current);window.addEventListener('resize',measure);
++ return()=>{observer.disconnect();window.removeEventListener('resize',measure)};
++ },[visualActive,reduce,x,y]);
++ useEffect(()=>{if(process.env.NODE_ENV!=='development')return;const samples:number[][]=[];const record=()=>{samples.push([Math.round(renderX.get()*100)/100,Math.round(renderY.get()*100)/100]);if(samples.length>80)samples.shift();if(nav.current)nav.current.dataset.motionSamples=JSON.stringify(samples)};const a=renderX.on('change',record),b=renderY.on('change',record);return()=>{a();b()}},[renderX,renderY]);
++ function beginDrag(e:PointerEvent<HTMLElement>){if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||gesture.current)return;
++  const root=nav.current;if(!root)return;const position=horizontal.current?e.clientX:e.clientY;
++  lastPointer.current={position,time:performance.now(),speed:0};if(!reduce)pressed.set(1);
++  // Keep an in-flight spring alive until a real drag takes over (L44 repeat-tap fix).
++  gesture.current={id:e.pointerId,start:position,origin:horizontal.current?x.get():y.get(),horizontal:horizontal.current,moved:false};
++  root.setPointerCapture(e.pointerId);setDragging(true);e.preventDefault();
++ }
++ function moveDrag(e:PointerEvent<HTMLElement>){const g=gesture.current;if(!g||g.id!==e.pointerId)return;
++  const position=g.horizontal?e.clientX:e.clientY,delta=position-g.start;
++  if(!g.moved){if(Math.abs(delta)<=3){e.preventDefault();return}g.moved=true;g.origin=(g.horizontal?x.get():y.get())-Math.sign(delta)*3;}
++  const now=performance.now(),speed=experimental?sampleVelocity(position,lastPointer.current.position,now,lastPointer.current.time)/1000:(position-lastPointer.current.position)/Math.max(8,now-lastPointer.current.time);
++  lastPointer.current={position,time:now,speed};if(!reduce)stretch.set(Math.max(-18,Math.min(18,speed*18)));
++  const coordinates=items.flatMap(i=>{const b=buttons.current[i.value];if(!b)return[];const a=anchor(b);return[g.horizontal?a.x:a.y]});
++  const value=experimental?segmentResistance(g.origin+delta,Math.min(...coordinates),Math.max(...coordinates)):Math.max(Math.min(...coordinates),Math.min(Math.max(...coordinates),g.origin+delta));
++  if(g.horizontal)x.jump(value);else y.jump(value);e.preventDefault();
++ }
++ function finishDrag(e:PointerEvent<HTMLElement>,cancelled=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;
++  gesture.current=null;pressed.set(0);stretch.set(0);setDragging(false);
++  if(nav.current?.hasPointerCapture(e.pointerId))nav.current.releasePointerCapture(e.pointerId);
++  let next=visualActive;
++  if(g.moved&&!cancelled){const position=g.horizontal?x.get():y.get();next=items.reduce((best,item)=>{const a=buttons.current[best.value],b=buttons.current[item.value];if(!a||!b)return best;const aa=anchor(a),ab=anchor(b);return Math.abs((g.horizontal?ab.x:ab.y)-position)<Math.abs((g.horizontal?aa.x:aa.y)-position)?item:best},items[0]).value;
++  }else if(!cancelled){next=navigationHit(e.clientX,e.clientY,items.flatMap(item=>{const b=buttons.current[item.value];return b?[{value:item.value,...b.getBoundingClientRect().toJSON()}]:[]}))||visualActive;}
++  const velocity=experimental?releaseVelocity(lastPointer.current.speed*1000,lastPointer.current.time,performance.now(),cancelled||!g.moved,!!reduce):!reduce&&g.moved&&!cancelled&&performance.now()-lastPointer.current.time<100?lastPointer.current.speed*1000:0;
++  settle(next,g.moved?velocity:undefined);suppressClick.current=performance.now()+400;
++  setVisualActive(next);if(!cancelled&&next!==visualActive)onChange(next);
++ }
++ return <nav ref={nav} className={'glass-navigation motion-glass'+(dragging?' is-dragging':'')} data-dock-version="l46"
++  onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={e=>finishDrag(e)} onPointerCancel={e=>finishDrag(e,true)} onLostPointerCapture={e=>finishDrag(e,true)}
++  onClickCapture={e=>{if(e.detail>0&&performance.now()<suppressClick.current){e.preventDefault();e.stopPropagation()}}} data-lg-role="dock" aria-label="Разделы дневника">
++  <div className="dock-material" aria-hidden="true"/>
++  {items.map(({Icon,value,label})=><button ref={el=>{buttons.current[value]=el}} key={value} aria-current={visualActive===value?'page':undefined} className={visualActive===value?'active':''} onClick={()=>{if(value!==visualActive){setVisualActive(value);onChange(value)}}}><span className="nav-visual"><Icon size={19}/><span>{label}</span>{value==='Тренировки'&&<small>{count}</small>}</span></button>)}
++  <motion.div className="glass-lens is-ready" aria-hidden="true" style={{x:renderX,y:renderY,width,height,borderRadius:shape.radius,skewX:shape.skewX,skewY:shape.skewY,opacity:ready?1:0}}>
++   <motion.div ref={surface} className="glass-lens-surface" style={{scale:shape.scale,'--light-angle':shape.angle,'--rf-light-x':shape.lightX,'--rf-light-y':shape.lightY} as MotionStyle}><div className="lens-caustic"/><div className="lens-touch-light"/></motion.div>
++  </motion.div>
++ </nav>;
+ }
+diff --git a/components/LegacyGlassNavigation.tsx b/components/LegacyGlassNavigation.tsx
+new file mode 100644
+index 0000000..623d1d8
+--- /dev/null
++++ b/components/LegacyGlassNavigation.tsx
+@@ -0,0 +1,38 @@
++'use client';
++import {useEffect,useLayoutEffect,useRef,useState,type PointerEvent} from 'react';
++import {navigationHit,sameNavigationGeometry} from '../lib/navigation-hit';
++import {segmentResistance} from '../lib/segment-geometry';
++import {sampleVelocity,releaseVelocity} from '../lib/gesture-sampling';
++import {useGlassMotion} from '../hooks/useGlassMotion';
++import {useLensShape} from '../hooks/useLensShape';
++import {useFrameSpring} from '../hooks/useFrameSpring';
++import {motion,useMotionValue,useTransform,useReducedMotion,type MotionStyle} from 'motion/react';
++import {LayoutDashboard,List,TrendingUp,GitCompareArrows,Target} from 'lucide-react';
++const items=[{Icon:LayoutDashboard,value:'Обзор',label:'Сегодня'},{Icon:List,value:'Тренировки',label:'Журнал'},{Icon:TrendingUp,value:'Прогресс',label:'Прогресс'},{Icon:GitCompareArrows,value:'Сравнение',label:'Сравнить'},{Icon:Target,value:'Цели и уровни',label:'Цели'}];
++export default function LegacyGlassNavigation({active,onChange,count,experimental=true}:{active:string,onChange:(tab:string)=>void,count:number;experimental?:boolean}){
++ const [visualActive,setVisualActive]=useState(active);
++ useEffect(()=>setVisualActive(active),[active]);
++ const nav=useRef<HTMLElement>(null),buttons=useRef<Record<string,HTMLButtonElement|null>>({}),initialized=useRef(false),geometry=useRef<number[]>([]);
++ const gesture=useRef<{id:number,start:number,origin:number,offset:number,horizontal:boolean,moved:boolean}|null>(null),suppressClick=useRef(0);
++ const [dragging,setDragging]=useState(false);
++ const reduce=useReducedMotion();
++ const x=useFrameSpring(0,{stiffness:220,damping:25,mass:1.1}),y=useFrameSpring(0,{stiffness:220,damping:25,mass:1.1});
++ const baseW=useMotionValue(0),baseH=useMotionValue(0),pressed=useFrameSpring(0,{stiffness:350,damping:24}),stretch=useFrameSpring(0,{stiffness:220,damping:20}),horizontal=useRef(true),axis=useMotionValue(1),lastPointer=useRef({position:0,time:0,speed:0});
++ const surface=useRef<HTMLDivElement>(null);useGlassMotion(surface,stretch.value,pressed.value);
++ const shape=useLensShape(baseW,baseH,stretch.value,pressed.value,axis,'rounded'),{width,height}=shape;
++ const renderX=useTransform(()=>x.get()+shape.offsetX.get()-(horizontal.current?6:0)),renderY=useTransform(()=>y.get()+shape.offsetY.get()+(horizontal.current?4:0));
++ useEffect(()=>{const update=()=>{if(gesture.current)return;stretch.set(reduce?0:Math.max(-18,Math.min(18,(horizontal.current?x.getVelocity():y.getVelocity())*.065)))};const a=x.on('change',update),b=y.on('change',update);return()=>{a();b()}},[x,y,stretch,reduce]);
++ useEffect(()=>{if(process.env.NODE_ENV!=='development')return;const samples:number[][]=[];const record=()=>{samples.push([Math.round(width.get()*10)/10,Math.round(height.get()*10)/10]);if(samples.length>50)samples.shift();if(nav.current)nav.current.dataset.shapeSamples=JSON.stringify(samples)};const offW=width.on('change',record),offH=height.on('change',record);return()=>{offW();offH()}},[width,height]);
++ // Explicit development-only inspection state for screenshots; never enabled in production.
++ useEffect(()=>{if(process.env.NODE_ENV==='development'&&new URLSearchParams(location.search).get('glass-inspect')==='held'){pressed.set(1);stretch.set(12);setDragging(true)}},[pressed,stretch]);
++ useEffect(()=>{if(reduce){pressed.jump(0);stretch.jump(0)}},[reduce,pressed,stretch]);
++ // A WebView can lose a pointer-up when its app/browser chrome takes focus.
++ useEffect(()=>{const cancel=()=>{const g=gesture.current;if(!g)return;gesture.current=null;const root=nav.current;if(root?.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.jump(0);stretch.jump(0);setDragging(false);const b=buttons.current[visualActive];if(b){x.set(b.offsetLeft);y.set(b.offsetTop)}suppressClick.current=performance.now()+400};const visibility=()=>{if(document.hidden)cancel()};window.addEventListener('blur',cancel);document.addEventListener('visibilitychange',visibility);return()=>{window.removeEventListener('blur',cancel);document.removeEventListener('visibilitychange',visibility)}},[visualActive,x,y,pressed,stretch]);
++ const [box,setBox]=useState({w:0,h:0,sceneW:0,sceneH:0});
++ useLayoutEffect(()=>{const measure=()=>{const root=nav.current,button=buttons.current[visualActive];if(!root||!button)return;const measured=[root.clientWidth,root.clientHeight,...items.flatMap(i=>{const b=buttons.current[i.value];return b?[b.offsetLeft,b.offsetTop,b.offsetWidth,b.offsetHeight]:[]})];if(gesture.current&&sameNavigationGeometry(geometry.current,measured))return;geometry.current=measured;if(gesture.current){const g=gesture.current;gesture.current=null;if(root.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.set(0);stretch.set(0);setDragging(false);suppressClick.current=performance.now()+400}const nextX=button.offsetLeft,nextY=button.offsetTop;horizontal.current=items.length>1&&buttons.current[items[4].value]?.offsetLeft!==buttons.current[items[0].value]?.offsetLeft;axis.set(horizontal.current?1:0);for(const item of items){const b=buttons.current[item.value];if(b){b.style.setProperty('--item-x',b.offsetLeft+'px');b.style.setProperty('--item-y',b.offsetTop+'px')}}baseW.set(button.offsetWidth+(horizontal.current?12:0));baseH.set(button.offsetHeight-(horizontal.current?8:0));setBox({w:button.offsetWidth,h:button.offsetHeight,sceneW:root.clientWidth,sceneH:root.clientHeight});if(!initialized.current||reduce){x.jump(nextX);y.jump(nextY);initialized.current=true}x.set(nextX);y.set(nextY)};measure();const observer=new ResizeObserver(measure);if(nav.current)observer.observe(nav.current);window.addEventListener('resize',measure);return()=>{observer.disconnect();window.removeEventListener('resize',measure)}},[visualActive,reduce,x,y]);
++ useEffect(()=>{if(process.env.NODE_ENV!=='development')return;const samples:number[][]=[];const record=()=>{samples.push([Math.round(x.get()*100)/100,Math.round(y.get()*100)/100]);if(samples.length>40)samples.shift();if(nav.current)nav.current.dataset.motionSamples=JSON.stringify(samples)};const offX=x.on('change',record),offY=y.on('change',record);return()=>{offX();offY()}},[x,y]);
++ function beginDrag(e:PointerEvent<HTMLElement>){if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||gesture.current)return;const root=nav.current;if(!root)return;const first=buttons.current[items[0].value],last=buttons.current[items[4].value];if(!first||!last)return;const isHorizontal=last.offsetLeft!==first.offsetLeft;horizontal.current=isHorizontal;axis.set(isHorizontal?1:0);lastPointer.current={position:isHorizontal?e.clientX:e.clientY,time:performance.now(),speed:0};if(!reduce)pressed.set(1);gesture.current={id:e.pointerId,start:isHorizontal?e.clientX:e.clientY,origin:isHorizontal?x.get():y.get(),offset:0,horizontal:isHorizontal,moved:false};root.setPointerCapture(e.pointerId);setDragging(true);e.preventDefault()}
++ function moveDrag(e:PointerEvent<HTMLElement>){const g=gesture.current;if(!g||g.id!==e.pointerId)return;const delta=(g.horizontal?e.clientX:e.clientY)-g.start;if(!g.moved){if(Math.abs(delta)<=3){e.preventDefault();return}g.moved=true;g.origin=(g.horizontal?x.get():y.get())-Math.sign(delta)*3;}const position=g.horizontal?e.clientX:e.clientY,now=performance.now(),speed=experimental?sampleVelocity(position,lastPointer.current.position,now,lastPointer.current.time)/1000:(position-lastPointer.current.position)/Math.max(8,now-lastPointer.current.time);lastPointer.current={position,time:now,speed};if(!reduce)stretch.set(Math.max(-18,Math.min(18,speed*18)));if(nav.current){const rect=nav.current.getBoundingClientRect();nav.current.style.setProperty('--touch-x',`${e.clientX-rect.left}px`);nav.current.style.setProperty('--touch-y',`${e.clientY-rect.top}px`);}const coordinates=items.map(i=>buttons.current[i.value]).filter((b):b is HTMLButtonElement=>!!b).map(b=>g.horizontal?b.offsetLeft:b.offsetTop);const value=experimental?segmentResistance(g.origin+delta,Math.min(...coordinates),Math.max(...coordinates)):Math.max(Math.min(...coordinates),Math.min(Math.max(...coordinates),g.origin+delta));if(g.horizontal){x.set(value);x.jump(value)}else{y.set(value);y.jump(value)}e.preventDefault()}
++ function finishDrag(e:PointerEvent<HTMLElement>,cancelled=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;gesture.current=null;pressed.set(0);stretch.set(0);setDragging(false);if(nav.current?.hasPointerCapture(e.pointerId))nav.current.releasePointerCapture(e.pointerId);let next=visualActive;if(g.moved&&!cancelled){const position=g.horizontal?x.get():y.get();next=items.reduce((best,item)=>{const a=buttons.current[best.value],b=buttons.current[item.value];return a&&b&&Math.abs((g.horizontal?b.offsetLeft:b.offsetTop)-position)<Math.abs((g.horizontal?a.offsetLeft:a.offsetTop)-position)?item:best},items[0]).value}else if(!cancelled){next=navigationHit(e.clientX,e.clientY,items.flatMap(item=>{const b=buttons.current[item.value];return b?[{value:item.value,...b.getBoundingClientRect().toJSON()}]:[]}))||visualActive}const button=buttons.current[next];if(button){const velocity=experimental?releaseVelocity(lastPointer.current.speed*1000,lastPointer.current.time,performance.now(),cancelled||!g.moved,!!reduce):!reduce&&g.moved&&!cancelled&&performance.now()-lastPointer.current.time<100?lastPointer.current.speed*1000:0;if(g.horizontal){if(g.moved)x.release(button.offsetLeft,velocity);else x.set(button.offsetLeft);y.set(button.offsetTop)}else{if(g.moved)y.release(button.offsetTop,velocity);else y.set(button.offsetTop);x.set(button.offsetLeft)}}suppressClick.current=performance.now()+400;setVisualActive(next);if(!cancelled&&next!==visualActive)onChange(next)}
++ return <nav ref={nav} className={"glass-navigation motion-glass"+(dragging?' is-dragging':'')} onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={e=>finishDrag(e)} onPointerCancel={e=>finishDrag(e,true)} onLostPointerCapture={e=>finishDrag(e,true)} onClickCapture={e=>{if(e.detail>0&&performance.now()<suppressClick.current){e.preventDefault();e.stopPropagation()}}} data-dock-version="l45" data-lg-role="dock" aria-label="Разделы дневника"><div className="dock-material" aria-hidden="true"/>{items.map(({Icon,value,label})=><button ref={el=>{buttons.current[value]=el}} key={value} aria-current={visualActive===value?'page':undefined} className={visualActive===value?'active':''} onClick={()=>{setVisualActive(value);onChange(value)}}><span className="nav-visual"><Icon size={19}/><span>{label}</span>{value==='Тренировки'&&<small>{count}</small>}</span></button>)}<motion.div className="glass-lens is-ready" aria-hidden="true" style={{x:renderX,y:renderY,width,height,borderRadius:shape.radius,skewX:shape.skewX,skewY:shape.skewY,opacity:box.w?1:0}}><motion.div ref={surface} className="glass-lens-surface" style={{scale:shape.scale,'--light-angle':shape.angle,'--rf-light-x':shape.lightX,'--rf-light-y':shape.lightY} as MotionStyle}><div className="lens-caustic"/><div className="lens-touch-light"/></motion.div></motion.div></nav>
++}
+diff --git a/components/RunflowGlass.tsx b/components/RunflowGlass.tsx
+index b89921c..410475f 100644
+--- a/components/RunflowGlass.tsx
++++ b/components/RunflowGlass.tsx
+@@ -24,6 +24,7 @@ export default function RunflowGlass(){
+    const energy=Math.min(1,Math.abs(entry?.drive??0)/18),contact=Math.max(0,Math.min(1,entry?.press??0));
+    const gain=1+energy*.22+contact*.08;
+    el.style.setProperty('--rf-motion-energy',String(energy));
++   el.style.setProperty('--rf-contact',String(contact));
+    el.dataset.opticalGain=gain.toFixed(3);
+    filter?.querySelector('feGaussianBlur')?.setAttribute('stdDeviation',String(GLASS_PROFILES[materialLevel(el)].preblur+energy*.18));
+    filter?.querySelectorAll('feDisplacementMap').forEach(node=>node.setAttribute('scale',String(Math.min(GLASS_PROFILES[materialLevel(el)].maxScale,scale)*gain*strength/100)));
+diff --git a/lib/dock-geometry.ts b/lib/dock-geometry.ts
+new file mode 100644
+index 0000000..adc965b
+--- /dev/null
++++ b/lib/dock-geometry.ts
+@@ -0,0 +1,20 @@
++export type DockBox={left:number;top:number;width:number;height:number};
++export const DOCK_SAFE_INSET=6;
++const clamp=(v:number,min:number,max:number)=>Math.max(min,Math.min(max,v));
++
++/** Button centres remain the selection anchors. Insets constrain presentation only. */
++export function dockAnchor(button:DockBox,root:{width:number;height:number},horizontal:boolean){
++ const inset=horizontal?DOCK_SAFE_INSET:0;
++ const width=Math.max(1,Math.min(button.width,root.width-2*inset));
++ const height=Math.max(1,Math.min(button.height,root.height-2*inset));
++ return {x:clamp(button.left+button.width/2,inset+width/2,root.width-inset-width/2),
++  y:clamp(button.top+button.height/2,inset+height/2,root.height-inset-height/2),width,height};
++}
++
++/** Constrain the *deformed* silhouette, not just its resting coordinate. */
++export function dockPresentation(left:number,top:number,width:number,height:number,root:{width:number;height:number}){
++ const inset=DOCK_SAFE_INSET;
++ const w=Math.max(1,Math.min(width,root.width-2*inset));
++ const h=Math.max(1,Math.min(height,root.height-2*inset));
++ return {left:clamp(left,inset,root.width-inset-w),top:clamp(top,inset,root.height-inset-h),width:w,height:h};
++}
+diff --git a/lib/lens-shape.ts b/lib/lens-shape.ts
+index 926a4d2..ea057e1 100644
+--- a/lib/lens-shape.ts
++++ b/lib/lens-shape.ts
+@@ -1,6 +1,15 @@
+ /** Directional glass geometry. This approximates motion; it is not Apple's native material. */
+-export type LensCornerStyle='capsule'|'rounded';
++export type LensCornerStyle='capsule'|'rounded'|'dock';
+ export function lensShape(w:number,h:number,drive:number,pressure:number,horizontal:boolean,cornerStyle:LensCornerStyle='capsule'){
++ if(cornerStyle==='dock'&&horizontal){
++  const d=Math.max(-18,Math.min(18,drive)),p=Math.max(0,Math.min(1,pressure));
++  const width=Math.max(1,w+p*Math.min(2,w*.025)+Math.abs(d)*.3);
++  const height=Math.max(1,h+p*.6-Math.abs(d)*.035),r=Math.min(width,height)/2;
++  const lead=Math.max(1,r-Math.max(0,-d)*.12),trail=Math.max(1,r-Math.max(0,d)*.12);
++  return {width,height,offsetX:-(width-w)/2+d*.12,offsetY:-(height-h)/2,
++   skewX:0,skewY:0,radius:`${trail}px ${lead}px ${lead}px ${trail}px`,scale:1,
++   lightAngle:135+d*1.5,lightX:50+d*1.2,lightY:25};
++ }
+  const d=Math.max(-18,Math.min(18,drive)),p=Math.max(0,Math.min(1,pressure)),a=Math.abs(d);
+  const width=Math.max(1,w+p*Math.min(6,w*.06)+(horizontal?a*Math.min(.65,w*.007):-a*.05));
+  const height=Math.max(1,h+p*Math.min(2,h*.035)+(horizontal?-a*.07:a*.35));
+diff --git a/tests/dock-geometry.test.ts b/tests/dock-geometry.test.ts
+new file mode 100644
+index 0000000..9c7ba6f
+--- /dev/null
++++ b/tests/dock-geometry.test.ts
+@@ -0,0 +1,27 @@
++import {test} from 'node:test';
++import assert from 'node:assert/strict';
++import {dockAnchor,dockPresentation,DOCK_SAFE_INSET} from '../lib/dock-geometry.ts';
++import {lensShape} from '../lib/lens-shape.ts';
++test('first, middle and last lenses stay inside Dock throughout deformation and overshoot',()=>{
++ for(const width of [300,350,370,500]){
++  const root={width,height:86},buttonW=(width-16-12)/5;
++  for(const index of [0,2,4]){
++   const b={left:8+index*(buttonW+3),top:8,width:buttonW,height:70},a=dockAnchor(b,root,true);
++   assert.equal(a.x,b.left+b.width/2);assert.equal(a.y,43);
++   for(const d of [-18,0,18])for(const p of [0,1])for(const overshoot of [-100,0,100]){
++    const shape=lensShape(a.width,a.height,d,p,true,'dock');
++    const rect=dockPresentation(a.x-a.width/2+shape.offsetX+overshoot,a.y-a.height/2+shape.offsetY,shape.width,shape.height,root);
++    assert.ok(rect.left>=DOCK_SAFE_INSET&&rect.left+rect.width<=width-DOCK_SAFE_INSET+.001);
++    assert.ok(rect.top>=DOCK_SAFE_INSET&&rect.top+rect.height<=root.height-DOCK_SAFE_INSET+.001);
++    assert.equal(shape.scale,1);assert.equal(shape.skewX,0);
++   }
++  }
++ }
++});
++test('Dock resting shape is a capsule and reverses directional shape without a jump in size',()=>{
++ const idle=lensShape(70,70,0,0,true,'dock');assert.equal(idle.radius,'35px 35px 35px 35px');
++ const l=lensShape(70,70,-12,1,true,'dock'),r=lensShape(70,70,12,1,true,'dock');
++ assert.equal(l.width,r.width);assert.equal(l.height,r.height);
++ assert.equal(l.offsetX+r.offsetX,-(l.width-70));
++ assert.notEqual(l.radius,r.radius);
++});

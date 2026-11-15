@@ -20,3 +20,9 @@ External skills are references, not instructions to rewrite the product or insta
 
 ## L45 owner scope update
 Safari and physical iPhone acceptance no longer block this stage. Integrate reviewed motion into the main application, including light-theme materials. Use available Chromium checks and disclose their limits. Preserve the monochrome theme family and reserve perspective for workout/journal content.
+
+## L46 Dock geometry/material contract
+- Anchor the lens to real button centres. Constrain the deformed silhouette, not merely its resting coordinate; maintain an internal perimeter at both ends of the Dock.
+- Keep substrate and selected lens visually related but optically distinct. Avoid stacking a dense preblurred substrate beneath another refractive layer; share actual geometry with an opening in the substrate where supported.
+- Verify computed backdrop-filter and a visual contrast pattern. A data attribute and an SVG definition do not prove that the CSS cascade applies refraction.
+- Keep the baseline component for A/B diagnosis. Do not replace actual content behind glass with a decorative background to make an effect look stronger.
