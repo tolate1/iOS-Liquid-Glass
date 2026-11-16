@@ -26,3 +26,9 @@ Safari and physical iPhone acceptance no longer block this stage. Integrate revi
 - Keep substrate and selected lens visually related but optically distinct. Avoid stacking a dense preblurred substrate beneath another refractive layer; share actual geometry with an opening in the substrate where supported.
 - Verify computed backdrop-filter and a visual contrast pattern. A data attribute and an SVG definition do not prove that the CSS cascade applies refraction.
 - Keep the baseline component for A/B diagnosis. Do not replace actual content behind glass with a decorative background to make an effect look stronger.
+
+## L48 hierarchy and entry-sheet contract
+- Source/period controls scroll with the document; persistent bottom navigation remains separate. Do not restore sticky labels over the period text without a complete separation design.
+- Distinguish canvas, content, secondary content, fields, active control and transient material. A neutral light theme needs independent density/edge/shadow values; do not fill every role with opaque white.
+- Keep workout-sheet.css the single owner of sheet geometry: fixed header/footer and one scrollable body. Preserve numeric input focus behavior and visible validation; all fields remain solid/readable.
+- A menu's handled Escape must not dismiss its enclosing sheet. Keep the inactive main application inert while a dialog is open.
