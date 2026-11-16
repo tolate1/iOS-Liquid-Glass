@@ -1,0 +1,559 @@
+diff --git a/DESIGN.md b/DESIGN.md
+index 64f04c8..2a9b372 100644
+--- a/DESIGN.md
++++ b/DESIGN.md
+@@ -32,3 +32,12 @@ Safari and physical iPhone acceptance no longer block this stage. Integrate revi
+ - Distinguish canvas, content, secondary content, fields, active control and transient material. A neutral light theme needs independent density/edge/shadow values; do not fill every role with opaque white.
+ - Keep workout-sheet.css the single owner of sheet geometry: fixed header/footer and one scrollable body. Preserve numeric input focus behavior and visible validation; all fields remain solid/readable.
+ - A menu's handled Escape must not dismiss its enclosing sheet. Keep the inactive main application inert while a dialog is open.
++
++## L49 — разделение контента и нижнего Dock
++
++- Сначала снижать локальный контраст содержимого под Dock; не подменять читаемость ростом общей непрозрачности материала.
++- Горизонтальный Dock использует один общий оптический слой без выреза под активной вкладкой. Выделение не имеет собственного backdrop-filter; иконки и подписи остаются отдельным резким слоем.
++- Scroll-edge маска с мягким краем следует измеренной панели в координатах контента, а не за курсором. Оверлеи и навигация не маскируются.
++- Компактная геометрия: 76 px вместо 86, кнопки 64 px вместо 70; линза вычисляется из реальной геометрии. Сохранять нижний запас прокрутки.
++- A/B L48/L49 хранить в /interaction-lab/dock; основное приложение всегда использует L49. Старые материальные правила подключать только в сравнении.
++- URL в computed backdrop-filter подтверждает подключение SVG, но не доказывает нативное качество или одинаковое преломление во всех браузерах. Запасной вариант — blur(3px), активный слой без фильтра.
+diff --git a/RELEASE_L49.md b/RELEASE_L49.md
+new file mode 100644
+index 0000000..148d12a
+--- /dev/null
++++ b/RELEASE_L49.md
+@@ -0,0 +1,23 @@
++# Runflow L49 — Dock material rework
++
++В основном приложении переработана нижняя горизонтальная навигация. Данные, API, формулы, карточки и контроллер жестов сохранены.
++
++## Изменения
++
++- Мягкая частичная альфа-маска фактического содержимого страницы локально снижает конкуренцию текста и чисел под Dock. Маска движется при прокрутке и пересчитывает изображение только при изменении размеров панели.
++- Вместо внешнего размытия с отверстием и отдельной сильной линзы используется общий ограниченный SVG displacement. Активное выделение — тонкий слой без второго backdrop-filter. Постоянные каустики и свет за курсором в нижнем Dock выключены.
++- В светлой и тёмной темах снижены плотность и контраст декоративных краёв. Размер 86 → 76 px; кнопки остаются 64 px. Иконки не деформируются.
++- Старый компонент L48 и старые правила материала изолированы в лаборатории /interaction-lab/dock. Добавлен фон с таблицей чисел.
++
++## Проверка
++
++- TypeScript; 14 тестов геометрии, краевых ограничений, захвата, прерывания, сегментов, меню и контраста.
++- Production build и проверка стандартных backdrop-filter в собранном CSS.
++- Доступный Chromium: A/B над линиями графика, текстом, карточкой, числами, чёрным и белым фоном; светлая и тёмная темы.
++- Основной Runflow в существующем viewport-review на 390 и 768 px: видимость Dock, Журнал, повторные нажатия, прокрутка последней карточки выше панели.
++- Фактические computed: общий слой url("#runflow-material-…"), активный слой none, 76/64 px; принудительный fallback — blur(3px), активный слой none.
++- Короткая запись — реальные снимки Chromium во время drag, повторных нажатий и scroll, собранные с исходными временными метками. Это низкочастотная запись, не замер плавности или времени кадров.
++
++## Ограничения
++
++Это веб-реализация, не нативный рендер Apple. По скриншотам подтверждено ослабление фоновых чисел и устранение двойного фильтра; нативная оптическая эквивалентность не заявляется. Аппаратный Safari/iPhone, GPU-профиль и layout/frame performance в этой итерации не измерялись. Проверка API данных не входит в этот визуальный выпуск; снимки используют встроенное Демо.
+diff --git a/app/dock-material.css b/app/dock-material.css
+new file mode 100644
+index 0000000..9d86f11
+--- /dev/null
++++ b/app/dock-material.css
+@@ -0,0 +1,42 @@
++/* L49: content separation -> ONE optical substrate -> thin selected state -> sharp labels. */
++.app nav[data-dock-version=l49][data-dock-axis=horizontal]{
++ --dock-tint:255 255 255;--dock-alpha:.42;--dock-rim-top:#ffffffa6;--dock-rim-bottom:#00000017;--dock-shadow:#00000024;--dock-selected:#ffffff12;--dock-selected-edge:#ffffff7a;
++ border-radius:var(--dock-radius);box-shadow:0 5px 18px var(--dock-shadow);
++}
++html[data-theme=dark] .app nav[data-dock-version=l49][data-dock-axis=horizontal]{
++ --dock-tint:24 24 24;--dock-alpha:.36;--dock-rim-top:#ffffff45;--dock-rim-bottom:#00000052;--dock-shadow:#00000066;--dock-selected:#ffffff08;--dock-selected-edge:#ffffff36;
++}
++.app nav[data-dock-version=l49][data-dock-axis=horizontal] .dock-material{
++ mask-image:none;border:0;background:rgb(var(--dock-tint)/var(--dock-alpha));
++ box-shadow:inset 0 1px 1px var(--dock-rim-top),inset 0 -1px 1px var(--dock-rim-bottom);
++ -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
++}
++.app nav[data-dock-version=l49][data-dock-axis=horizontal] .dock-material[data-rf-glass=svg]{-webkit-backdrop-filter:var(--rf-backdrop);backdrop-filter:var(--rf-backdrop)}
++.app nav[data-dock-version=l49][data-dock-axis=horizontal] .glass-lens-surface{
++ border:0;background:var(--dock-selected);box-shadow:inset 0 1px .6px var(--dock-selected-edge),inset 0 -1px .6px var(--dock-rim-bottom);
++ -webkit-backdrop-filter:none;backdrop-filter:none;transition:none;
++}
++.app nav[data-dock-version=l49][data-dock-axis=horizontal] .glass-lens-surface::before{
++ background:linear-gradient(var(--light-angle,135deg),var(--dock-selected-edge),transparent 24% 76%,var(--dock-selected-edge));
++ opacity:calc(.18 + var(--rf-contact,0)*.2 + var(--rf-motion-energy,0)*.2);
++}
++.app nav[data-dock-version=l49][data-dock-axis=horizontal] .lens-caustic,.app nav[data-dock-version=l49][data-dock-axis=horizontal] .lens-touch-light{display:none}
++/* The mask affects content only, never the navigation foreground. It follows the
++   measured Dock in the content's coordinates; the image is rebuilt on resize only. */
++.app [data-dock-edge=true]{
++ mask-image:linear-gradient(#000 0 0),var(--dock-edge-mask);
++ mask-size:100% 100%,var(--dock-edge-w) var(--dock-edge-h);
++ mask-position:0 0,var(--dock-edge-x) var(--dock-edge-y);
++ mask-repeat:no-repeat;mask-composite:exclude;
++}
++@media(max-width:850px){
++ .app nav[data-dock-version=l49][data-dock-axis=horizontal]{padding:6px;gap:3px}
++ .app nav[data-dock-version=l49][data-dock-axis=horizontal] button{min-height:64px}
++ .app nav[data-dock-version=l49] button>.nav-visual{padding:8px 1px;gap:4px}
++}
++@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
++ .app nav[data-dock-version=l49][data-dock-axis=horizontal] .dock-material{background:var(--surface);border:1px solid var(--ink);-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
++ .app nav[data-dock-version=l49][data-dock-axis=horizontal] .glass-lens-surface{background:var(--surface2);border:1px solid var(--ink)}
++ .app [data-dock-edge=true]{mask-image:none}
++}
++@supports not (mask-composite:exclude){.app nav[data-dock-version=l49][data-dock-axis=horizontal] .dock-material{background:rgb(var(--dock-tint)/.88)}}
+diff --git a/app/interaction-lab/dock/dock.css b/app/interaction-lab/dock/dock.css
+index 467704e..e07ebdf 100644
+--- a/app/interaction-lab/dock/dock.css
++++ b/app/interaction-lab/dock/dock.css
+@@ -6,7 +6,7 @@
+ .dock-review-controls button[aria-pressed=true]{background:var(--accent);color:var(--accentink)}
+ .dock-review-pair{display:flex;flex-wrap:wrap;gap:24px}.dock-review-pair>section{width:390px;max-width:100%}.dock-review-pair h2{font-size:16px;margin-bottom:12px}
+ .dock-review-scene{position:relative;height:300px;border-radius:24px;background:var(--bg);color:var(--ink);border:1px solid var(--line);overflow:hidden}
+-.dock-review-content{position:absolute;inset:0;overflow:hidden;padding:12px;font-size:13px;line-height:1.8}
++.dock-review-content{position:absolute;inset:0;overflow:auto;padding:12px;font-size:13px;line-height:1.8}
+ .dock-review-content p{margin:0 0 8px;line-height:1.6;color:inherit}.dock-review-content svg{width:100%;height:100%}
+ .dock-review-content article{position:absolute;inset:40px 14px 5px;padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:24px}
+ .backdrop-black{background:#070707;color:#f3f3f3}.backdrop-white{background:#fff;color:#181818}
+@@ -16,3 +16,8 @@
+ .app.dock-review nav.glass-navigation button{min-width:0;min-height:70px;padding:8px 0}
+ .app.dock-review nav.glass-navigation button>.nav-visual{flex-direction:column;justify-content:center;gap:4px;padding:8px 1px;font-size:11px;line-height:1.2;letter-spacing:-.015em}
+ .app.dock-review nav small{display:none}
++
++.app.dock-review nav.glass-navigation[data-dock-version=l49]{padding:6px;border-radius:var(--dock-radius,38px)}
++.app.dock-review nav.glass-navigation[data-dock-version=l49] button{min-height:64px}
++.diagnostic-numbers{display:flex;justify-content:space-between;gap:8px;font-variant-numeric:tabular-nums;white-space:nowrap;padding:10px 0;border-bottom:1px solid var(--line)}
++.dock-review-scroll{min-height:100%;padding-bottom:150px}
+diff --git a/app/interaction-lab/dock/legacy-dock.css b/app/interaction-lab/dock/legacy-dock.css
+new file mode 100644
+index 0000000..809727d
+--- /dev/null
++++ b/app/interaction-lab/dock/legacy-dock.css
+@@ -0,0 +1,44 @@
++/* L46 horizontal Dock: one substrate with a lens opening, one optical surface.
++   A/B L45 keeps the original rules above. Values are web tuning, not Apple constants. */
++.app nav[data-dock-version=l46][data-dock-axis=horizontal]{
++ border-radius:var(--dock-radius);box-shadow:0 6px 20px var(--dock-shadow);--dock-tint:255 255 255;--dock-alpha:.6;
++ --dock-edge:#ffffffbf;--dock-bottom:#00000012;--dock-shadow:#0000001f;
++ --dock-lens-shade:#00000006;--dock-contact-shadow:#0000000d;--dock-lens-sheen:#ffffff24;--dock-lens-center:.42;--dock-lens-edge:.67;--dock-reflection:#ffffffdb;
++}
++html[data-theme=dark] .app nav[data-dock-version=l46][data-dock-axis=horizontal]{
++ --dock-tint:24 24 24;--dock-alpha:.58;--dock-edge:#ffffff2e;--dock-bottom:#00000070;--dock-shadow:#00000066;
++ --dock-lens-shade:#ffffff06;--dock-contact-shadow:#00000022;--dock-lens-sheen:#ffffff0e;--dock-lens-center:.38;--dock-lens-edge:.57;--dock-reflection:#ffffff61;
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .dock-material{
++ background:rgb(var(--dock-tint)/calc(var(--dock-alpha) + var(--rf-scroll-density,0)*.35));
++ border:0;box-shadow:inset 0 1px .5px var(--dock-edge),inset 0 -1px .5px var(--dock-bottom);
++ -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
++ /* The SVG has no viewBox: rx is resolved in the mask's own CSS-sized viewport. */
++ mask-image:linear-gradient(#000 0 0),url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" rx="9999" fill="black"/></svg>');
++ mask-size:100% 100%,calc(var(--dock-lens-w,0px) - 2px) calc(var(--dock-lens-h,0px) - 2px);
++ mask-position:0 0,calc(var(--dock-lens-x,0px) + 1px) calc(var(--dock-lens-y,0px) + 1px);
++ mask-repeat:no-repeat;mask-composite:exclude;
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface{
++ border:0;
++ background:linear-gradient(165deg,var(--dock-lens-sheen),var(--dock-lens-shade) 75%),linear-gradient(165deg,rgb(var(--dock-tint)/var(--dock-lens-edge)),rgb(var(--dock-tint)/var(--dock-lens-center)) 45%,rgb(var(--dock-tint)/var(--dock-lens-edge)));
++ box-shadow:inset 0 1px 1px var(--dock-edge),inset 0 -1px 2px var(--dock-bottom),0 2px 4px var(--dock-contact-shadow);
++ -webkit-backdrop-filter:blur(.6px);backdrop-filter:blur(.6px);transition:none;
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface::before{
++ background:linear-gradient(var(--light-angle,135deg),var(--dock-reflection),transparent 28% 66%,var(--dock-reflection));
++ opacity:calc(.45 + var(--rf-motion-energy,0)*.25 + var(--rf-contact,0)*.25);
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .lens-caustic{
++ opacity:calc(.08 + var(--rf-motion-energy,0)*.18 + var(--rf-contact,0)*.12);transition:none;
++}
++.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface[data-rf-glass=svg]{
++ -webkit-backdrop-filter:var(--rf-backdrop);backdrop-filter:var(--rf-backdrop);
++}
++.app nav[data-dock-version=l46] button:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
++
++@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
++ .app nav[data-dock-version=l46][data-dock-axis=horizontal] .dock-material{mask-image:none;background:var(--surface)}
++ .app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface{background:var(--surface2);border:1px solid var(--ink)}
++}
++
+diff --git a/app/interaction-lab/dock/page.tsx b/app/interaction-lab/dock/page.tsx
+index a51e980..1c084da 100644
+--- a/app/interaction-lab/dock/page.tsx
++++ b/app/interaction-lab/dock/page.tsx
+@@ -1,27 +1,28 @@
+ 'use client';
+ import {useEffect,useState} from 'react';
+ import GlassNavigation from '../../../components/GlassNavigation';
+-import LegacyGlassNavigation from '../../../components/LegacyGlassNavigation';
++import GlassNavigationL48 from '../../../components/GlassNavigationL48';
+ import RunflowGlass from '../../../components/RunflowGlass';
+ import './dock.css';
++import './legacy-dock.css';
+ const tabs=[['Обзор','Первая'],['Прогресс','Центральная'],['Цели и уровни','Последняя']];
+ export default function DockReview(){
+- const [variant,setVariant]=useState('both'),[tab,setTab]=useState('Цели и уровни'),[backdrop,setBackdrop]=useState('lines'),[theme,setTheme]=useState('dark'),[commits,setCommits]=useState(0);
++ const [variant,setVariant]=useState('both'),[tab,setTab]=useState('Тренировки'),[backdrop,setBackdrop]=useState('lines'),[theme,setTheme]=useState('dark'),[commits,setCommits]=useState(0);
+  useEffect(()=>{document.documentElement.dataset.theme=theme},[theme]);
+  const change=(value:string)=>{setTab(value);setCommits(n=>n+1)};
+  return <div className="app dock-review"><RunflowGlass/><main>
+-  <a href="/interaction-lab">← Проверка взаимодействий</a><h1>Dock · L45 / L46</h1>
++  <a href="/interaction-lab">← Проверка взаимодействий</a><h1>Dock · L48 / L49</h1>
+   <div className="dock-review-controls">
+-   <div role="group" aria-label="Версия">{[['l45','A · L45'],['l46','B · L46'],['both','Рядом']].map(([v,l])=><button key={v} aria-pressed={variant===v} onClick={()=>setVariant(v)}>{l}</button>)}</div>
++   <div role="group" aria-label="Версия">{[['l48','A · L48'],['l49','B · L49'],['both','Рядом']].map(([v,l])=><button key={v} aria-pressed={variant===v} onClick={()=>setVariant(v)}>{l}</button>)}</div>
+    <div role="group" aria-label="Тема">{[['dark','Тёмная'],['light','Светлая']].map(([v,l])=><button key={v} aria-pressed={theme===v} onClick={()=>setTheme(v)}>{l}</button>)}</div>
+    <div role="group" aria-label="Положение">{tabs.map(([v,l])=><button key={v} aria-pressed={tab===v} onClick={()=>setTab(v)}>{l}</button>)}</div>
+-   <div role="group" aria-label="Фон">{[['lines','Линии'],['text','Текст'],['card','Карточка'],['black','Чёрный'],['white','Белый']].map(([v,l])=><button key={v} aria-pressed={backdrop===v} onClick={()=>setBackdrop(v)}>{l}</button>)}</div>
++   <div role="group" aria-label="Фон">{[['lines','Линии'],['text','Текст'],['card','Карточка'],['numbers','Числа'],['black','Чёрный'],['white','Белый']].map(([v,l])=><button key={v} aria-pressed={backdrop===v} onClick={()=>setBackdrop(v)}>{l}</button>)}</div>
+   </div>
+-  <div className="dock-review-pair">{(variant==='both'?['l45','l46']:[variant]).map(v=><section key={v}>
+-   <h2>{v==='l45'?'A · L45':'B · L46'}</h2>
++  <div className="dock-review-pair">{(variant==='both'?['l48','l49']:[variant]).map(v=><section key={v}>
++   <h2>{v==='l48'?'A · L48':'B · L49'}</h2>
+    <div className={'dock-review-scene backdrop-'+backdrop}>
+-    <div className="dock-review-content" aria-hidden="true">{backdrop==='text'?Array.from({length:9},(_,i)=><p key={i}>Runflow 0123456789 · Темп · круги · 0123456789<br/>Дистанция · стабильность · Runflow 0123456789</p>):backdrop==='lines'?<svg viewBox="0 0 370 260" preserveAspectRatio="none"><path d="M0 200 L60 140 L120 180 L180 80 L240 130 L300 50 L370 100 M0 50 L370 250 M0 250 L370 50" fill="none" stroke="currentColor" strokeWidth="2"/>{[20,60,100,140,180,220].map(y=><path key={y} d={`M0 ${y}H370`} stroke="currentColor" strokeWidth=".5"/>)}</svg>:backdrop==='card'?<article><b>Вечерний стадион</b><p>2,40 км · 13:39</p><strong>10,55 км/ч</strong></article>:null}</div>
+-    {v==='l45'?<LegacyGlassNavigation active={tab} count={7} onChange={change}/>:<GlassNavigation active={tab} count={7} onChange={change}/>}
++    <div className="dock-review-content" aria-hidden="true"><div className="dock-review-scroll">{backdrop==='numbers'?Array.from({length:14},(_,i)=><p key={i} className="diagnostic-numbers"><span>Спред 0,12</span><span>10,55 км/ч</span><span>CV 1,25%</span></p>):backdrop==='text'?Array.from({length:9},(_,i)=><p key={i}>Runflow 0123456789 · Темп · круги · 0123456789<br/>Дистанция · стабильность · Runflow 0123456789</p>):backdrop==='lines'?<svg viewBox="0 0 370 260" preserveAspectRatio="none"><path d="M0 200 L60 140 L120 180 L180 80 L240 130 L300 50 L370 100 M0 50 L370 250 M0 250 L370 50" fill="none" stroke="currentColor" strokeWidth="2"/>{[20,60,100,140,180,220].map(y=><path key={y} d={`M0 ${y}H370`} stroke="currentColor" strokeWidth=".5"/>)}</svg>:backdrop==='card'?<article><b>Вечерний стадион</b><p>2,40 км · 13:39</p><strong>10,55 км/ч</strong></article>:null}</div></div>
++    {v==='l48'?<GlassNavigationL48 active={tab} count={7} onChange={change}/>:<GlassNavigation active={tab} count={7} onChange={change}/>}
+    </div>
+   </section>)}</div>
+   <p role="status">Раздел: {tab}. Принято переключений: {commits}.</p>
+diff --git a/app/layout.tsx b/app/layout.tsx
+index a9c185c..a37b268 100644
+--- a/app/layout.tsx
++++ b/app/layout.tsx
+@@ -8,6 +8,7 @@ import './navigation-motion.css';
+ import './ios-polish-v36.css';
+ import './glass-interactions-v37.css';
+ import './workout-sheet.css';
++import './dock-material.css';
+ export const viewport={width:'device-width',initialScale:1,viewportFit:'cover'};
+ export const metadata={title:'Runflow — беговой дневник',description:'Тренировки, круги и прогресс в беге.'};
+ export default function Layout({children}:{children:React.ReactNode}){return <html lang="ru" data-theme="dark" suppressHydrationWarning><body><script dangerouslySetInnerHTML={{__html:"try{document.documentElement.dataset.theme=localStorage.getItem('runflow-theme')==='light'?'light':'dark'}catch{}"}}/><div className="ambient-background" aria-hidden="true"/>{children}</body></html>}
+diff --git a/app/material-system.css b/app/material-system.css
+index 50aeb01..dc5fbd1 100644
+--- a/app/material-system.css
++++ b/app/material-system.css
+@@ -51,51 +51,7 @@ body{background:var(--bg);color:var(--ink)}body::before{display:none}
+ .app .recharts-cartesian-grid line{stroke:var(--line)}
+ .app .glassbutton,.app .comparequick button,.app .progress-series-controls button{background:var(--surface2);border-color:var(--line);box-shadow:inset 0 1px 0 var(--edge-light);backdrop-filter:none}
+ .app [data-rf-glass=svg].segment-lens,.app nav.motion-glass:not([data-dock-version=l45]) .glass-lens-surface[data-rf-glass=svg],.glass-select-trigger[data-rf-glass=svg],.glass-action-trigger[data-rf-glass=svg],.glass-menu-layer[data-rf-glass=svg],.glass-action-menu[data-rf-glass=svg],.glass-settings[data-rf-glass=svg]{-webkit-backdrop-filter:var(--rf-backdrop);backdrop-filter:var(--rf-backdrop)}
+-/* L46 horizontal Dock: one substrate with a lens opening, one optical surface.
+-   A/B L45 keeps the original rules above. Values are web tuning, not Apple constants. */
+-.app nav[data-dock-version=l46][data-dock-axis=horizontal]{
+- border-radius:var(--dock-radius);box-shadow:0 6px 20px var(--dock-shadow);--dock-tint:255 255 255;--dock-alpha:.6;
+- --dock-edge:#ffffffbf;--dock-bottom:#00000012;--dock-shadow:#0000001f;
+- --dock-lens-shade:#00000006;--dock-contact-shadow:#0000000d;--dock-lens-sheen:#ffffff24;--dock-lens-center:.42;--dock-lens-edge:.67;--dock-reflection:#ffffffdb;
+-}
+-html[data-theme=dark] .app nav[data-dock-version=l46][data-dock-axis=horizontal]{
+- --dock-tint:24 24 24;--dock-alpha:.58;--dock-edge:#ffffff2e;--dock-bottom:#00000070;--dock-shadow:#00000066;
+- --dock-lens-shade:#ffffff06;--dock-contact-shadow:#00000022;--dock-lens-sheen:#ffffff0e;--dock-lens-center:.38;--dock-lens-edge:.57;--dock-reflection:#ffffff61;
+-}
+-.app nav[data-dock-version=l46][data-dock-axis=horizontal] .dock-material{
+- background:rgb(var(--dock-tint)/calc(var(--dock-alpha) + var(--rf-scroll-density,0)*.35));
+- border:0;box-shadow:inset 0 1px .5px var(--dock-edge),inset 0 -1px .5px var(--dock-bottom);
+- -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+- /* The SVG has no viewBox: rx is resolved in the mask's own CSS-sized viewport. */
+- mask-image:linear-gradient(#000 0 0),url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" rx="9999" fill="black"/></svg>');
+- mask-size:100% 100%,calc(var(--dock-lens-w,0px) - 2px) calc(var(--dock-lens-h,0px) - 2px);
+- mask-position:0 0,calc(var(--dock-lens-x,0px) + 1px) calc(var(--dock-lens-y,0px) + 1px);
+- mask-repeat:no-repeat;mask-composite:exclude;
+-}
+-.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface{
+- border:0;
+- background:linear-gradient(165deg,var(--dock-lens-sheen),var(--dock-lens-shade) 75%),linear-gradient(165deg,rgb(var(--dock-tint)/var(--dock-lens-edge)),rgb(var(--dock-tint)/var(--dock-lens-center)) 45%,rgb(var(--dock-tint)/var(--dock-lens-edge)));
+- box-shadow:inset 0 1px 1px var(--dock-edge),inset 0 -1px 2px var(--dock-bottom),0 2px 4px var(--dock-contact-shadow);
+- -webkit-backdrop-filter:blur(.6px);backdrop-filter:blur(.6px);transition:none;
+-}
+-.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface::before{
+- background:linear-gradient(var(--light-angle,135deg),var(--dock-reflection),transparent 28% 66%,var(--dock-reflection));
+- opacity:calc(.45 + var(--rf-motion-energy,0)*.25 + var(--rf-contact,0)*.25);
+-}
+-.app nav[data-dock-version=l46][data-dock-axis=horizontal] .lens-caustic{
+- opacity:calc(.08 + var(--rf-motion-energy,0)*.18 + var(--rf-contact,0)*.12);transition:none;
+-}
+-.app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface[data-rf-glass=svg]{
+- -webkit-backdrop-filter:var(--rf-backdrop);backdrop-filter:var(--rf-backdrop);
+-}
+-.app nav[data-dock-version=l46] button:focus-visible{outline:2px solid var(--ink);outline-offset:-3px}
+ @media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.app .segment-lens,.app .glass-lens-surface,.app nav .dock-material,.app .headeractions::before,.glass-menu-layer,.glass-action-menu,.glass-settings{background:var(--surface);-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--ink)}}
+-
+-@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){
+- .app nav[data-dock-version=l46][data-dock-axis=horizontal] .dock-material{mask-image:none;background:var(--surface)}
+- .app nav[data-dock-version=l46][data-dock-axis=horizontal] .glass-lens-surface{background:var(--surface2);border:1px solid var(--ink)}
+-}
+-
+ /* Targets are one content group, not two more framed cards inside a panel. */
+ .app .targetcards>article{background:none;border:0;border-radius:0;border-right:1px solid var(--line);padding:8px 24px 0 0}
+ .app .targetcards>article:last-child{border-right:0;padding-right:0}
+diff --git a/components/GlassNavigation.tsx b/components/GlassNavigation.tsx
+index 8188428..1357dc6 100644
+--- a/components/GlassNavigation.tsx
++++ b/components/GlassNavigation.tsx
+@@ -22,7 +22,7 @@ export default function GlassNavigation({active,onChange,count,experimental=true
+  const baseW=useMotionValue(0),baseH=useMotionValue(0),sceneW=useMotionValue(0),sceneH=useMotionValue(0);
+  const pressed=useFrameSpring(0,{stiffness:350,damping:24}),stretch=useFrameSpring(0,{stiffness:220,damping:20});
+  const horizontal=useRef(true),axis=useMotionValue(1),lastPointer=useRef({position:0,time:0,speed:0});
+- const surface=useRef<HTMLDivElement>(null);useGlassMotion(surface,stretch.value,pressed.value);
++ const surface=useRef<HTMLDivElement>(null),material=useRef<HTMLDivElement>(null);useGlassMotion(surface,stretch.value,pressed.value);useGlassMotion(material,stretch.value,pressed.value);
+  const shape=useLensShape(baseW,baseH,stretch.value,pressed.value,axis,'dock');
+  const presentation=useTransform(()=>{
+   const left=x.get()-baseW.get()/2+shape.offsetX.get(),top=y.get()-baseH.get()/2+shape.offsetY.get();
+@@ -39,11 +39,10 @@ export default function GlassNavigation({active,onChange,count,experimental=true
+  useEffect(()=>{const update=()=>{if(!gesture.current)stretch.set(reduce?0:Math.max(-18,Math.min(18,(horizontal.current?x.getVelocity():y.getVelocity())*.065)))};
+   const a=x.on('change',update),b=y.on('change',update);return()=>{a();b()};
+  },[x,y,stretch,reduce]);
+- // Cut the substrate out under the lens so its filter samples page pixels once.
+- // The same presentation values drive both the silhouette and its opening.
++ // Shape and edge lighting use the same springs. Horizontal selection has no second backdrop filter.
+  useLayoutEffect(()=>{const update=()=>{const root=nav.current;if(!root)return;
+-  for(const [k,v] of Object.entries({x:renderX.get(),y:renderY.get(),w:width.get(),h:height.get()}))root.style.setProperty('--dock-lens-'+k,v+'px');
+- };const off=[renderX,renderY,width,height].map(v=>v.on('change',update));update();return()=>off.forEach(f=>f());},[renderX,renderY,width,height]);
++  const el=surface.current;if(el){el.style.setProperty('--rf-motion-energy',String(Math.min(1,Math.abs(stretch.get())/18)));el.style.setProperty('--rf-contact',String(Math.max(0,Math.min(1,pressed.get()))));}
++ };const off=[renderX,renderY,width,height,stretch.value,pressed.value].map(v=>v.on('change',update));update();return()=>off.forEach(f=>f());},[renderX,renderY,width,height,stretch,pressed]);
+  useEffect(()=>{if(reduce){pressed.jump(0);stretch.jump(0)}},[reduce,pressed,stretch]);
+  useEffect(()=>{const cancel=()=>{const g=gesture.current;if(!g)return;gesture.current=null;const root=nav.current;
+   if(root?.hasPointerCapture(g.id))root.releasePointerCapture(g.id);
+@@ -92,10 +91,10 @@ export default function GlassNavigation({active,onChange,count,experimental=true
+   settle(next,g.moved?velocity:undefined);suppressClick.current=performance.now()+400;
+   setVisualActive(next);if(!cancelled&&next!==visualActive)onChange(next);
+  }
+- return <nav ref={nav} className={'glass-navigation motion-glass'+(dragging?' is-dragging':'')} data-dock-version="l46"
++ return <nav ref={nav} className={'glass-navigation motion-glass'+(dragging?' is-dragging':'')} data-dock-version="l49"
+   onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={e=>finishDrag(e)} onPointerCancel={e=>finishDrag(e,true)} onLostPointerCapture={e=>finishDrag(e,true)}
+   onClickCapture={e=>{if(e.detail>0&&performance.now()<suppressClick.current){e.preventDefault();e.stopPropagation()}}} data-lg-role="dock" aria-label="Разделы дневника">
+-  <div className="dock-material" aria-hidden="true"/>
++  <div ref={material} className="dock-material" aria-hidden="true"/>
+   {items.map(({Icon,value,label})=><button ref={el=>{buttons.current[value]=el}} key={value} aria-current={visualActive===value?'page':undefined} className={visualActive===value?'active':''} onClick={()=>{if(value!==visualActive){setVisualActive(value);onChange(value)}}}><span className="nav-visual"><Icon size={19}/><span>{label}</span>{value==='Тренировки'&&<small>{count}</small>}</span></button>)}
+   <motion.div className="glass-lens is-ready" aria-hidden="true" style={{x:renderX,y:renderY,width,height,borderRadius:shape.radius,skewX:shape.skewX,skewY:shape.skewY,opacity:ready?1:0}}>
+    <motion.div ref={surface} className="glass-lens-surface" style={{scale:shape.scale,'--light-angle':shape.angle,'--rf-light-x':shape.lightX,'--rf-light-y':shape.lightY} as MotionStyle}><div className="lens-caustic"/><div className="lens-touch-light"/></motion.div>
+diff --git a/components/GlassNavigationL48.tsx b/components/GlassNavigationL48.tsx
+new file mode 100644
+index 0000000..d67fa11
+--- /dev/null
++++ b/components/GlassNavigationL48.tsx
+@@ -0,0 +1,104 @@
++'use client';
++import {useEffect,useLayoutEffect,useRef,useState,type PointerEvent} from 'react';
++import {navigationHit,sameNavigationGeometry} from '../lib/navigation-hit';
++import {dockAnchor,dockPresentation} from '../lib/dock-geometry';
++import {segmentResistance} from '../lib/segment-geometry';
++import {sampleVelocity,releaseVelocity} from '../lib/gesture-sampling';
++import {useGlassMotion} from '../hooks/useGlassMotion';
++import {useLensShape} from '../hooks/useLensShape';
++import {useFrameSpring} from '../hooks/useFrameSpring';
++import {motion,useMotionValue,useTransform,useReducedMotion,type MotionStyle} from 'motion/react';
++import {LayoutDashboard,List,TrendingUp,GitCompareArrows,Target} from 'lucide-react';
++const items=[{Icon:LayoutDashboard,value:'Обзор',label:'Сегодня'},{Icon:List,value:'Тренировки',label:'Журнал'},{Icon:TrendingUp,value:'Прогресс',label:'Прогресс'},{Icon:GitCompareArrows,value:'Сравнение',label:'Сравнить'},{Icon:Target,value:'Цели и уровни',label:'Цели'}];
++type Gesture={id:number;start:number;origin:number;horizontal:boolean;moved:boolean};
++export default function GlassNavigationL48({active,onChange,count,experimental=true}:{active:string;onChange:(tab:string)=>void;count:number;experimental?:boolean}){
++ const [visualActive,setVisualActive]=useState(active),[dragging,setDragging]=useState(false);
++ useEffect(()=>setVisualActive(active),[active]);
++ const nav=useRef<HTMLElement>(null),buttons=useRef<Record<string,HTMLButtonElement|null>>({});
++ const initialized=useRef(false),geometry=useRef<number[]>([]),gesture=useRef<Gesture|null>(null),suppressClick=useRef(0);
++ const reduce=useReducedMotion();
++ // Coordinates are button centres, not left edges with hard-coded visual offsets.
++ const x=useFrameSpring(0,{stiffness:220,damping:25,mass:1.1}),y=useFrameSpring(0,{stiffness:220,damping:25,mass:1.1});
++ const baseW=useMotionValue(0),baseH=useMotionValue(0),sceneW=useMotionValue(0),sceneH=useMotionValue(0);
++ const pressed=useFrameSpring(0,{stiffness:350,damping:24}),stretch=useFrameSpring(0,{stiffness:220,damping:20});
++ const horizontal=useRef(true),axis=useMotionValue(1),lastPointer=useRef({position:0,time:0,speed:0});
++ const surface=useRef<HTMLDivElement>(null);useGlassMotion(surface,stretch.value,pressed.value);
++ const shape=useLensShape(baseW,baseH,stretch.value,pressed.value,axis,'dock');
++ const presentation=useTransform(()=>{
++  const left=x.get()-baseW.get()/2+shape.offsetX.get(),top=y.get()-baseH.get()/2+shape.offsetY.get();
++  return axis.get()===1?dockPresentation(left,top,shape.width.get(),shape.height.get(),{width:sceneW.get(),height:sceneH.get()}):{left,top,width:shape.width.get(),height:shape.height.get()};
++ });
++ const renderX=useTransform(presentation,p=>p.left),renderY=useTransform(presentation,p=>p.top);
++ const width=useTransform(presentation,p=>p.width),height=useTransform(presentation,p=>p.height);
++ const [ready,setReady]=useState(false);
++ function anchor(button:HTMLButtonElement){const root=nav.current!;return dockAnchor({left:button.offsetLeft,top:button.offsetTop,width:button.offsetWidth,height:button.offsetHeight},{width:root.clientWidth,height:root.clientHeight},horizontal.current)}
++ function settle(value:string,velocity?:number){const b=buttons.current[value];if(!b||!nav.current)return;const a=anchor(b);
++  baseW.set(a.width);baseH.set(a.height);
++  if(reduce){x.jump(a.x);y.jump(a.y)}else if(velocity===undefined){x.set(a.x);y.set(a.y)}else if(horizontal.current){x.release(a.x,velocity);y.set(a.y)}else{y.release(a.y,velocity);x.set(a.x)}
++ }
++ useEffect(()=>{const update=()=>{if(!gesture.current)stretch.set(reduce?0:Math.max(-18,Math.min(18,(horizontal.current?x.getVelocity():y.getVelocity())*.065)))};
++  const a=x.on('change',update),b=y.on('change',update);return()=>{a();b()};
++ },[x,y,stretch,reduce]);
++ // Cut the substrate out under the lens so its filter samples page pixels once.
++ // The same presentation values drive both the silhouette and its opening.
++ useLayoutEffect(()=>{const update=()=>{const root=nav.current;if(!root)return;
++  for(const [k,v] of Object.entries({x:renderX.get(),y:renderY.get(),w:width.get(),h:height.get()}))root.style.setProperty('--dock-lens-'+k,v+'px');
++ };const off=[renderX,renderY,width,height].map(v=>v.on('change',update));update();return()=>off.forEach(f=>f());},[renderX,renderY,width,height]);
++ useEffect(()=>{if(reduce){pressed.jump(0);stretch.jump(0)}},[reduce,pressed,stretch]);
++ useEffect(()=>{const cancel=()=>{const g=gesture.current;if(!g)return;gesture.current=null;const root=nav.current;
++  if(root?.hasPointerCapture(g.id))root.releasePointerCapture(g.id);
++  pressed.set(0);stretch.set(0);setDragging(false);settle(visualActive);suppressClick.current=performance.now()+400;
++ };const visibility=()=>{if(document.hidden)cancel()};window.addEventListener('blur',cancel);document.addEventListener('visibilitychange',visibility);
++ return()=>{window.removeEventListener('blur',cancel);document.removeEventListener('visibilitychange',visibility)};
++ },[visualActive,reduce]);
++ useLayoutEffect(()=>{const measure=()=>{const root=nav.current,button=buttons.current[visualActive];if(!root||!button)return;
++  const measured=[root.clientWidth,root.clientHeight,...items.flatMap(i=>{const b=buttons.current[i.value];return b?[b.offsetLeft,b.offsetTop,b.offsetWidth,b.offsetHeight]:[]})];
++  if(gesture.current&&sameNavigationGeometry(geometry.current,measured))return;
++  const resized=!sameNavigationGeometry(geometry.current,measured);geometry.current=measured;
++  if(gesture.current){const g=gesture.current;gesture.current=null;if(root.hasPointerCapture(g.id))root.releasePointerCapture(g.id);pressed.set(0);stretch.set(0);setDragging(false);suppressClick.current=performance.now()+400;}
++  horizontal.current=buttons.current[items[4].value]?.offsetLeft!==buttons.current[items[0].value]?.offsetLeft;
++  axis.set(horizontal.current?1:0);root.dataset.dockAxis=horizontal.current?'horizontal':'vertical';
++  root.style.setProperty('--dock-radius',horizontal.current?root.clientHeight/2+'px':'24px');
++  sceneW.set(root.clientWidth);sceneH.set(root.clientHeight);const a=anchor(button);baseW.set(a.width);baseH.set(a.height);
++  if(!initialized.current||reduce||resized){x.jump(a.x);y.jump(a.y);initialized.current=true}else{x.set(a.x);y.set(a.y)}
++  setReady(true);
++ };measure();const observer=new ResizeObserver(measure);if(nav.current)observer.observe(nav.current);window.addEventListener('resize',measure);
++ return()=>{observer.disconnect();window.removeEventListener('resize',measure)};
++ },[visualActive,reduce,x,y]);
++ useEffect(()=>{if(process.env.NODE_ENV!=='development')return;const samples:number[][]=[];const record=()=>{samples.push([Math.round(renderX.get()*100)/100,Math.round(renderY.get()*100)/100]);if(samples.length>80)samples.shift();if(nav.current)nav.current.dataset.motionSamples=JSON.stringify(samples)};const a=renderX.on('change',record),b=renderY.on('change',record);return()=>{a();b()}},[renderX,renderY]);
++ function beginDrag(e:PointerEvent<HTMLElement>){if(!e.isPrimary||(e.pointerType==='mouse'&&e.button!==0)||gesture.current)return;
++  const root=nav.current;if(!root)return;const position=horizontal.current?e.clientX:e.clientY;
++  lastPointer.current={position,time:performance.now(),speed:0};if(!reduce)pressed.set(1);
++  // Keep an in-flight spring alive until a real drag takes over (L44 repeat-tap fix).
++  gesture.current={id:e.pointerId,start:position,origin:horizontal.current?x.get():y.get(),horizontal:horizontal.current,moved:false};
++  root.setPointerCapture(e.pointerId);setDragging(true);e.preventDefault();
++ }
++ function moveDrag(e:PointerEvent<HTMLElement>){const g=gesture.current;if(!g||g.id!==e.pointerId)return;
++  const position=g.horizontal?e.clientX:e.clientY,delta=position-g.start;
++  if(!g.moved){if(Math.abs(delta)<=3){e.preventDefault();return}g.moved=true;g.origin=(g.horizontal?x.get():y.get())-Math.sign(delta)*3;}
++  const now=performance.now(),speed=experimental?sampleVelocity(position,lastPointer.current.position,now,lastPointer.current.time)/1000:(position-lastPointer.current.position)/Math.max(8,now-lastPointer.current.time);
++  lastPointer.current={position,time:now,speed};if(!reduce)stretch.set(Math.max(-18,Math.min(18,speed*18)));
++  const coordinates=items.flatMap(i=>{const b=buttons.current[i.value];if(!b)return[];const a=anchor(b);return[g.horizontal?a.x:a.y]});
++  const value=experimental?segmentResistance(g.origin+delta,Math.min(...coordinates),Math.max(...coordinates)):Math.max(Math.min(...coordinates),Math.min(Math.max(...coordinates),g.origin+delta));
++  if(g.horizontal)x.jump(value);else y.jump(value);e.preventDefault();
++ }
++ function finishDrag(e:PointerEvent<HTMLElement>,cancelled=false){const g=gesture.current;if(!g||g.id!==e.pointerId)return;
++  gesture.current=null;pressed.set(0);stretch.set(0);setDragging(false);
++  if(nav.current?.hasPointerCapture(e.pointerId))nav.current.releasePointerCapture(e.pointerId);
++  let next=visualActive;
++  if(g.moved&&!cancelled){const position=g.horizontal?x.get():y.get();next=items.reduce((best,item)=>{const a=buttons.current[best.value],b=buttons.current[item.value];if(!a||!b)return best;const aa=anchor(a),ab=anchor(b);return Math.abs((g.horizontal?ab.x:ab.y)-position)<Math.abs((g.horizontal?aa.x:aa.y)-position)?item:best},items[0]).value;
++  }else if(!cancelled){next=navigationHit(e.clientX,e.clientY,items.flatMap(item=>{const b=buttons.current[item.value];return b?[{value:item.value,...b.getBoundingClientRect().toJSON()}]:[]}))||visualActive;}
++  const velocity=experimental?releaseVelocity(lastPointer.current.speed*1000,lastPointer.current.time,performance.now(),cancelled||!g.moved,!!reduce):!reduce&&g.moved&&!cancelled&&performance.now()-lastPointer.current.time<100?lastPointer.current.speed*1000:0;
++  settle(next,g.moved?velocity:undefined);suppressClick.current=performance.now()+400;
++  setVisualActive(next);if(!cancelled&&next!==visualActive)onChange(next);
++ }
++ return <nav ref={nav} className={'glass-navigation motion-glass'+(dragging?' is-dragging':'')} data-dock-version="l46"
++  onPointerDown={beginDrag} onPointerMove={moveDrag} onPointerUp={e=>finishDrag(e)} onPointerCancel={e=>finishDrag(e,true)} onLostPointerCapture={e=>finishDrag(e,true)}
++  onClickCapture={e=>{if(e.detail>0&&performance.now()<suppressClick.current){e.preventDefault();e.stopPropagation()}}} data-lg-role="dock" aria-label="Разделы дневника">
++  <div className="dock-material" aria-hidden="true"/>
++  {items.map(({Icon,value,label})=><button ref={el=>{buttons.current[value]=el}} key={value} aria-current={visualActive===value?'page':undefined} className={visualActive===value?'active':''} onClick={()=>{if(value!==visualActive){setVisualActive(value);onChange(value)}}}><span className="nav-visual"><Icon size={19}/><span>{label}</span>{value==='Тренировки'&&<small>{count}</small>}</span></button>)}
++  <motion.div className="glass-lens is-ready" aria-hidden="true" style={{x:renderX,y:renderY,width,height,borderRadius:shape.radius,skewX:shape.skewX,skewY:shape.skewY,opacity:ready?1:0}}>
++   <motion.div ref={surface} className="glass-lens-surface" style={{scale:shape.scale,'--light-angle':shape.angle,'--rf-light-x':shape.lightX,'--rf-light-y':shape.lightY} as MotionStyle}><div className="lens-caustic"/><div className="lens-touch-light"/></motion.div>
++  </motion.div>
++ </nav>;
++}
+diff --git a/components/RunflowGlass.tsx b/components/RunflowGlass.tsx
+index 9ee6dfb..23870a8 100644
+--- a/components/RunflowGlass.tsx
++++ b/components/RunflowGlass.tsx
+@@ -1,5 +1,6 @@
+ 'use client';
+ import {useEffect} from 'react';
++import {dockSeparationMask,DOCK_EDGE_PAD} from '../lib/dock-separation';
+ import {GLASS_PROFILES,materialLevel} from '../lib/glass-materials';
+ import {createLiquidGlassDisplacementMap,supportsLiquidGlassSvgFilter} from './liquid-glass/displacementMap';
+ 
+@@ -14,6 +15,7 @@ export default function RunflowGlass(){
+   const enabled=()=>svgSupported&&!transparency.matches&&!contrast.matches;
+   const entries=new Map<HTMLElement,{filter:SVGFilterElement|null;key:string;scale:number;drive:number;press:number}>();
+   const pending=new Map<HTMLElement,number>();
++  const edgeTargets=new Set<HTMLElement>(),edgeKeys=new WeakMap<HTMLElement,string>();
+   const cache=new Map<string,ReturnType<typeof createLiquidGlassDisplacementMap>>();
+   let scrollFrame=0,scrollTimer=0,resizeFrame=0;
+   const resizeDirty=new Set<HTMLElement>();
+@@ -37,7 +39,7 @@ export default function RunflowGlass(){
+    let entry=entries.get(el);
+    if(!entry){entry={filter:null,key:'',scale:0,drive:0,press:0};entries.set(el,entry);resize.observe(el);el.dataset.rfGlass=enabled()?'svg':transparency.matches||contrast.matches?'opaque':'frosted'}
+    el.dataset.rfGlass=enabled()?'svg':transparency.matches||contrast.matches?'opaque':'frosted';
+-   if(!enabled())return;
++   if(!enabled()){scaleFor(el,0);return;}
+    const radius=parseFloat(getComputedStyle(el).borderTopLeftRadius)||26;
+    const key=level+':'+[Math.round(rect.width/4)*4,Math.round(rect.height/4)*4,Math.round(radius)].join(':');
+    if(entry.key===key){scaleFor(el,entry.scale);return}
+@@ -54,11 +56,21 @@ export default function RunflowGlass(){
+    nodes.push(displacement);
+    entry.filter.replaceChildren(...nodes);entry.key=key;entry.scale=map.scale;scaleFor(el,map.scale);el.style.setProperty('--rf-backdrop',`url("#${entry.filter.id}")`);
+   }
+-  function scan(){frame=0;for(const [el,e]of entries)if(!el.isConnected){resize.unobserve(el);e.filter?.remove();entries.delete(el)}
+-   document.querySelectorAll<HTMLElement>('.app .segment-lens,.app .glass-lens-surface,.app .glass-select-trigger,.app .glass-action-trigger,.app .glass-settings,.glass-menu-layer,.glass-action-menu').forEach(el=>sync(el));
++  function scan(){frame=0;for(const [el,e]of entries)if(!el.isConnected||el.matches('[data-dock-version=l49][data-dock-axis=horizontal] .glass-lens-surface')||el.matches('.dock-material')&&!el.matches('[data-dock-axis=horizontal] .dock-material')){resize.unobserve(el);e.filter?.remove();delete el.dataset.rfGlass;el.style.removeProperty('--rf-backdrop');entries.delete(el)}
++   document.querySelectorAll<HTMLElement>('.app .segment-lens,.app .glass-lens-surface,.app .glass-select-trigger,.app .glass-action-trigger,.app .glass-settings,.glass-menu-layer,.glass-action-menu,.app nav[data-dock-version=l49][data-dock-axis=horizontal] .dock-material').forEach(el=>{if(!el.matches('[data-dock-version=l49][data-dock-axis=horizontal] .glass-lens-surface'))sync(el)});
+    document.querySelector('.app')?.setAttribute('data-lg-role','stage');scrollMaterial();
+   }
+   function scrollMaterial(){scrollFrame=0;
++   const liveEdges=new Set<HTMLElement>();
++   document.querySelectorAll<HTMLElement>('.app nav[data-dock-version=l49][data-dock-axis=horizontal]').forEach(nav=>{
++    const target=nav.closest('.dock-review-scene')?.querySelector<HTMLElement>('.dock-review-content')??document.querySelector<HTMLElement>('.app:not(.dock-review):not(.interaction-lab)>main');
++    if(!target)return;liveEdges.add(target);edgeTargets.add(target);const r=nav.getBoundingClientRect(),c=target.getBoundingClientRect();
++    const key=Math.round(r.width)+':'+Math.round(r.height);
++    if(edgeKeys.get(target)!==key){const mask=dockSeparationMask(r.width,r.height);target.style.setProperty('--dock-edge-mask',mask.url);target.style.setProperty('--dock-edge-w',mask.width+'px');target.style.setProperty('--dock-edge-h',mask.height+'px');edgeKeys.set(target,key)}
++    target.style.setProperty('--dock-edge-x',(r.left-c.left-DOCK_EDGE_PAD)+'px');target.style.setProperty('--dock-edge-y',(r.top-c.top-DOCK_EDGE_PAD)+'px');target.dataset.dockEdge='true';
++   });
++   for(const target of edgeTargets)if(!liveEdges.has(target)){delete target.dataset.dockEdge;edgeTargets.delete(target);edgeKeys.delete(target)}
++
+    const main=document.querySelector('.app>main');if(!main)return;
+    // Check nearby content only: avoid repeated viewport-wide geometry walks while scrolling.
+    const candidates=Array.from(main.querySelectorAll<HTMLElement>('.panel,.dailyhero,.stats>article,.journal tbody tr')).map(el=>el.getBoundingClientRect()).filter(r=>r.bottom>=0&&r.top<=innerHeight);
+@@ -87,8 +99,8 @@ export default function RunflowGlass(){
+     resizeDirty.clear();
+     if(refreshDepth)scrollMaterial();
+    });
+-  }),mutation=new MutationObserver(schedule);mutation.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['open','aria-expanded']});
++  }),mutation=new MutationObserver(schedule);mutation.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['open','aria-expanded','data-dock-axis']});
+   transparency.addEventListener('change',schedule);contrast.addEventListener('change',schedule);window.addEventListener('scroll',scrolling,{passive:true,capture:true});window.addEventListener('resize',schedule);window.addEventListener('runflow:glass',settings);document.addEventListener('runflow:glass-motion',motion);schedule();
+-  return()=>{for(const t of pending.values())clearTimeout(t);cancelAnimationFrame(frame);cancelAnimationFrame(scrollFrame);cancelAnimationFrame(resizeFrame);resizeDirty.clear();clearTimeout(scrollTimer);transparency.removeEventListener('change',schedule);contrast.removeEventListener('change',schedule);window.removeEventListener('scroll',scrolling,true);delete document.documentElement.dataset.glassScrolling;resize.disconnect();mutation.disconnect();window.removeEventListener('resize',schedule);window.removeEventListener('runflow:glass',settings);document.removeEventListener('runflow:glass-motion',motion);for(const el of entries.keys()){delete el.dataset.rfGlass;delete el.dataset.material;delete el.dataset.glassLevel;delete el.dataset.glassPlane;el.style.removeProperty('--rf-backdrop')}svg.remove()};
++  return()=>{for(const t of pending.values())clearTimeout(t);cancelAnimationFrame(frame);cancelAnimationFrame(scrollFrame);cancelAnimationFrame(resizeFrame);resizeDirty.clear();clearTimeout(scrollTimer);transparency.removeEventListener('change',schedule);contrast.removeEventListener('change',schedule);window.removeEventListener('scroll',scrolling,true);delete document.documentElement.dataset.glassScrolling;resize.disconnect();mutation.disconnect();window.removeEventListener('resize',schedule);window.removeEventListener('runflow:glass',settings);document.removeEventListener('runflow:glass-motion',motion);for(const target of edgeTargets){delete target.dataset.dockEdge;for(const k of ['mask','x','y','w','h'])target.style.removeProperty('--dock-edge-'+k)}for(const el of entries.keys()){delete el.dataset.rfGlass;delete el.dataset.material;delete el.dataset.glassLevel;delete el.dataset.glassPlane;el.style.removeProperty('--rf-backdrop')}svg.remove()};
+  },[]);return null;
+ }
+diff --git a/lib/dock-separation.ts b/lib/dock-separation.ts
+new file mode 100644
+index 0000000..1103703
+--- /dev/null
++++ b/lib/dock-separation.ts
+@@ -0,0 +1,8 @@
++/** Partial, feathered content attenuation. No page reconstruction or opaque cut-out. */
++export const DOCK_EDGE_PAD=24;
++export const DOCK_CONTENT_ATTENUATION=.92;
++export function dockSeparationMask(width:number,height:number){
++ const w=Math.max(1,Math.round(width)),h=Math.max(1,Math.round(height)),pad=DOCK_EDGE_PAD;
++ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w+pad*2}" height="${h+pad*2}" viewBox="0 0 ${w+pad*2} ${h+pad*2}"><defs><filter id="e" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="10"/></filter></defs><rect x="${pad}" y="${pad}" width="${w}" height="${h}" rx="${h/2}" fill="black" fill-opacity="${DOCK_CONTENT_ATTENUATION}" filter="url(#e)"/></svg>`;
++ return {url:`url("data:image/svg+xml,${encodeURIComponent(svg)}")`,width:w+pad*2,height:h+pad*2};
++}
+diff --git a/lib/glass-materials.ts b/lib/glass-materials.ts
+index ab79270..c523525 100644
+--- a/lib/glass-materials.ts
++++ b/lib/glass-materials.ts
+@@ -1,12 +1,14 @@
+ /** Project profiles, not official Apple material constants. */
+-export type GlassLevel='surface'|'navigation'|'optical';
++export type GlassLevel='surface'|'navigation'|'optical'|'dock';
+ export const GLASS_PROFILES={
++ dock:{maxScale:9,magnify:1.025,bend:.025,bezelRatio:.22,preblur:.45},
+  surface:{maxScale:8,magnify:1.035,bend:.025,bezelRatio:.22,preblur:0},
+  navigation:{maxScale:14,magnify:1.06,bend:.04,bezelRatio:.4,preblur:.15},
+  optical:{maxScale:22,magnify:1.08,bend:.05,bezelRatio:.62,preblur:.35},
+ } as const;
+ export const SURFACE_SELECTOR='.app .dailyhero,.app .panel,.app .stats>article,.app .goalpreview,.app .modal';
+ export function materialLevel(el:Element):GlassLevel{
++ if(el.matches('.dock-material'))return 'dock';
+  if(el.matches(SURFACE_SELECTOR))return 'surface';
+  if(el.matches('.app>aside,nav.motion-glass,.liquid-segment,.glass-select-trigger,.scalecontrol select'))return 'navigation';
+  return 'optical';
+diff --git a/scripts/verify-built-glass.mjs b/scripts/verify-built-glass.mjs
+index bbe60ec..534f9df 100644
+--- a/scripts/verify-built-glass.mjs
++++ b/scripts/verify-built-glass.mjs
+@@ -5,8 +5,8 @@ const css=readdirSync(folder).filter(f=>f.endsWith('.css')).map(f=>readFileSync(
+ const rules=[...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+ const hasStandard=(selector,value)=>rules.some(([,s,body])=>s.includes(selector)&&new RegExp('(?:^|;)backdrop-filter:'+value+'(?:;|$)').test(body));
+ assert.ok(hasStandard('.glass-lens-surface[data-rf-glass=svg]','var\\(--rf-backdrop\\)'), 'Built SVG lens lost its standard backdrop-filter');
+-assert.ok(hasStandard('[data-dock-axis=horizontal] .dock-material','blur\\(4px\\)'), 'Built substrate lost its standard backdrop-filter');
+-assert.ok(hasStandard('[data-dock-axis=horizontal] .glass-lens-surface','blur\\(\\.6px\\)'), 'Built fallback lens lost its standard backdrop-filter');
++assert.ok(hasStandard('.dock-material[data-rf-glass=svg]','var\\(--rf-backdrop\\)'), 'Built shared Dock lost its standard backdrop-filter');
++assert.ok(hasStandard('[data-dock-axis=horizontal] .glass-lens-surface','none'), 'Selection must not acquire a second optical filter');
+ console.log('Production CSS retains standard SVG, substrate and fallback backdrop filters.');
+ 
+ for(const selector of ['.segment-lens','.glass-select-trigger[data-rf-glass=svg]','.glass-action-trigger[data-rf-glass=svg]','.glass-menu-layer[data-rf-glass=svg]','.glass-action-menu[data-rf-glass=svg]','.glass-settings[data-rf-glass=svg]']){
+diff --git a/tests/dock-geometry.test.ts b/tests/dock-geometry.test.ts
+index 9c7ba6f..d4e903d 100644
+--- a/tests/dock-geometry.test.ts
++++ b/tests/dock-geometry.test.ts
+@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
+ import {dockAnchor,dockPresentation,DOCK_SAFE_INSET} from '../lib/dock-geometry.ts';
+ import {lensShape} from '../lib/lens-shape.ts';
+ test('first, middle and last lenses stay inside Dock throughout deformation and overshoot',()=>{
+- for(const width of [300,350,370,500]){
+-  const root={width,height:86},buttonW=(width-16-12)/5;
++ for(const width of [300,350,370,500])for(const [padding,buttonH] of [[8,70],[6,64]]){
++  const root={width,height:buttonH+padding*2},buttonW=(width-padding*2-12)/5;
+   for(const index of [0,2,4]){
+-   const b={left:8+index*(buttonW+3),top:8,width:buttonW,height:70},a=dockAnchor(b,root,true);
+-   assert.equal(a.x,b.left+b.width/2);assert.equal(a.y,43);
++   const b={left:padding+index*(buttonW+3),top:padding,width:buttonW,height:buttonH},a=dockAnchor(b,root,true);
++   assert.ok(Math.abs(a.x-(b.left+b.width/2))<1e-9);assert.equal(a.y,root.height/2);
+    for(const d of [-18,0,18])for(const p of [0,1])for(const overshoot of [-100,0,100]){
+     const shape=lensShape(a.width,a.height,d,p,true,'dock');
+     const rect=dockPresentation(a.x-a.width/2+shape.offsetX+overshoot,a.y-a.height/2+shape.offsetY,shape.width,shape.height,root);

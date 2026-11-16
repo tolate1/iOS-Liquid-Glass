@@ -32,3 +32,12 @@ Safari and physical iPhone acceptance no longer block this stage. Integrate revi
 - Distinguish canvas, content, secondary content, fields, active control and transient material. A neutral light theme needs independent density/edge/shadow values; do not fill every role with opaque white.
 - Keep workout-sheet.css the single owner of sheet geometry: fixed header/footer and one scrollable body. Preserve numeric input focus behavior and visible validation; all fields remain solid/readable.
 - A menu's handled Escape must not dismiss its enclosing sheet. Keep the inactive main application inert while a dialog is open.
+
+## L49 — разделение контента и нижнего Dock
+
+- Сначала снижать локальный контраст содержимого под Dock; не подменять читаемость ростом общей непрозрачности материала.
+- Горизонтальный Dock использует один общий оптический слой без выреза под активной вкладкой. Выделение не имеет собственного backdrop-filter; иконки и подписи остаются отдельным резким слоем.
+- Scroll-edge маска с мягким краем следует измеренной панели в координатах контента, а не за курсором. Оверлеи и навигация не маскируются.
+- Компактная геометрия: 76 px вместо 86, кнопки 64 px вместо 70; линза вычисляется из реальной геометрии. Сохранять нижний запас прокрутки.
+- A/B L48/L49 хранить в /interaction-lab/dock; основное приложение всегда использует L49. Старые материальные правила подключать только в сравнении.
+- URL в computed backdrop-filter подтверждает подключение SVG, но не доказывает нативное качество или одинаковое преломление во всех браузерах. Запасной вариант — blur(3px), активный слой без фильтра.
