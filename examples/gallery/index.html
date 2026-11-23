@@ -28,6 +28,15 @@
           <option value="opaque">Opaque</option>
         </select>
       </label>
+      <label>Backdrop
+        <select id="scene">
+          <option value="grid">Grid</option>
+          <option value="text">Text</option>
+          <option value="chart">Chart</option>
+          <option value="table">Table</option>
+          <option value="plain">Plain</option>
+        </select>
+      </label>
     </div>
     <section aria-label="Interactive controls" class="interactive">
       <div class="lg-toolbar" id="toolbar">
@@ -66,6 +75,38 @@
         </div>
       </section>
     </div>
+    <details class="diagnostics">
+      <summary>Renderer and interaction details</summary>
+      <dl>
+        <dt>SVG syntax / eligible</dt><dd id="optics-diagnostic"></dd>
+        <dt>Selected tab</dt><dd id="tab-diagnostic"></dd>
+        <dt>Pointer state</dt><dd id="pointer-diagnostic"></dd>
+        <dt>Accepted changes</dt><dd id="commit-diagnostic">0</dd>
+      </dl>
+    </details>
+    <template id="scene-text">
+      <div class="text-background">
+        <strong>Workspace index</strong>
+        <p>Release notes and design updates</p>
+        <p>Navigation, search, and file history</p>
+        <p>Responsive layout and keyboard review</p>
+        <p>Drafts, checklists, and recent changes</p>
+      </div>
+    </template>
+    <template id="scene-chart">
+      <canvas width="700" height="300" class="chart-background"></canvas>
+    </template>
+    <template id="scene-table">
+      <table class="table-background">
+        <thead><tr><th>Review</th><th>Open</th><th>Resolved</th></tr></thead>
+        <tbody>
+          <tr><th>Navigation</th><td>3</td><td>18</td></tr>
+          <tr><th>Materials</th><td>7</td><td>14</td></tr>
+          <tr><th>Forms</th><td>2</td><td>10</td></tr>
+          <tr><th>Accessibility</th><td>1</td><td>21</td></tr>
+        </tbody>
+      </table>
+    </template>
     <section class="reading" id="reading">
       <h2>Content surface</h2>
       <p>Text and data remain readable on a solid material.</p>

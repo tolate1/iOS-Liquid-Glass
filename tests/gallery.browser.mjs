@@ -286,3 +286,19 @@ test("Vite dashboard keeps its real control and table behavior after controlled 
     assert.equal(await page.locator("tbody td").textContent(), "17");
   }
 });
+
+test("lab uses matching scenes and material profiles while exposing actual renderer and committed value", async (t) => {
+  const page = await visit(t, { width: 768, height: 900 });
+  for (const scene of ["text", "chart", "table", "plain", "grid"]) {
+    await page.selectOption("#scene", scene);
+    assert.equal(await page.locator(`.spectrum[data-scene=${scene}]`).count(), 2);
+  }
+  await page.getByRole("button", { name: "Material" }).click();
+  await page.getByRole("menuitem", { name: "Clear" }).click();
+  assert.equal(await page.locator(".lens[data-lg-material=clear]").count(), 2);
+  await page.getByRole("tab", { name: "Files" }).click();
+  await page.getByText("Renderer and interaction details").click();
+  assert.equal(await page.locator("#optics-diagnostic").textContent(), "yes / yes");
+  assert.equal(await page.locator("#tab-diagnostic").textContent(), "files");
+  assert.equal(await page.locator("#commit-diagnostic").textContent(), "1");
+});

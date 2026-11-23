@@ -1,26 +1,37 @@
 import { mountGlassMenu, mountGlassSegmentedControl, mountGlassSurface } from "/dist/index.js";
 
 const candidate = mountGlassSurface(document.querySelector("#candidate"));
-mountGlassSurface(document.querySelector("#baseline"), { renderer: "frosted-css" });
+const baseline = mountGlassSurface(document.querySelector("#baseline"), { renderer: "frosted-css" });
 mountGlassSurface(document.querySelector("#reading"), { role: "content" });
 
 const toolbar = mountGlassSurface(document.querySelector("#toolbar"));
 const picker = document.querySelector("#material-picker");
 const popover = mountGlassMenu(document.querySelector("#popover-trigger"), picker);
-mountGlassSegmentedControl(document.querySelector("#segments"), {
+const group = document.querySelector("#segments");
+let commits = 0;
+const segments = mountGlassSegmentedControl(group, {
+  onValueChange(value) {
+    document.querySelector("#tab-diagnostic").textContent = value;
+    document.querySelector("#commit-diagnostic").textContent = ++commits;
+  },
   panels: Object.fromEntries(["chat", "files", "project"].map((key) => [key, document.querySelector(`#panel-${key}`)])),
 });
 picker.addEventListener("click", (event) => {
   const material = event.target.closest("[data-material]")?.dataset.material;
   if (!material) return;
-  toolbar.update({ material });
+  [toolbar, candidate, baseline].forEach((surface) => surface.update({ material }));
+  for (const label of document.querySelectorAll(".lens > :last-child")) {
+    label.textContent = `${material[0].toUpperCase()}${material.slice(1)} glass`;
+  }
 });
 
 const renderer = document.querySelector("#renderer");
 const theme = document.querySelector("#theme");
 const status = document.querySelector("#status");
 const renderStatus = () => {
-  status.textContent = candidate.diagnostics.selected;
+  const { selected, syntax, svgEligible } = candidate.diagnostics;
+  status.textContent = selected;
+  document.querySelector("#optics-diagnostic").textContent = `${syntax.svg ? "yes" : "no"} / ${svgEligible ? "yes" : "no"}`;
 };
 
 renderer.addEventListener("change", () => {
@@ -29,9 +40,52 @@ renderer.addEventListener("change", () => {
   popover.update({ renderer: renderer.value });
   renderStatus();
 });
+const scene = document.querySelector("#scene");
+const backdrops = [...document.querySelectorAll(".spectrum")];
+
+function drawChart(canvas) {
+  const context = canvas.getContext("2d");
+  const { width, height } = canvas;
+  const muted = getComputedStyle(document.documentElement).getPropertyValue("--lg-muted").trim();
+  context.lineWidth = 2;
+  context.strokeStyle = muted;
+  context.globalAlpha = .3;
+  context.beginPath();
+  for (let y = 40; y < height; y += 35) {
+    context.moveTo(0, y);
+    context.lineTo(width, y);
+  }
+  context.stroke();
+  context.globalAlpha = 1;
+  context.lineWidth = 4;
+  context.beginPath();
+  const series = [8, 4, 13, 9, 16, 14, 22, 11, 19, 17, 28, 23, 31];
+  series.forEach((value, index) => {
+    context.lineTo(20 + index * (width - 40) / (series.length - 1), height - 30 - value * 7);
+  });
+  context.stroke();
+}
+
+function updateScene() {
+  const template = document.getElementById(`scene-${scene.value}`);
+  for (const backdrop of backdrops) {
+    backdrop.dataset.scene = scene.value;
+    backdrop.replaceChildren(...(template ? [template.content.cloneNode(true)] : []));
+    const canvas = backdrop.querySelector("canvas");
+    if (canvas) drawChart(canvas);
+  }
+}
 theme.addEventListener("change", () => {
   document.documentElement.dataset.lgTheme = theme.value;
+  updateScene();
 });
+scene.addEventListener("change", updateScene);
+document.querySelector("#tab-diagnostic").textContent = segments.value;
+const renderPointer = () => {
+  document.querySelector("#pointer-diagnostic").textContent = group.hasAttribute("data-lg-dragging") ? "dragging" : "idle";
+};
+new MutationObserver(renderPointer).observe(group, { attributeFilter: ["data-lg-dragging"] });
+renderPointer();
 const statusObserver = new MutationObserver(renderStatus);
 statusObserver.observe(document.querySelector("#candidate"), { attributeFilter: ["data-lg-renderer"] });
 renderStatus();

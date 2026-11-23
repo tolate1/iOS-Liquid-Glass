@@ -67,3 +67,7 @@ An opt-in menu candidate can retain final-size labels and animate a separate mat
 ## 2026-11-23 — Shared web engine backdrop evidence
 
 Preserve the existing optical math and vary displacement scale alone to check physical pixel output. Chromium Headless Shell 153 at DPR 1.25 showed 4,166 changed grid pixels with the same tint, blur and foreground. Build and browser checks also confirmed both filter declarations survived production minification and that forced fallback removed SVG definitions. Repeated mount/unmount verified DOM resource cleanup, while device and compositor performance still require separate evidence. Reproduce with the engine's `npm run test:browser`.
+
+## 2026-11-23 — Consumer builds and scoped migration
+
+The same packed runtime hydrated in React SSR and a Next static export. Chromium verified search results and an active SVG filter in the consumer, and the emitted Next CSS retained both backdrop declarations. In the Vite dashboard, an approved one-file toolbar transform preserved stock filtering and numeric cells. The rollback recovered byte-identical source and rejected post-apply edits. Source fingerprints verify that the expected patch landed. Consumer behavior still needs separate renderer and interaction checks.

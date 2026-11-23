@@ -36,3 +36,17 @@ output { display: block; margin-top: .5rem; font-size: .8rem; }
 .interactive { margin-block-end: 2rem; }
 .interactive .lg-toolbar { width: fit-content; max-width: 100%; }
 .workspace-preview { padding: .8rem 0; color: var(--lg-muted); }
+.spectrum[data-scene]:not([data-scene="grid"]) {
+  background: var(--lg-field);
+  opacity: 1;
+  overflow: hidden;
+}
+.text-background, .table-background, .chart-background { width: 100%; color: var(--lg-muted); }
+.text-background { padding: 1rem; text-align: center; }
+.table-background { border-collapse: collapse; text-align: center; }
+.table-background :is(th, td) { padding: .7rem 0; border-bottom: 1px solid var(--lg-border); }
+.chart-background { height: 100%; }
+.diagnostics { margin-top: 1rem; color: var(--lg-muted); font-size: .875rem; }
+.diagnostics summary { cursor: pointer; }
+.diagnostics dl { display: grid; grid-template-columns: max-content 1fr; gap: .2rem .8rem; }
+.diagnostics dd { margin: 0; color: var(--lg-ink); }
