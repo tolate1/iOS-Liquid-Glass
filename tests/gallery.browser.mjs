@@ -458,3 +458,13 @@ test("collection switches layout and restores an archived tile with keyboard und
   await page.getByText("About these materials").click();
   assert.equal(await page.locator(".lg-disclosure").getAttribute("open"), "");
 });
+
+test("settings button clears the section divider and the original archive is linked", async (t) => {
+  for (const width of [390, 1114]) {
+    const page = await visit(t, { width, height: 900 });
+    const button = await page.getByRole("button", { name: "Open settings" }).boundingBox();
+    const row = await page.locator("#control-sample .control-row").first().boundingBox();
+    assert.ok(row.y - button.y - button.height >= 11);
+    assert.match(await page.getByRole("link", { name: "Runflow source ZIP" }).getAttribute("href"), /Runflow-open-source\.zip$/);
+  }
+});

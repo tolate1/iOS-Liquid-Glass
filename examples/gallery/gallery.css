@@ -56,7 +56,10 @@ output { display: block; margin-top: .5rem; font-size: .8rem; }
 .control-heading, .control-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .control-heading h2 { margin: 0; }
 .control-row { min-height: 3.1rem; border-block-start: 1px solid var(--lg-border); }
-.control-row:first-of-type { margin-block-start: .5rem; }
+.control-sample > .control-heading { padding-block-end: .75rem; }
+#sheet-trigger { white-space: nowrap; }
+.gallery-links { display: flex; flex-wrap: wrap; gap: .35rem 1rem; margin-top: .65rem; }
+.gallery-links a { color: var(--lg-muted); }
 .control-row output { margin: 0; font-variant-numeric: tabular-nums; }
 .slider-row { display: grid; grid-template-columns: 1fr auto; padding-block-start: .5rem; }
 .slider-row input { grid-column: 1 / -1; }
