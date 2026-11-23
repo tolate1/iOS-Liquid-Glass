@@ -8,6 +8,17 @@
     "schemaVersion": { "const": 1 },
     "designMode": { "enum": ["preserve-brand", "ios-transform"] },
     "routes": { "type": "array", "items": { "type": "string" } },
+    "migration": {
+      "type": "object",
+      "required": ["operation", "path", "before", "after"],
+      "properties": {
+        "operation": { "const": "react-vite-toolbar" },
+        "path": { "type": "string", "minLength": 1 },
+        "before": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "after": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      },
+      "additionalProperties": false
+    },
     "actions": {
       "type": "array",
       "items": {

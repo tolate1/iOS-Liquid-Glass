@@ -77,7 +77,7 @@ export async function readConfig(project) {
   }
 }
 
-function walkAst(node, callback) {
+export function walkAst(node, callback) {
   if (!node || typeof node !== "object") return;
   if (Array.isArray(node)) {
     for (const item of node) walkAst(item, callback);

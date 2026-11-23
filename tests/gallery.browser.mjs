@@ -266,3 +266,23 @@ test("pointer cancellation leaves the selected panel and reduced motion still pe
   const indicator = await page.locator(".lg-segment-indicator").boundingBox();
   assert.ok(Math.abs(indicator.x - final.x) <= 1);
 });
+
+test("Vite dashboard keeps its real control and table behavior after controlled application", async (t) => {
+  for (const state of ["baseline", "migrated"]) {
+    const page = await browser.newPage({ viewport: { width: 390, height: 760 } });
+    t.after(() => page.close());
+    await page.goto(url + `examples/vite-fixture/generated/${state}/index.html`);
+    const toolbar = page.locator("[data-lg-migrate=toolbar]");
+    await toolbar.waitFor();
+    if (state === "migrated") {
+      await page.locator("[data-lg-migrate=toolbar][data-lg-renderer=svg-backdrop]").waitFor();
+      assert.match(await computedFilter(toolbar.locator(".lg-backdrop")), /url\(/);
+    } else {
+      assert.equal(await toolbar.locator(".lg-backdrop").count(), 0);
+    }
+    assert.deepEqual(await page.locator("tbody th").allTextContents(), ["Desk stand", "Field kit"]);
+    await page.getByRole("button", { name: "Low stock" }).press("Enter");
+    assert.deepEqual(await page.locator("tbody th").allTextContents(), ["Field kit"]);
+    assert.equal(await page.locator("tbody td").textContent(), "17");
+  }
+});

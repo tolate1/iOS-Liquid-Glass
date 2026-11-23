@@ -3,3 +3,4 @@ dist/
 test-results/
 *.tgz
 examples/react-fixture/generated/
+examples/vite-fixture/generated/

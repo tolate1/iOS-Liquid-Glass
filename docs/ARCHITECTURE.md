@@ -32,3 +32,7 @@ See [compatibility](COMPATIBILITY.md) for the verification boundaries.
 - `mountGlassSegmentedControl` accepts direct `button[type=button][data-lg-value]` children. Supply ID-bearing panels for tabs, or omit panels for a radio group. `setValue` synchronizes externally chosen values without calling `onValueChange`. Use a stable button list for the lifetime of a mount.
 - `mountGlassPopover` uses the native top layer, dismissal and focus restoration. `mountGlassMenu` adds arrow/Home/End navigation and closes after menu-item activation. The app owns its item actions. Supply locally unique IDs and mark up the panel and menu items with their accessible names.
 - `lg-button`, `lg-field`, `lg-toolbar` and `lg-dock` are CSS hooks for native elements. The application owns input validation, form submission and loading state. Pair a mobile Dock with the `lg-dock-layout` bottom reserve and keep its fixed positioning ancestors free of transforms and filters.
+
+## Reviewable source changes
+
+The React/Vite pilot binds one marked toolbar source to Git root, a deterministic transform and exact before/after SHA-256. Checked Git patches leave the index alone. Revert requires the exact transformed contents; user changes cause a refusal. The plan contains no copy of the application source.

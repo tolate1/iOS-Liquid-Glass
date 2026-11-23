@@ -35,3 +35,7 @@ Tested with Chromium Headless Shell 153 on Linux. Popover support requires the n
 ## Stage 3 consumer validation
 
 The React 19 fixture installs the engine tarball into a fresh directory and runs React SSR plus hydration in Chromium. The fixture checks actual search results, input persistence and theme updates. A clean Next.js 16.4.6 project installed the same tarball, built a production static export via webpack, and verified the computed SVG backdrop and search result at 768 CSS px in Chromium. React 18 is in the peer dependency range and has not been exercised here.
+
+## Stage 4 migration pilot
+
+The independent Vite 8 dashboard was built both before and after the reviewed transform. Headless Chromium verified the computed SVG toolbar, keyboard activation of the stock filter and the same surviving row with 17 units. The fixture reverted to byte-identical source. CLI tests cover rejection of a modified target, modified migrated output and a nested directory whose enclosing Git root differs. This is one marked toolbar transform, and the CLI's source check reports browser verification separately.
