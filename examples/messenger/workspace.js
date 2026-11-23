@@ -43,7 +43,6 @@ function updateProgress() {
   progress.max = tasks.length;
   progress.value = complete;
   get("checklist-caption").textContent = `${complete} of ${tasks.length}`;
-  get("task-total").textContent = `${complete} / ${tasks.length}`;
 }
 checklist.addEventListener("change", updateProgress);
 updateProgress();

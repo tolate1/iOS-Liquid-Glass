@@ -522,3 +522,32 @@
     background: var(--lg-selection);
   }
 }
+
+/* Runflow controls keep the highlight on the curved rim, even in CSS frost. */
+:is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) {
+  --lg-glass-glint: #fff8;
+  --lg-glass-rim: #0002;
+  --lg-glass-shade: #0002;
+  --lg-dock-frost-tint: .66;
+}
+[data-lg-theme="runflow-dark"] {
+  --lg-glass-glint: #fff4;
+  --lg-glass-rim: #fff2;
+  --lg-glass-shade: #0007;
+  --lg-dock-frost-tint: .60;
+}
+
+:is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) .lg-surface[data-lg-role="functional-control"]:is([data-lg-renderer="svg-backdrop"], [data-lg-renderer="frosted-css"]) > .lg-backdrop {
+  background-image: linear-gradient(165deg, #ffffff0a, transparent 52%, #0000000a);
+  box-shadow: inset 0 0 0 1px var(--lg-glass-rim), inset 0 1px 1px var(--lg-glass-glint), inset 0 -1px 1px var(--lg-glass-shade), 0 3px 10px #0002;
+}
+
+:is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) .lg-dock[data-lg-renderer="frosted-css"] > .lg-backdrop {
+  --lg-frost: 7px;
+  --lg-tint-alpha: var(--lg-dock-frost-tint);
+}
+
+:is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) .lg-dock[data-lg-dock]:is([data-lg-renderer="svg-backdrop"], [data-lg-renderer="frosted-css"]) > .lg-segment-indicator {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--lg-dock-selected), #fff 9%), var(--lg-dock-selected) 65%);
+  box-shadow: inset 0 0 0 1px var(--lg-dock-selection-edge), inset 0 1px 1px var(--lg-glass-glint), inset 0 -1px 1px var(--lg-glass-shade);
+}

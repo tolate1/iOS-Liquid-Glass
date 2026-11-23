@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-lg-theme="neutral-light">
+<html lang="en" data-lg-theme="runflow-dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -12,11 +12,9 @@
   <main>
     <header>
       <h1>Liquid Glass Gallery</h1>
-      <p>Compare how each material renders the same background.</p>
+      <p>Same backdrop. Different glass.</p>
       <nav class="gallery-links" aria-label="Workspace and Runflow">
         <a href="/examples/messenger/index.html">Workspace demo</a>
-        <a href="https://github.com/tolate1/iOS-Liquid-Glass/blob/main/Runflow-open-source.zip">Runflow source ZIP</a>
-        <a href="https://github.com/tolate1/iOS-Liquid-Glass/blob/main/runflow-research/RELEASE_L49.md">Runflow L49 notes</a>
       </nav>
     </header>
     <div class="preferences">
@@ -25,7 +23,7 @@
           <option value="neutral-light">Neutral light</option>
           <option value="neutral-dark">Neutral dark</option>
           <option value="runflow-light">Runflow light</option>
-          <option value="runflow-dark">Runflow dark</option>
+          <option value="runflow-dark" selected>Runflow dark</option>
         </select>
       </label>
       <label>Renderer
@@ -44,6 +42,23 @@
           <option value="plain">Plain</option>
         </select>
       </label>
+    </div>
+    <div class="scenes">
+      <section>
+        <h2>Candidate</h2>
+        <div class="specimen">
+          <div class="spectrum" aria-hidden="true"></div>
+          <div class="lens" id="candidate"><span>Regular glass</span></div>
+        </div>
+        <output id="status" aria-live="polite"></output>
+      </section>
+      <section>
+        <h2>Frosted baseline</h2>
+        <div class="specimen">
+          <div class="spectrum" aria-hidden="true"></div>
+          <div class="lens" id="baseline"><span>Regular glass</span></div>
+        </div>
+      </section>
     </div>
     <section aria-label="Interactive controls" class="interactive">
       <div class="lg-toolbar" id="toolbar">
@@ -126,23 +141,6 @@
         <button type="button" class="lg-button" id="collection-dismiss">Dismiss</button>
       </div>
     </section>
-    <div class="scenes">
-      <section>
-        <h2>Candidate</h2>
-        <div class="specimen">
-          <div class="spectrum" aria-hidden="true"></div>
-          <div class="lens" id="candidate"><span>Regular glass</span></div>
-        </div>
-        <output id="status" aria-live="polite"></output>
-      </section>
-      <section>
-        <h2>Frosted baseline</h2>
-        <div class="specimen">
-          <div class="spectrum" aria-hidden="true"></div>
-          <div class="lens" id="baseline"><span>Regular glass</span></div>
-        </div>
-      </section>
-    </div>
     <details class="diagnostics">
       <summary>Renderer and interaction details</summary>
       <dl>
@@ -179,6 +177,10 @@
       <h2>Content surface</h2>
       <p>Text and data remain readable on a solid material.</p>
     </section>
+    <footer class="gallery-links" aria-label="Runflow resources">
+        <a href="https://github.com/tolate1/iOS-Liquid-Glass/blob/main/Runflow-open-source.zip">Runflow source ZIP</a>
+        <a href="https://github.com/tolate1/iOS-Liquid-Glass/blob/main/runflow-research/RELEASE_L49.md">Runflow L49 notes</a>
+    </footer>
   </main>
 </body>
 </html>

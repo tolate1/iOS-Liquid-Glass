@@ -71,3 +71,49 @@ output { display: block; margin-top: .5rem; font-size: .8rem; }
 .swatch-regular { background: linear-gradient(135deg, #a890c2, #e8d0ef); }
 .swatch-frosted { background: linear-gradient(135deg, #8da6a2, #dce8c8); }
 [data-layout="list"] .swatch { height: 2.5rem; }
+
+body { background: var(--lg-ambient, none), var(--lg-canvas); }
+header { margin-block-end: 1.25rem; }
+h1 { font-size: clamp(2rem, 6vw, 3.6rem); }
+header p { font-size: .925rem; }
+header .gallery-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: .35rem .9rem;
+  color: var(--lg-ink);
+  text-decoration: none;
+  border: 1px solid var(--lg-border);
+  border-radius: 100px;
+  background: var(--lg-content);
+}
+.preferences { gap: .5rem .75rem; margin-block-end: 1.2rem; }
+.preferences label { color: var(--lg-muted); }
+.preferences select {
+  appearance: none;
+  color: var(--lg-ink);
+  background-color: var(--lg-field);
+  border-radius: 100px;
+  padding-inline: .75rem 1.5rem;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 12px center, right 8px center;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+}
+.scenes { margin-block-end: 1.5rem; }
+.specimen { overflow: clip; }
+.control-sample.lg-surface[data-lg-role="functional-control"] > .lg-backdrop {
+  box-shadow: inset 0 0 0 1px var(--lg-border);
+}
+@media (max-width: 520px) {
+  main { padding: 1rem; }
+  .scenes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+  .specimen { min-height: 130px; border-radius: 16px; }
+  .lens { width: 88%; min-height: 60px; padding: .35rem; text-align: center; font-size: .875rem; }
+  .preferences select { max-width: 100%; min-width: 0; font-size: max(16px, .875rem); }
+}
+
+@media (min-width: 375px) and (max-width: 520px) {
+  .interactive .lg-toolbar { flex-wrap: nowrap; gap: .25rem; }
+  .interactive .lg-button { padding-inline: .5rem; font-size: .875rem; }
+}

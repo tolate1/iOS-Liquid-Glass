@@ -108,3 +108,24 @@ h2 { font-size: clamp(1.35rem, 3vw, 1.8rem); }
   #views-tabs.lg-dock { width: min(22rem, calc(100% - 1.5rem)); }
   #views-tabs .lg-button { flex-basis: 0; min-inline-size: min(76px, 25%); }
 }
+
+/* One overview, with secondary counts in a lighter visual tier. */
+.workspace-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.workspace-metrics .lg-metric {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border-radius: 16px;
+  box-shadow: none;
+}
+.workspace-metrics .lg-metric > dd { font-size: 1.25rem; }
+.workspace-kicker { text-transform: none; letter-spacing: .015em; }
+#views > .lg-panel { border-color: color-mix(in srgb, var(--lg-border), transparent 30%); }
+#messages li { line-height: 1.4; }
+@media (max-width: 520px) {
+  .workspace-hero { --lg-panel-padding: 1rem; }
+  h1 { font-size: clamp(2rem, 8vw, 3rem); }
+  .workspace-progress { padding-block-start: .65rem; }
+  .workspace-metrics { --lg-metric-padding: .55rem .8rem; }
+  #views-tabs.lg-dock { width: min(21rem, calc(100% - 2.5rem)); }
+  #views-tabs[data-lg-dock] > .lg-button { min-height: 48px; }
+}
