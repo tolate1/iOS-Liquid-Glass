@@ -13,11 +13,18 @@ const pace = (seconds) => {
   return Math.floor(value / 60) + ":" + String(value % 60).padStart(2, "0");
 };
 
+function duration(run) {
+  const totalSeconds = Math.round(run.seconds * run.km);
+  const hours = Math.floor(totalSeconds / 3600);
+  const rest = pace(totalSeconds % 3600);
+  return hours ? hours + ":" + rest.padStart(5, "0") : rest;
+}
+
 const types = [
-  ["Лёгкий бег", "Ровный темп в комфортной зоне.", '<path d="M2 12h4l3-6 3 10 3-4h5"/>'],
-  ["Длительная", "Дистанция в аэробном темпе.", '<path d="M3 15c3-10 6-10 9-5s5 5 8-2"/>'],
-  ["Темповая", "Основной отрезок в устойчивом темпе.", '<path d="m3 15 6-6 4 4 7-8"/>'],
-  ["Интервалы", "Быстрые отрезки чередуются с восстановлением.", '<path d="M2 15h4V6h4v9h4V6h4v9h2"/>'],
+  ["Лёгкий бег", '<path d="M2 12h4l3-6 3 10 3-4h5"/>'],
+  ["Длительная", '<path d="M3 15c3-10 6-10 9-5s5 5 8-2"/>'],
+  ["Темповая", '<path d="m3 15 6-6 4 4 7-8"/>'],
+  ["Интервалы", '<path d="M2 15h4V6h4v9h4V6h4v9h2"/>'],
 ];
 
 const recent = [
@@ -54,13 +61,14 @@ function drawMetrics(items, previous) {
   const delta = change > 0 ? "+" + change : String(change).replace("-", "−");
   const metrics = [
     ["Дистанция", decimal.format(km), "км", delta + "% к предыдущему периоду"],
-    ["Средний темп", pace(total(items, (run) => run.seconds * run.km) / km), "/км", "Взвешено по дистанции"],
-    ["Тренировки", items.length, "", Math.max(...items.map((run) => run.km)).toLocaleString("ru-RU") + " км · самая длинная"],
-    ["Разброс темпа", decimal.format(median(items.map((run) => run.cv))), "%", "Медианный коэффициент вариации"],
+    ["Средний темп", pace(total(items, (run) => run.seconds * run.km) / km), "/км", ""],
+    ["Тренировки", items.length, "", ""],
+    ["Медиана CV", decimal.format(median(items.map((run) => run.cv))), "%", ""],
   ];
   byId("metrics").innerHTML = metrics.map(([label, value, unit, context]) =>
     '<dl class="an-panel metric"><dt>' + label + '</dt><dd class="metric-value">' + value +
-    ' <small>' + unit + '</small></dd><dd class="metric-context">' + context + '</dd></dl>').join("");
+    (unit ? ' <small>' + unit + '</small>' : '') + '</dd>' +
+    (context ? '<dd class="metric-context">' + context + '</dd>' : '') + '</dl>').join("");
 }
 
 function drawChart(items, days) {
@@ -74,7 +82,7 @@ function drawChart(items, days) {
     return { label: start, compact: compactDate.format(dateAt(from)), range: step === 1 ? start : start + " — " + end,
       cv: group.length ? median(group.map((run) => run.cv)) : null };
   });
-  byId("chart-description").textContent = step === 1 ? "CV по тренировкам · ниже — ровнее темп" : "Медиана CV за каждые " + step + " дней · ниже — ровнее темп";
+  byId("chart-description").textContent = step === 1 ? "CV, % · меньше — стабильнее" : "Медиана CV за " + step + " дней, %";
   const values = bins.flatMap(({ cv }) => cv === null ? [] : [cv]);
   const floor = Math.floor(Math.min(...values) * 2) / 2;
   const tick = Math.max(.25, Math.ceil((Math.max(...values) - floor) * 2) / 8);
@@ -138,14 +146,13 @@ function drawZones(items) {
 
 function drawJournal() {
   const count = visibleWorkouts.length;
-  byId("journal-count").textContent = "Тренировок за период: " + count;
   const showAll = byId("show-all");
   showAll.hidden = count <= 3;
   showAll.setAttribute("aria-expanded", String(expanded));
-  showAll.textContent = expanded ? "Свернуть список" : "Показать все";
+  showAll.textContent = expanded ? "Свернуть" : "Показать все (" + count + ")";
   byId("workouts").innerHTML = visibleWorkouts.slice(0, expanded ? count : 3).map(({ day, type, km, seconds }, index) =>
     '<button class="workout-row" type="button" data-workout="' + index + '"><span class="workout-icon" aria-hidden="true">' +
-    '<svg viewBox="0 0 22 22">' + types[type][2] + '</svg></span><span class="workout-name"><strong>' + types[type][0] +
+    '<svg viewBox="0 0 22 22">' + types[type][1] + '</svg></span><span class="workout-name"><strong>' + types[type][0] +
     '</strong><small>' + dateFormat.format(dateAt(day)) + '</small></span><span class="workout-number">' +
     decimal.format(km) + ' км</span><span class="workout-number workout-pace">' + pace(seconds) +
     ' /км</span><span class="workout-arrow" aria-hidden="true">›</span></button>').join("");
@@ -167,9 +174,18 @@ mountGlassSurface(byId("period"), { material: "regular", role: "functional-contr
 render(defaultPeriod);
 
 const dock = byId("progress-dock");
-mountGlassSegmentedControl(dock, { value: "dynamics", onValueChange: (value) => {
-  byId(value).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-} });
+let dockScroll;
+function scrollFromDock(value) {
+  cancelAnimationFrame(dockScroll);
+  dockScroll = requestAnimationFrame(() => {
+    byId(value).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  });
+}
+mountGlassSegmentedControl(dock, { value: "overview", onValueChange: scrollFromDock });
+dock.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-lg-value]");
+  if (button) scrollFromDock(button.dataset.lgValue);
+});
 mountGlassDock(dock, { layout: byId("main") });
 
 byId("show-all").addEventListener("click", () => {
@@ -178,17 +194,33 @@ byId("show-all").addEventListener("click", () => {
 });
 
 const dialog = byId("workout-dialog");
+
+function workoutStats(run, includeVariation = true) {
+  const pairs = [["Время", duration(run)], ["Темп", pace(run.seconds) + " /км"]];
+  if (includeVariation) pairs.push(["CV", decimal.format(run.cv) + "%"]);
+  return pairs.map(([label, value]) => '<div><dt>' + label + '</dt><dd>' + value + '</dd></div>').join("");
+}
+
+function showWorkout(run) {
+  byId("workout-title").textContent = types[run.type][0];
+  byId("workout-date").textContent = dateFormat.format(dateAt(run.day));
+  byId("workout-details").innerHTML = '<div><dt>Дистанция</dt><dd>' + decimal.format(run.km) +
+    ' км</dd></div>' + workoutStats(run);
+  dialog.showModal();
+}
+
+const latest = workouts[0];
+const latestDate = byId("latest-date");
+latestDate.dateTime = dateAt(latest.day).toISOString().slice(0, 10);
+latestDate.textContent = dateFormat.format(dateAt(latest.day));
+byId("latest-name").textContent = types[latest.type][0];
+byId("latest-distance").innerHTML = decimal.format(latest.km) + ' <small>км</small>';
+byId("latest-splits").innerHTML = workoutStats(latest, false);
+mountGlassSurface(byId("latest-details"), { material: "regular", role: "functional-control" });
+byId("latest-details").addEventListener("click", () => showWorkout(latest));
 byId("workouts").addEventListener("click", (event) => {
   const row = event.target.closest("[data-workout]");
-  if (!row) return;
-  const { day, type, km, seconds, cv } = visibleWorkouts[Number(row.dataset.workout)];
-  byId("workout-title").textContent = types[type][0];
-  byId("workout-date").textContent = dateFormat.format(dateAt(day));
-  byId("workout-details").innerHTML = '<div><dt>Дистанция</dt><dd>' + decimal.format(km) +
-    ' км</dd></div><div><dt>Темп</dt><dd>' + pace(seconds) +
-    ' /км</dd></div><div><dt>Разброс темпа</dt><dd>' + decimal.format(cv) + '%</dd></div>';
-  byId("workout-note").textContent = types[type][1];
-  dialog.showModal();
+  if (row) showWorkout(visibleWorkouts[Number(row.dataset.workout)]);
 });
 
 byId("theme").addEventListener("click", (event) => {
