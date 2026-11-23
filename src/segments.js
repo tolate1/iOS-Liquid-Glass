@@ -41,6 +41,8 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
   let presentation;
   let velocity = 0;
   let widthVelocity = 0;
+  let lensDrive = 0;
+  const elastic = group.hasAttribute("data-lg-elastic");
   let pointer;
   let frame = null;
   let lastFrame = null;
@@ -63,9 +65,9 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
 
   function paint(shape) {
     presentation = boundSegment(shape, groupWidth);
-    if (group.hasAttribute("data-lg-elastic")) {
+    if (elastic) {
       // Port the horizontal Runflow lens drive and curvature to the shared DOM controller.
-      const drive = reduced.matches ? 0 : Math.max(-18, Math.min(18, (pointer?.dragging ? pointer.velocity : velocity) * .02));
+      const drive = reduced.matches ? 0 : lensDrive;
       const extra = Math.abs(drive) * 1.35;
       const inset = measured[0].center - measured[0].width / 2;
       const shape = boundSegment({ width: presentation.width + extra, center: presentation.center + drive * .28 - inset }, groupWidth - 2 * inset);
@@ -92,10 +94,11 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     const position = stepSpring(presentation.center, velocity, goal.center, seconds);
     const size = stepSpring(presentation.width, widthVelocity, goal.width, seconds);
     velocity = position.velocity;
+    if (elastic) lensDrive = stepSpring(lensDrive, 0, Math.max(-18, Math.min(18, velocity * .02)), seconds).value;
     widthVelocity = size.velocity;
     paint({ center: position.value, width: size.value });
     if (Math.abs(goal.center - presentation.center) < .25 && Math.abs(goal.width - presentation.width) < .25 &&
-        Math.abs(velocity) < 3 && Math.abs(widthVelocity) < 3) {
+        Math.abs(velocity) < 3 && Math.abs(widthVelocity) < 3 && Math.abs(lensDrive) < .15) {
       settle(true);
       return;
     }
@@ -105,7 +108,7 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
   function settle(immediate = false) {
     stop();
     if (immediate || reduced.matches) {
-      velocity = widthVelocity = 0;
+      velocity = widthVelocity = lensDrive = 0;
       paint(target());
     } else {
       frame = view.requestAnimationFrame(animate);
@@ -202,7 +205,7 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
       time: event.timeStamp, velocity: 0, dragging: false,
       offset: overLens ? start - presentation.center : start - measured.find((item) => item.index === index).center,
     };
-    if (group.hasAttribute("data-lg-elastic")) pointer.overLens = overLens;
+    if (elastic) pointer.overLens = overLens;
     else if (overLens) {
       stop();
       velocity = widthVelocity = 0;
@@ -213,7 +216,10 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     const x = event.clientX - group.getBoundingClientRect().left - group.clientLeft;
     const seconds = (event.timeStamp - pointer.time) / 1000;
     if (seconds > 0) {
-      pointer.velocity = Math.max(-1400, Math.min(1400, (x - pointer.x) / seconds));
+      // A pause is not a velocity sample. Restart from the next real movement.
+      const sampledVelocity = elastic && seconds > .08 ? 0 : Math.max(-1400, Math.min(1400, (x - pointer.x) / seconds));
+      pointer.velocity = elastic && seconds <= .08 ? pointer.velocity + (sampledVelocity - pointer.velocity) * .45 : sampledVelocity;
+      if (elastic) lensDrive += (Math.max(-18, Math.min(18, pointer.velocity * .02)) - lensDrive) * .4;
     }
     pointer.time = event.timeStamp;
     pointer.x = x;
@@ -246,7 +252,7 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     if (pointer?.id !== event.pointerId) return;
     if (!pointer.dragging) {
       release();
-      if (!group.hasAttribute("data-lg-elastic")) settle();
+      if (!elastic) settle();
       return;
     }
     const center = event.clientX - group.getBoundingClientRect().left - group.clientLeft - pointer.offset;
@@ -270,7 +276,7 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     settle(true);
   });
   group.addEventListener("contextmenu", (event) => {
-    if (group.hasAttribute("data-lg-elastic") && pointer) event.preventDefault();
+    if (elastic && pointer) event.preventDefault();
   }, listen);
   observer.observe(group);
   buttons.forEach((button) => observer.observe(button));

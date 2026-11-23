@@ -25,3 +25,7 @@ Use brief press feedback, clear active state, and consistent easing. Reuse an al
 Navigation and transient controls can express material. Content should stay stable: do not animate all async panels from opacity zero on every refresh. A new fetch should not replay the entire screen.
 
 Reduced motion: keep selection and focus obvious, remove stretch/parallax/overshoot, and use immediate or restrained state changes. Keep every action available without dragging.
+
+## Перенос в новый интерфейс
+
+Переиспользовать штатный контроллер и оптический слой вместе. Проверять, что стили страницы оставляют кнопки прозрачными при нажатии, а капсула остаётся внутри трека. Отдельно проверять удержание с паузой, смену направления, повторное нажатие, отпускание и отмену. При паузе сбрасывать оценку скорости жеста, при отпускании сохранять текущую геометрию линзы и возвращать её к выбранной позиции. Смену панели анимировать отдельно, оставляя Dock установленным.

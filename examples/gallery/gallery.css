@@ -117,3 +117,8 @@ header .gallery-links a {
   .interactive .lg-toolbar { flex-wrap: nowrap; gap: .25rem; }
   .interactive .lg-button { padding-inline: .5rem; font-size: .875rem; }
 }
+
+.lg-segments[data-lg-elastic] > .lg-button:not(:disabled):active { background: transparent; }
+.lg-segments[data-lg-elastic] > .lg-segment-indicator {
+  background: linear-gradient(var(--lg-lens-angle, 135deg), #fff3, transparent 60%), var(--lg-selection);
+}
