@@ -1,8 +1,10 @@
-import { mountGlassMenu, mountGlassSegmentedControl, mountGlassSurface } from "/dist/index.js";
+import { mountGlassMenu, mountGlassSegmentedControl, mountGlassSheet, mountGlassStepper, mountGlassSurface } from "/dist/index.js";
 
 const candidate = mountGlassSurface(document.querySelector("#candidate"));
 const baseline = mountGlassSurface(document.querySelector("#baseline"), { renderer: "frosted-css" });
 mountGlassSurface(document.querySelector("#reading"), { role: "content" });
+mountGlassSurface(document.querySelector("#control-sample"), { role: "content" });
+const sheet = mountGlassSheet(document.querySelector("#sheet-trigger"), document.querySelector("#settings-sheet"));
 
 const toolbar = mountGlassSurface(document.querySelector("#toolbar"));
 const picker = document.querySelector("#material-picker");
@@ -38,6 +40,7 @@ renderer.addEventListener("change", () => {
   candidate.update({ renderer: renderer.value });
   toolbar.update({ renderer: renderer.value });
   popover.update({ renderer: renderer.value });
+  sheet.update({ renderer: renderer.value });
   renderStatus();
 });
 const scene = document.querySelector("#scene");
@@ -89,3 +92,26 @@ renderPointer();
 const statusObserver = new MutationObserver(renderStatus);
 statusObserver.observe(document.querySelector("#candidate"), { attributeFilter: ["data-lg-renderer"] });
 renderStatus();
+
+
+const snap = document.querySelector("#grid-snap");
+const brightness = document.querySelector("#brightness");
+const previewScenes = document.querySelector(".scenes");
+const divisions = mountGlassStepper(document.querySelector("#grid-stepper"), {
+  min: 4, max: 24, value: 12, onValueChange: renderGrid,
+});
+
+function renderGrid() {
+  const interval = snap.checked ? Math.round(132 / divisions.value) : 132 / divisions.value;
+  previewScenes.style.setProperty("--grid-size", `${interval}px`);
+  previewScenes.style.setProperty("--grid-opacity", brightness.value / 100);
+  document.querySelector("#snap-value").value = snap.checked ? "On" : "Off";
+  document.querySelector("#brightness-value").value = `${brightness.value}%`;
+}
+
+snap.addEventListener("change", renderGrid);
+brightness.addEventListener("input", renderGrid);
+document.querySelector("#compact-layout").addEventListener("change", (event) => {
+  document.querySelector("main").classList.toggle("compact", event.target.checked);
+});
+renderGrid();

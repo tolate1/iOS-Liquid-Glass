@@ -58,6 +58,44 @@
         <section id="panel-project" tabindex="0" hidden>Project preview · Design review on Friday.</section>
       </div>
     </section>
+    <section class="control-sample" id="control-sample" aria-labelledby="controls-title">
+      <div class="control-heading">
+        <h2 id="controls-title">Controls</h2>
+        <button class="lg-button" type="button" id="sheet-trigger">Open settings</button>
+      </div>
+      <div class="control-row">
+        <label class="lg-switch">
+          <input type="checkbox" id="grid-snap" role="switch">
+          Snap to grid
+        </label>
+        <output id="snap-value" for="grid-snap">Off</output>
+      </div>
+      <div class="control-row slider-row">
+        <label for="brightness">Grid brightness</label>
+        <output id="brightness-value" for="brightness">60%</output>
+        <input class="lg-slider" id="brightness" type="range" min="10" max="100" value="60">
+      </div>
+      <div class="control-row">
+        <span id="count-label">Grid divisions</span>
+        <div class="lg-stepper" id="grid-stepper" role="group" aria-labelledby="count-label">
+          <button type="button" class="lg-button" data-lg-stepper-decrease aria-label="Fewer divisions">−</button>
+          <output id="count-value" aria-live="polite">12</output>
+          <button type="button" class="lg-button" data-lg-stepper-increase aria-label="More divisions">+</button>
+        </div>
+      </div>
+    </section>
+    <dialog id="settings-sheet" aria-labelledby="sheet-title">
+      <div data-lg-sheet-handle aria-hidden="true"></div>
+      <div class="control-heading">
+        <h2 id="sheet-title">Display settings</h2>
+        <button class="lg-button" type="button" data-lg-sheet-close autofocus>Done</button>
+      </div>
+      <p>Choose the density of the layout.</p>
+      <label class="lg-switch">
+        <input type="checkbox" id="compact-layout" role="switch">
+        Compact layout
+      </label>
+    </dialog>
     <div class="scenes">
       <section>
         <h2>Candidate</h2>

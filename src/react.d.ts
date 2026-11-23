@@ -15,3 +15,7 @@ export const GlassSurface: Forwarded<GlassSurfaceProps, HTMLDivElement>;
 export const GlassToolbar: Forwarded<GlassSurfaceProps, HTMLDivElement>;
 export const GlassButton: Forwarded<ComponentPropsWithoutRef<"button"> & { loading?: boolean }, HTMLButtonElement>;
 export const GlassSearch: Forwarded<Omit<ComponentPropsWithoutRef<"input">, "type">, HTMLInputElement>;
+export const GlassSwitch: Forwarded<Omit<ComponentPropsWithoutRef<"input">, "type" | "children"> & {
+  children?: import("react").ReactNode;
+}, HTMLInputElement>;
+export const GlassSlider: Forwarded<Omit<ComponentPropsWithoutRef<"input">, "type">, HTMLInputElement>;

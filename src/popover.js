@@ -18,7 +18,10 @@ export function mountGlassPopover(trigger, panel, options = {}) {
   trigger.setAttribute("aria-expanded", "false");
   panel.classList.add("lg-popover");
 
-  function position() {
+  let frame;
+  let layoutKey;
+
+  function position(force = false) {
     if (!panel.matches(":popover-open")) return;
     const gap = 8;
     const anchor = trigger.getBoundingClientRect();
@@ -30,6 +33,9 @@ export function mountGlassPopover(trigger, panel, options = {}) {
     const below = bottom - anchor.bottom - gap * 2;
     const above = anchor.top - top - gap * 2;
     const naturalHeight = panel.scrollHeight;
+    const key = [anchor.left, anchor.top, anchor.bottom, left, top, right, bottom, naturalHeight].join();
+    if (!force && key === layoutKey) return;
+    layoutKey = key;
     const flip = below < naturalHeight && above > below;
     panel.style.setProperty("--lg-popover-max-width", `${Math.max(0, right - left - 2 * gap)}px`);
     panel.style.setProperty("--lg-popover-max-height", `${Math.max(0, flip ? above : below)}px`);
@@ -38,21 +44,25 @@ export function mountGlassPopover(trigger, panel, options = {}) {
     panel.style.setProperty("--lg-popover-y", `${Math.max(top + gap, flip ? anchor.top - size.height - gap : anchor.bottom + gap)}px`);
   }
 
+  function followAnchor() {
+    if (!panel.matches(":popover-open")) return;
+    position();
+    frame = view.requestAnimationFrame(followAnchor);
+  }
+
   function sync() {
+    view.cancelAnimationFrame(frame);
     const open = panel.matches(":popover-open");
     trigger.setAttribute("aria-expanded", String(open));
     if (open) {
-      position();
+      position(true);
       surface.refresh();
+      frame = view.requestAnimationFrame(followAnchor);
     }
   }
 
   panel.addEventListener("toggle", sync, listen);
-  view.addEventListener("resize", position, listen);
-  view.addEventListener("scroll", position, { ...listen, capture: true });
-  view.visualViewport?.addEventListener("resize", position, listen);
-  view.visualViewport?.addEventListener("scroll", position, listen);
-  const observer = new view.ResizeObserver(position);
+  const observer = new view.ResizeObserver(() => position(true));
   observer.observe(trigger);
   observer.observe(panel);
 
@@ -68,6 +78,7 @@ export function mountGlassPopover(trigger, panel, options = {}) {
     destroy() {
       if (panel.matches(":popover-open")) panel.hidePopover();
       events.abort();
+      view.cancelAnimationFrame(frame);
       observer.disconnect();
       surface.destroy();
       restore(trigger, "popovertarget", previousTarget);

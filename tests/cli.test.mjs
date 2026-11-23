@@ -50,6 +50,15 @@ test("controlled toolbar rejects dirty source, edited output and projects inside
   await git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-m", "Baseline");
   const plan = JSON.parse((await run(root, "plan", "--entry", "App.jsx")).stdout);
   await writeFile(join(root, "plan.json"), JSON.stringify(plan));
+  await assert.rejects(run(root, "apply", "--plan", "plan.json"), /could not be resolved/);
+  assert.equal(await readFile(source, "utf8"), baseline);
+  const localPackage = join(root, "node_modules", "@ios-liquid-glass", "web");
+  await mkdir(localPackage, { recursive: true });
+  await writeFile(join(localPackage, "package.json"), JSON.stringify({ exports: {
+    "./react": "./react.js", "./styles.css": "./styles.css",
+  } }));
+  await writeFile(join(localPackage, "react.js"), "");
+  await writeFile(join(localPackage, "styles.css"), "");
 
   await writeFile(source, baseline + "// local edit\n");
   await assert.rejects(run(root, "apply", "--plan", "plan.json"), /source changed/);

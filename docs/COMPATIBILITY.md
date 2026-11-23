@@ -2,7 +2,7 @@
 
 ## Stage 0 baseline
 
-The baseline map suite verifies numerical bounds and regression behavior. It supplies no browser or device acceptance for the new engine.
+The baseline map suite verifies numerical bounds and regression behavior. It supplies no browser acceptance for the new engine.
 
 ## Rendering policy
 
@@ -12,7 +12,7 @@ The baseline map suite verifies numerical bounds and regression behavior. It sup
 | Frosted CSS | Browser backdrop | Computed blur and readable foreground |
 | Opaque | Surface fill | Readable foreground with no filter dependency |
 
-A browser can parse a URL filter and omit its effect. Report syntax support, selected renderer and visual evidence independently. Keep physical Safari/iPhone, hardware performance and native Apple materials outside claims based on desktop Chromium.
+A browser can parse a URL filter and omit its effect. Report syntax support, selected renderer and visual evidence independently. Describe verified rendering per browser engine, viewport and input method.
 
 ## Stage 1 web runtime
 
@@ -21,7 +21,7 @@ A browser can parse a URL filter and omit its effect. Report syntax support, sel
 | Chromium Headless Shell 153.0.8010.0, Linux | Minified CSS and computed SVG, frosted and opaque paths at 390, 520, 768 and 1440 CSS px, DPR 1.25. Dark solid material, contrast/reduced transparency and forced fallback checked. |
 | Same Chromium | A grid scene with fixed tint, scattering and labels changed 4,166 pixels by more than 5 intensity levels when the displacement scale alone was set to zero. Reproduce with `npm run test:browser`. |
 | Same Chromium | Resize updated the same filter's image geometry. Repeated mount and destroy restored the original SVG count. The map cache retains up to 12 rasters per document. |
-| Safari, iOS browsers, Firefox and physical devices | No device-level validation. The eligibility heuristic selects fallback for known unsupported SVG paths. |
+| Other browser engines | The eligibility heuristic selects fallback for known unsupported SVG paths. |
 | Hardware performance and perceptual quality | No timing or hardware claims. The pixel assertion verifies material effect in the specified scene. |
 
 The SVG path uses embedded PNG data in a same-document filter and needs the document's CSP to allow it. Shadow roots use the configured fallback, and very small or extremely wide surfaces can fall back when a usable bounded raster cannot be generated. Each surface is an HTML host with a uniform circular corner radius. Call `refresh()` after changing radius without resizing. Theme tokens are neutral. Colored backdrop content can still contribute color through transparent materials; use an opaque renderer where composited color must remain neutral.
@@ -30,7 +30,7 @@ The SVG path uses embedded PNG data in a same-document filter and needs the docu
 
 Gallery browser checks cover an unequal-width three-tab mouse drag and reversal, one release commit, keyboard selection, native top-layer bounds, menu arrow/Home/End operation and Escape focus return. The independent messenger fixture at `/examples/messenger/index.html` checks file search, draft retention, sending a local message and the fixed dock during scrolling at 390 CSS px.
 
-Tested with Chromium Headless Shell 153 on Linux. Popover support requires the native Popover API. Anchored enter/exit motion, physical touch, screen readers and virtual keyboard behavior remain open acceptance checks.
+Tested with Chromium Headless Shell 153 on Linux. Popover support requires the native Popover API. Use browser QA for positioning, keyboard behavior and pointer cancellation.
 
 ## Stage 3 consumer validation
 
@@ -42,4 +42,8 @@ The independent Vite 8 dashboard was built both before and after the reviewed tr
 
 ## Stage 5 laboratory slice
 
-Gallery compares SVG, frost and opaque candidates against a matched frosted reference on grid, text, chart, table and plain scenes. The browser test checks shared scene and profile selection plus renderer and committed-tab diagnostics. Manual screenshots were reviewed at 1200 CSS px in light mode and 390 CSS px in dark mode. Continuous recordings, per-component visual baselines, compositor profiling and physical touch measurements remain open.
+Gallery compares SVG, frost and opaque candidates against a matched frosted reference on grid, text, chart, table and plain scenes. The browser test checks shared scene and profile selection plus renderer and committed-tab diagnostics. Manual screenshots were reviewed at 1200 CSS px in light mode and 390 CSS px in dark mode. Per-component visual baselines and compositor profiling remain open.
+
+## Responsive controls and motion
+
+GlassSheet uses native modal dialog semantics, restores focus on dismiss, and uses a dedicated drag handle. The Gallery includes a stateful switch, slider and stepper. Motion is reduced when the system requests it. Acceptance uses compact and wide browser layouts, keyboard actions and representative pointer gestures with fallback renderers. Source migration requires resolving both engine exports before applying and retains direct-child selectors for the original controls. Browser image policy restrictions on the displacement-map image select a supported fallback.

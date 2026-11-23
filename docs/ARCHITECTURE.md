@@ -22,7 +22,7 @@ These are design contracts for the tooling stages. Validate JSON at every comman
 - Configuration v1 declares framework, design mode, theme, renderer, fallback, project-relative include/exclude scopes and QA viewports. Unknown versions fail validation. Resolve real paths before reads or writes and reject paths outside the selected root.
 - Inventory v1 carries project metadata, source records with relative paths and 1-based locations, and observations with evidence and confidence. Static evidence and runtime observations remain distinct.
 - Plan v1 adds design mode, file scope, source identity, action, risk and checks for each proposed edit. Content and input stay readable. Application of a plan requires consent and stale-source detection.
-- Verification reports carry per-check status (`passed`, `failed`, `blocked`, `not-tested`), context and evidence links. Browser output never establishes device support by inference.
+- Verification reports carry per-check status (`passed`, `failed`, `blocked`, `not-tested`), context and evidence links. Scope results to the tested browser, viewport and input method.
 
 See [compatibility](COMPATIBILITY.md) for the verification boundaries.
 
@@ -36,3 +36,5 @@ See [compatibility](COMPATIBILITY.md) for the verification boundaries.
 ## Reviewable source changes
 
 The React/Vite pilot binds one marked toolbar source to Git root, a deterministic transform and exact before/after SHA-256. Checked Git patches leave the index alone. Revert requires the exact transformed contents; user changes cause a refusal. The plan contains no copy of the application source.
+
+The sheet controller takes a trigger and a native dialog with a local ID and an element marked data-lg-sheet-handle. Mark dismiss buttons with data-lg-sheet-close. Keyboard dismissal and drag dismissal use the same exit path. Native inputs power the switch and slider; React exposes corresponding wrappers. Use the stepper CSS class to group standard buttons with a visible value.

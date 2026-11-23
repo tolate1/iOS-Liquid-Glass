@@ -1,6 +1,6 @@
 ---
 name: ios-liquid-glass
-description: "Build, refine, and audit layered Liquid Glass interfaces across existing websites, dashboards, mobile web apps, desktop apps, and native shells. Use for Apple-like glass, weak or excessive glass, floating navigation, draggable tab indicators, material systems, blur versus refraction, Safari fallbacks, monochrome glass, compact chart controls, and verified responsive UI polish. Preserve the product, its data and brand; deliver working UI rather than mockups."
+description: "Build, refine, and audit layered Liquid Glass interfaces across existing websites, dashboards, mobile web apps, desktop apps, and native shells. Use for Apple-like glass, weak or excessive glass, floating navigation, draggable tab indicators, material systems, blur versus refraction, browser fallbacks, monochrome glass, compact chart controls, and verified responsive UI polish. Preserve the product, its data and brand; deliver working UI rather than mockups."
 ---
 
 # iOS Liquid Glass
@@ -32,7 +32,7 @@ When the engine checkout is available, run `npm ci` and `npm run build` from its
 - Do not add an enclosing full-width glass tray around two small chart toggles. Size the control group to its contents or omit the enclosing material entirely.
 - Separate optical blur from fallback blur. Large blur can hide the very edge detail needed to perceive a lens.
 - Preserve the requested palette. Monochrome means neutral tokens, charts, status treatments, shadows and highlights; disable chromatic channel offsets. Do not apply a root grayscale filter that changes fixed-position or backdrop behavior.
-- Do not claim Safari parity from Chromium or hardware GPU performance from a software renderer. A syntax probe alone does not prove the browser renders a filter correctly.
+- Report renderer capabilities per browser. Use keyboard, mouse and touch scenarios across compact and wide viewports, system accessibility preferences and a working fallback.
 - Prefer reducing conflicting surfaces over adding another glow. Keep the functional hierarchy legible before tuning spectacle.
 
 ## Accumulating knowledge
@@ -54,7 +54,7 @@ For this owner's UI projects, provide an updated project source ZIP at completio
 | Shared profiles, neutral/brand variants | references/material.md; assets/material-tokens.css |
 | Drag, springs and anchored transitions | references/motion.md |
 | Chart legends and real analytical UI | references/product-patterns.md |
-| Browser/device and evidence gates | references/acceptance.md |
+| Responsive browser and input checks | references/acceptance.md |
 | Failure diagnosis from real iterations | references/lessons.md |
 | Stage completion, knowledge capture and delivery | references/completion.md |
 | Ready optical math | assets/core/displacement-map.js and liquid-glass-core.js |

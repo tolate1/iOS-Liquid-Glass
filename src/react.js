@@ -22,13 +22,14 @@ export const GlassSurface = forwardRef(function GlassSurface(props, ref) {
     ...nativeProps
   } = props;
   const host = useRef(null);
+  const backdrop = useRef(null);
   useImperativeHandle(ref, () => host.current, []);
   useEffect(() => {
-    const surface = mountGlassSurface(host.current, { role: surfaceRole, renderer, fallback, forceFallback, material });
+    const surface = mountGlassSurface(host.current, { role: surfaceRole, renderer, fallback, forceFallback, material }, backdrop.current);
     return () => surface.destroy();
   }, [surfaceRole, renderer, fallback, forceFallback, material]);
   return createElement("div", { ...nativeProps, ref: host },
-    createElement("div", { className: "lg-react-foreground" }, children));
+    createElement("span", { ref: backdrop, className: "lg-backdrop", "aria-hidden": true }), children);
 });
 
 export const GlassToolbar = forwardRef(function GlassToolbar({ className = "", role = "group", ...props }, ref) {
@@ -47,4 +48,13 @@ export const GlassButton = forwardRef(function GlassButton(
 
 export const GlassSearch = forwardRef(function GlassSearch({ className = "", ...props }, ref) {
   return createElement("input", { ...props, type: "search", className: `lg-field ${className}`, ref });
+});
+
+export const GlassSwitch = forwardRef(function GlassSwitch({ children, className = "", ...props }, ref) {
+  return createElement("label", { className: `lg-switch ${className}` },
+    createElement("input", { ...props, ref, type: "checkbox", role: "switch" }), children);
+});
+
+export const GlassSlider = forwardRef(function GlassSlider({ className = "", ...props }, ref) {
+  return createElement("input", { ...props, ref, type: "range", className: `lg-slider ${className}` });
 });

@@ -1,5 +1,6 @@
 import { parse } from "@babel/parser";
 import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
 import { spawnSync } from "node:child_process";
 import { lstat, readFile, realpath } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -54,15 +55,15 @@ function replaceTag(content, names, replacement) {
 }
 
 function transform(content, filename) {
-  if (!content.endsWith("\n") || content.includes("\r") || content.includes(upgradedTag)) {
-    throw new Error("Expected LF-terminated JSX and an unused migration import name.");
-  }
-  return imports + replaceTag(content, findToolbar(content, filename, "div"), upgradedTag);
+  if (content.includes(upgradedTag)) throw new Error("Expected an unused migration import name.");
+  const header = content.includes("\r\n") ? imports.replaceAll("\n", "\r\n") : imports;
+  return header + replaceTag(content, findToolbar(content, filename, "div"), upgradedTag);
 }
 
 function reverse(content, filename) {
-  if (!content.startsWith(imports)) throw new Error("The migration imports have changed.");
-  const body = content.slice(imports.length);
+  const header = content.startsWith(imports) ? imports : imports.replaceAll("\n", "\r\n");
+  if (!content.startsWith(header)) throw new Error("The migration imports have changed.");
+  const body = content.slice(header.length);
   return replaceTag(body, findToolbar(body, filename, upgradedTag), "div");
 }
 
@@ -120,6 +121,16 @@ export async function runMigration(command, project, config, planPath, dryRun) {
   await verifyRoot(project.root);
   git(project.root, ["ls-files", "--error-unmatch", "--", path]);
   const reverting = command === "revert";
+  if (!reverting) {
+    const consumerRequire = createRequire(resolve(project.root, path));
+    for (const specifier of ["@ios-liquid-glass/web/react", "@ios-liquid-glass/web/styles.css"]) {
+      try {
+        consumerRequire.resolve(specifier);
+      } catch (error) {
+        throw new Error(`Install the Liquid Glass web package in the target project before applying: ${specifier} could not be resolved.`, { cause: error });
+      }
+    }
+  }
   const expected = reverting ? migration.after : migration.before;
   if (digest !== expected) throw new Error("The source changed after the reviewed plan. No change was applied.");
   const status = git(project.root, ["status", "--porcelain=v1", "--untracked-files=all", "--", path]);

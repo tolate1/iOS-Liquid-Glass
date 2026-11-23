@@ -224,7 +224,7 @@ test("React SSR markup hydrates cleanly and retains input and callbacks across t
   const response = await page.goto(url + "examples/react-fixture/generated/index.html");
   const html = await response.text();
   assert.match(html, /Handoff\.md/);
-  assert.doesNotMatch(html, /lg-backdrop/);
+  assert.doesNotMatch(html, /data-lg-renderer|lg-filter-defs/);
   await page.locator(".lg-react-toolbar[data-lg-renderer]").waitFor();
   await page.getByRole("searchbox").fill("layout");
   await page.getByRole("button", { name: "Change theme" }).click();
@@ -274,6 +274,7 @@ test("Vite dashboard keeps its real control and table behavior after controlled 
     await page.goto(url + `examples/vite-fixture/generated/${state}/index.html`);
     const toolbar = page.locator("[data-lg-migrate=toolbar]");
     await toolbar.waitFor();
+    assert.equal(await toolbar.locator(":scope > button").count(), 1);
     if (state === "migrated") {
       await page.locator("[data-lg-migrate=toolbar][data-lg-renderer=svg-backdrop]").waitFor();
       assert.match(await computedFilter(toolbar.locator(".lg-backdrop")), /url\(/);
@@ -301,4 +302,144 @@ test("lab uses matching scenes and material profiles while exposing actual rende
   assert.equal(await page.locator("#optics-diagnostic").textContent(), "yes / yes");
   assert.equal(await page.locator("#tab-diagnostic").textContent(), "files");
   assert.equal(await page.locator("#commit-diagnostic").textContent(), "1");
+});
+
+test("releasing vertically away from a tab preserves the selection", async (t) => {
+  const page = await visit(t, { width: 768, height: 900 });
+  const files = page.getByRole("tab", { name: "Files" });
+  const box = await files.boundingBox();
+  const x = box.x + box.width / 2;
+  await page.mouse.move(x, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(x, box.y + box.height + 90, { steps: 5 });
+  await page.mouse.up();
+  assert.equal(await files.getAttribute("aria-selected"), "false");
+  await files.click();
+  assert.equal(await files.getAttribute("aria-selected"), "true");
+});
+
+test("an open popover follows a layout shift and a CSP image restriction selects frost", async (t) => {
+  const page = await browser.newPage({ viewport: { width: 900, height: 900 } });
+  t.after(() => page.close());
+  await page.route(url, async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({ response, headers: { ...response.headers(), "content-security-policy": "img-src 'self'" } });
+  });
+  await page.goto(url);
+  await page.locator('#candidate[data-lg-renderer="frosted-css"]').waitFor();
+  const trigger = page.getByRole("button", { name: "Material" });
+  await trigger.click();
+  await page.locator('#popover-trigger[aria-expanded="true"]').waitFor();
+  await page.evaluate(() => {
+    const spacer = document.createElement("div");
+    spacer.style.height = "100px";
+    document.querySelector("main").prepend(spacer);
+  });
+  await page.waitForFunction(() => Math.abs(
+    document.querySelector("#material-picker").getBoundingClientRect().top -
+    document.querySelector("#popover-trigger").getBoundingClientRect().bottom - 8,
+  ) < 1, null, { timeout: 3000 });
+});
+
+test("switch, range and stepper update the scene and the modal closes by keyboard and drag", async (t) => {
+  const page = await visit(t, { width: 390, height: 900 });
+  const toggle = page.getByRole("switch", { name: "Snap to grid" });
+  await toggle.press("Space");
+  assert.equal(await toggle.isChecked(), true);
+  const range = page.getByRole("slider", { name: "Grid brightness" });
+  await range.press("End");
+  assert.equal(await range.inputValue(), "100");
+  await page.getByRole("button", { name: "More divisions" }).click();
+  assert.equal(await page.locator("#count-value").textContent(), "13");
+
+  const trigger = page.getByRole("button", { name: "Open settings" });
+  const dialog = page.getByRole("dialog", { name: "Display settings" });
+  await trigger.click();
+  await dialog.waitFor();
+  await dialog.getByRole("switch", { name: "Compact layout" }).press("Space");
+  await page.locator("main.compact").waitFor();
+  await page.keyboard.press("Escape");
+  await dialog.waitFor({ state: "hidden" });
+  assert.equal(await trigger.evaluate((node) => document.activeElement === node), true);
+
+  await trigger.click();
+  await dialog.waitFor();
+  const handle = dialog.locator("[data-lg-sheet-handle]");
+  await handle.evaluate(async (node) => {
+    await Promise.all(node.closest("dialog").getAnimations().map((animation) => animation.finished.catch(() => {})));
+  });
+  const box = await handle.boundingBox();
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 90, { steps: 7 });
+  await page.mouse.up();
+  await dialog.waitFor({ state: "hidden" });
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await trigger.click();
+  await dialog.waitFor();
+  assert.equal(await dialog.evaluate((node) => node.getAnimations().length), 0);
+  await dialog.getByRole("button", { name: "Done" }).click();
+  await dialog.waitFor({ state: "hidden" });
+});
+
+test("an oversized segment stops scheduling frames once the bounded indicator settles", async (t) => {
+  const page = await visit(t, { width: 768, height: 900 });
+  const result = await page.evaluate(async () => {
+    const { mountGlassSegmentedControl } = await import("/dist/index.js");
+    const host = document.createElement("div");
+    host.style.width = "100px";
+    for (const value of ["a", "b", "c"]) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.lgValue = value;
+      button.textContent = value;
+      button.style.minWidth = "85px";
+      host.append(button);
+    }
+    document.body.append(host);
+    const group = mountGlassSegmentedControl(host);
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    const original = window.requestAnimationFrame;
+    let scheduled = 0;
+    window.requestAnimationFrame = (request) => { scheduled++; return original(request); };
+    try {
+      group.setValue("c");
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+      const settled = scheduled;
+      await new Promise((resolve) => setTimeout(resolve, 160));
+      return { settled, remaining: scheduled - settled };
+    } finally {
+      window.requestAnimationFrame = original;
+      group.destroy();
+      host.remove();
+    }
+  });
+  assert.ok(result.settled > 0);
+  assert.equal(result.remaining, 0);
+});
+
+test("touch emulation dismisses the sheet by the handle", async (t) => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  t.after(() => page.close());
+  await page.goto(url + "?glass-fallback");
+  await page.getByRole("button", { name: "Open settings" }).tap();
+  const dialog = page.getByRole("dialog", { name: "Display settings" });
+  await dialog.waitFor();
+  const handle = dialog.locator("[data-lg-sheet-handle]");
+  await handle.evaluate(async (node) => {
+    await Promise.all(node.closest("dialog").getAnimations().map((animation) => animation.finished.catch(() => {})));
+  });
+  const box = await handle.boundingBox();
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+  for (const distance of [12, 28, 45, 65, 90]) {
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: y + distance }] });
+  }
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await dialog.waitFor({ state: "hidden" });
 });

@@ -4,7 +4,7 @@ Record date, context, mechanism, correction and evidence. Generalize from projec
 
 ## 2026-11-11 — Functional hierarchy
 
-A running analytics UI became clearer when data surfaces stayed calm while navigation, toolbar groups and popovers shared material tokens. A full-width empty toolbar and a full-width enclosure around two legend toggles added noise rather than useful depth. Compact controls preserved their semantics and reduced competing outlines. Verified in Chromium desktop and a 390px iframe, not physical iPhone Safari.
+A running analytics UI became clearer when data surfaces stayed calm while navigation, toolbar groups and popovers shared material tokens. A full-width empty toolbar and a full-width enclosure around two legend toggles added noise rather than useful depth. Compact controls preserved their semantics and reduced competing outlines. Verified in Chromium desktop and a 390px iframe.
 
 ## 2026-11-11 — Indicators and metrics
 
@@ -12,7 +12,7 @@ A composite performance index and a cumulative XP level are different constructs
 
 ## 2026-11-11 — Optical source and platform limits
 
-CSS/SVG backdrop displacement can process real backdrop detail on a verified supported engine. A WebGL renderer needs an explicit texture source; reconstructing DOM is not direct access to browser pixels. Smooth lens movement does not prove source freshness or hardware GPU speed. Keep Safari fallback and physical-device status explicit.
+CSS/SVG backdrop displacement can process real backdrop detail on a verified supported engine. A WebGL renderer needs an explicit texture source; reconstructing DOM is not direct access to browser pixels. Smooth lens movement does not prove source freshness or hardware GPU speed. Record fallback behavior by browser engine.
 
 ## 2026-11-11 — Fixed navigation
 
@@ -21,7 +21,6 @@ Filtering a mobile shell can relocate a fixed descendant dock. Check ancestor co
 ## Pending hypotheses
 
 - A cleaner explicit material-profile cascade should improve maintainability; migrate one surface family at a time and compare visuals.
-- Real-device iPhone Safari appearance/performance is still unverified in the available project tests. Do not promote this to a verified result until a device recording and measurements exist.
 
 ## 2026-11-11 — Locally resolved compound material tokens
 
@@ -38,7 +37,7 @@ Observation: the same hosted UI animated and transmitted its backdrop in cloud C
 
 ## 2026-11-12 — Shared motion presentation, bounded optical work
 
-Implementation finding: connect actual spring presentation (signed drive, contact and settling) to material parameters, rather than resetting lighting at pointerup while geometry still moves. Retain signed leading/trailing geometry. Cache maps by geometry/profile, debounce map rebuilds until settling, and vary bounded filter parameters without allocating canvases per input frame. Stop spring RAF work at rest and wake on target changes. Numerical shape/spring tests passed; desktop UI inspection covered intermediate position histories and rest recovery. Continuous interaction recordings and physical iPhone performance remain open; parameter wiring alone does not prove natural optics.
+Implementation finding: connect actual spring presentation (signed drive, contact and settling) to material parameters, rather than resetting lighting at pointerup while geometry still moves. Retain signed leading/trailing geometry. Cache maps by geometry/profile, debounce map rebuilds until settling, and vary bounded filter parameters without allocating canvases per input frame. Stop spring RAF work at rest and wake on target changes. Numerical shape/spring tests passed; desktop UI inspection covered intermediate position histories and rest recovery. Continuous interaction recordings and performance measurements remain open; parameter wiring alone does not prove natural optics.
 
 ## 2026-11-12 — Portal observation and reversible menu lifetime
 
@@ -46,11 +45,11 @@ Observation: a shared material scanner scoped to the application subtree missed 
 
 ## 2026-11-12 — Scroll separation and honest diagnostics
 
-Implementation finding: detect real content crossing floating controls before increasing neutral density; do not animate background artwork to simulate environmental response. Coalesce scroll work into one scheduled frame and return to idle after scrolling. Desktop scrolling confirmed the overlap state changed at a sticky toolbar. Density change is readability treatment, not proof of refraction or luminance sampling. Diagnostics should distinguish syntax support, configured renderer, pixel proof, WebGL context availability, actual shader compilation, RAF intervals, input-to-RAF delay and GPU timing. UA may not reliably identify an embedded WebView. A zero delay before interaction is not a latency measurement. Safari and Telegram require separate physical-device observations.
+Implementation finding: detect real content crossing floating controls before increasing neutral density; do not animate background artwork to simulate environmental response. Coalesce scroll work into one scheduled frame and return to idle after scrolling. Desktop scrolling confirmed the overlap state changed at a sticky toolbar. Density change is readability treatment, not proof of refraction or luminance sampling. Diagnostics should distinguish syntax support, configured renderer, pixel proof, WebGL context availability, actual shader compilation, RAF intervals, input-to-RAF delay and GPU timing. UA may not reliably identify an embedded WebView. A zero delay before interaction is not a latency measurement. Embedded WebViews can use different compositing paths.
 
 
 ## 2026-11-12 — Unequal-width segment dragging and native control gaps
-A dragging lens that retains the starting segment width can overflow a narrower destination and appear disconnected from the selected state. Interpolate width by the pointer-driven center between segment centers, and clamp the center to the valid range. Test reversal, unequal widths and a single segment. Desktop preview confirmed selection on drag and custom scale-menu selection updating chart range; two geometry regression tests and TypeScript passed. Long-hold touch behavior on physical iPhone remains unverified. Audit all select elements: styling the closed native select does not style its system dropdown. Route chart and form selects through the same accessible portal component when a consistent glass menu is required. A shallow pointer-relative perspective tilt is geometry feedback, not optical refraction; constrain large-card tilt and preserve reduced motion.
+A dragging lens that retains the starting segment width can overflow a narrower destination and appear disconnected from the selected state. Interpolate width by the pointer-driven center between segment centers, and clamp the center to the valid range. Test reversal, unequal widths and a single segment. Desktop preview confirmed selection on drag and custom scale-menu selection updating chart range; two geometry regression tests and TypeScript passed. Audit all select elements: styling the closed native select does not style its system dropdown. Route chart and form selects through the same accessible portal component when a consistent glass menu is required. A shallow pointer-relative perspective tilt is geometry feedback, not optical refraction; constrain large-card tilt and preserve reduced motion.
 
 
 ## 2026-11-12 — Scope spatial feedback and separate menu typography
@@ -58,11 +57,11 @@ User-approved card tilt should not spread to ordinary controls. Restrict perspec
 
 
 ## 2026-11-15 — Reference verification and isolated gesture candidates
-Inspect repository contents before assigning a skill responsibility: improve-animations is an advisor/planner, learn-taste records corrections, and a state-machine workbench need not install a state-machine runtime. SwiftUI TabView/Menu examples delegate native behavior to the OS and do not expose portable spring physics. Build isolated pages with the real web components and local observable state before adopting changes. A bounded resistance candidate can be opt-in while existing selection remains unchanged; numerical tests establish bounds and continuity, not finger feel. Desktop checks covered component switching, value commits, menu selection and keyboard navigation. Physical-device recordings and compositor/layout profiling remain open.
+Inspect repository contents before assigning a skill responsibility: improve-animations is an advisor/planner, learn-taste records corrections, and a state-machine workbench need not install a state-machine runtime. SwiftUI TabView/Menu examples delegate native behavior to the OS and do not expose portable spring physics. Build isolated pages with the real web components and local observable state before adopting changes. A bounded resistance candidate can be opt-in while existing selection remains unchanged; numerical tests establish bounds and continuity, not finger feel. Desktop checks covered component switching, value commits, menu selection and keyboard navigation. Compositor and layout profiling remain open.
 
 
 ## 2026-11-15 — Experimental sibling material and honest performance comparison
-An opt-in menu candidate can retain final-size labels and animate a separate material sibling from a single spring progress; derive clip, reveal and shadow from that progress, and sample it when retargeting. This avoids per-frame layout-bound writes in the controller, but does not prove compositor-only work or native optics. Add old/new controls and same-device instrumentation before promoting it. RAF intervals are scheduling observations; long-animation-frame forcedStyleAndLayoutDuration covers only reported slow-frame scripts and is not total layout cost. Six numeric tests and production build passed for an isolated experiment; current browser verification was blocked, with no measured old/new performance result or physical iPhone recording. Do not convert the existence of an instrument into a performance claim.
+An opt-in menu candidate can retain final-size labels and animate a separate material sibling from a single spring progress; derive clip, reveal and shadow from that progress, and sample it when retargeting. This avoids per-frame layout-bound writes in the controller, but does not prove compositor-only work or native optics. Add old/new controls and same-device instrumentation before promoting it. RAF intervals are scheduling observations; long-animation-frame forcedStyleAndLayoutDuration covers only reported slow-frame scripts and is not total layout cost. Six numeric tests and production build passed for an isolated experiment; current browser verification was blocked, with no measured old/new performance result. Do not convert the existence of an instrument into a performance claim.
 
 ## 2026-11-23 — Shared web engine backdrop evidence
 

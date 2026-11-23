@@ -38,7 +38,7 @@ The React fixture is built and hydrated by `npm run test:browser` after installi
 
 ## Reviewed toolbar pilot
 
-The pilot requires an installed engine, a React/Vite project at the Git root, and exactly one paired `<div data-lg-migrate="toolbar">` in the selected module. The plan binds the change to a file and exact before/after fingerprints. The transform changes the marked element to `GlassToolbar` and adds its imports. It preserves children and their bindings. Existing CSS that depends on the original direct-child structure requires separate review.
+The pilot requires an installed engine, a React/Vite project at the Git root, and exactly one paired `<div data-lg-migrate="toolbar">` in the selected module. The plan binds the change to a file and exact before/after fingerprints. The transform changes the marked element to `GlassToolbar` and adds its imports. It preserves children and their bindings. The original controls remain direct children, alongside a decorative first child. Review selectors that depend on exact child order.
 
 ```bash
 npx --no-install ios-liquid-glass plan --entry App.jsx --dry-run > glass-plan.json

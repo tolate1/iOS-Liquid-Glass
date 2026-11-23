@@ -77,7 +77,7 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     frame = null;
     const seconds = lastFrame === null ? 1 / 60 : Math.min(.05, (time - lastFrame) / 1000);
     lastFrame = time;
-    const goal = target();
+    const goal = boundSegment(target(), groupWidth);
     const position = stepSpring(presentation.center, velocity, goal.center, seconds);
     const size = stepSpring(presentation.width, widthVelocity, goal.width, seconds);
     velocity = position.velocity;
@@ -184,21 +184,21 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     if (index < 0) return;
     measure();
     const button = buttons[index];
-    const start = event.clientX - group.getBoundingClientRect().left;
+    const start = event.clientX - group.getBoundingClientRect().left - group.clientLeft;
     const overLens = Math.abs(start - presentation.center) <= presentation.width / 2;
     pointer = {
-      id: event.pointerId, button, start, x: start, time: event.timeStamp, velocity: 0, dragging: false,
+      id: event.pointerId, button, start, startY: event.clientY, x: start,
+      time: event.timeStamp, velocity: 0, dragging: false,
       offset: overLens ? start - presentation.center : start - measured.find((item) => item.index === index).center,
     };
     if (overLens) {
       stop();
       velocity = widthVelocity = 0;
     }
-    button.setPointerCapture(event.pointerId);
   }, listen);
 
   function dragTo(event) {
-    const x = event.clientX - group.getBoundingClientRect().left;
+    const x = event.clientX - group.getBoundingClientRect().left - group.clientLeft;
     const seconds = (event.timeStamp - pointer.time) / 1000;
     if (seconds > 0) {
       pointer.velocity = Math.max(-1400, Math.min(1400, (x - pointer.x) / seconds));
@@ -208,25 +208,35 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     paint(interpolateSegment(measured, x - pointer.offset));
   }
 
-  group.addEventListener("pointermove", (event) => {
+  view.addEventListener("pointermove", (event) => {
     if (pointer?.id !== event.pointerId) return;
-    if (!pointer.dragging &&
-        Math.abs(event.clientX - group.getBoundingClientRect().left - pointer.start) < 4) return;
-    pointer.dragging = true;
-    group.dataset.lgDragging = "";
-    stop();
-    widthVelocity = 0;
+    if (!pointer.dragging) {
+      const x = event.clientX - group.getBoundingClientRect().left - group.clientLeft;
+      const horizontal = Math.abs(x - pointer.start);
+      const vertical = Math.abs(event.clientY - pointer.startY);
+      if (vertical >= 4 && vertical > horizontal) {
+        release();
+        settle();
+        return;
+      }
+      if (horizontal < 4) return;
+      pointer.dragging = true;
+      pointer.button.setPointerCapture(event.pointerId);
+      group.dataset.lgDragging = "";
+      stop();
+      widthVelocity = 0;
+    }
     dragTo(event);
   }, listen);
 
-  group.addEventListener("pointerup", (event) => {
+  view.addEventListener("pointerup", (event) => {
     if (pointer?.id !== event.pointerId) return;
     if (!pointer.dragging) {
       release();
       settle();
       return;
     }
-    const center = event.clientX - group.getBoundingClientRect().left - pointer.offset;
+    const center = event.clientX - group.getBoundingClientRect().left - group.clientLeft - pointer.offset;
     const nearest = measured.reduce((best, item) =>
       Math.abs(item.center - center) < Math.abs(best.center - center) ? item : best);
     release(nearest.index, event);
@@ -237,7 +247,7 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     release();
     settle();
   };
-  group.addEventListener("pointercancel", cancel, listen);
+  view.addEventListener("pointercancel", cancel, listen);
   group.addEventListener("lostpointercapture", cancel, listen);
   view.addEventListener("blur", () => { release(); settle(); }, listen);
   reduced.addEventListener("change", () => { if (!pointer?.dragging) settle(true); }, listen);

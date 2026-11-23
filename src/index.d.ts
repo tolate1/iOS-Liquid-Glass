@@ -56,3 +56,25 @@ export interface GlassPopoverController {
 }
 export function mountGlassPopover(trigger: HTMLButtonElement, panel: HTMLElement, options?: Omit<GlassSurfaceOptions, "role">): GlassPopoverController;
 export function mountGlassMenu(trigger: HTMLButtonElement, panel: HTMLElement, options?: Omit<GlassSurfaceOptions, "role">): GlassPopoverController;
+
+export interface GlassSheetController {
+  open(): void;
+  close(): void;
+  update(options: Omit<GlassSurfaceOptions, "role">): GlassDiagnostics;
+  destroy(): void;
+}
+export function mountGlassSheet(trigger: HTMLButtonElement, dialog: HTMLDialogElement, options?: Omit<GlassSurfaceOptions, "role">): GlassSheetController;
+
+export interface GlassStepperOptions {
+  min?: number;
+  max?: number;
+  step?: number;
+  value?: number;
+  onValueChange?: (value: number) => void;
+}
+export interface GlassStepperController {
+  readonly value: number;
+  setValue(value: number): void;
+  destroy(): void;
+}
+export function mountGlassStepper(group: HTMLElement, options?: GlassStepperOptions): GlassStepperController;

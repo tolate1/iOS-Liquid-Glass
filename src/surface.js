@@ -2,21 +2,45 @@ import { createBackdropFilter, detectCapabilities, selectRenderer } from "./opti
 
 export { detectCapabilities, selectRenderer } from "./optics.js";
 
+const imageSupport = new WeakMap();
+
+function probeMapImage(document) {
+  let probe = imageSupport.get(document);
+  if (!probe) {
+    probe = { allowed: undefined };
+    const image = document.createElement("img");
+    probe.ready = new Promise((resolve) => {
+      const finish = (allowed) => {
+        probe.allowed = allowed;
+        resolve();
+      };
+      image.addEventListener("load", () => finish(true), { once: true });
+      image.addEventListener("error", () => finish(false), { once: true });
+      // Same PNG transport as feImage so a restrictive page policy can select frost.
+      image.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==";
+    });
+    imageSupport.set(document, probe);
+  }
+  return probe;
+}
+
 const mountedSurfaces = new WeakSet();
 const solidRoles = new Set(["canvas", "content", "field", "selection"]);
 const scattering = { clear: 0.22, regular: 0.48, transient: 0.9 };
 
-export function mountGlassSurface(host, options = {}) {
+export function mountGlassSurface(host, options = {}, ownedLayer) {
   const document = host.ownerDocument;
   const view = document.defaultView;
   if (!view || !host.isConnected) throw new Error("Mount GlassSurface on a connected element.");
   if (mountedSurfaces.has(host)) throw new Error("GlassSurface is already mounted on this element.");
   mountedSurfaces.add(host);
 
-  const layer = document.createElement("span");
-  layer.className = "lg-backdrop";
-  layer.setAttribute("aria-hidden", "true");
-  host.prepend(layer);
+  const layer = ownedLayer ?? document.createElement("span");
+  if (!ownedLayer) {
+    layer.className = "lg-backdrop";
+    layer.setAttribute("aria-hidden", "true");
+    host.prepend(layer);
+  }
   host.classList.add("lg-surface");
 
   const transparency = view.matchMedia("(prefers-reduced-transparency: reduce)");
@@ -27,6 +51,7 @@ export function mountGlassSurface(host, options = {}) {
   let diagnostics;
   let destroyed = false;
   let lastOpticsKey;
+  let checkingImage = false;
 
   function clearFilter() {
     filter?.destroy();
@@ -53,6 +78,14 @@ export function mountGlassSurface(host, options = {}) {
       reduceTransparency: transparency.matches,
       increaseContrast: contrast.matches || forcedColors.matches,
     };
+    if (selectRenderer(capabilities, policy) === "svg-backdrop") {
+      const probe = probeMapImage(document);
+      if (probe.allowed === undefined && !checkingImage) {
+        checkingImage = true;
+        probe.ready.then(schedule);
+      }
+      if (probe.allowed === false) capabilities.svgEligible = false;
+    }
     let selected = selectRenderer(capabilities, policy);
     if (selected === "svg-backdrop") {
       const style = view.getComputedStyle(layer);
@@ -117,7 +150,7 @@ export function mountGlassSurface(host, options = {}) {
       forcedColors.removeEventListener("change", schedule);
       if (frame !== null) view.cancelAnimationFrame(frame);
       clearFilter();
-      layer.remove();
+      if (!ownedLayer) layer.remove();
       host.classList.remove("lg-surface");
       delete host.dataset.lgMaterial;
       delete host.dataset.lgRole;

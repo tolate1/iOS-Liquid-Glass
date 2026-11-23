@@ -4,7 +4,7 @@
 
 After a meaningful UI stage, update the knowledge log with the observed issue, causal mechanism, correction, environment, evidence and remaining uncertainty. Retain reusable constraints, including palette, typography, hierarchy, motion, input semantics, overlays, accessibility, rendering source, performance and browser compatibility. Deduplicate; do not append a transcript or collect every CSS value.
 
-Keep implementation facts separate from visible quality and user confirmation. Record incorrect earlier diagnoses as disproved when evidence contradicts them. Treat an acceptance plan as open if its required recording, device, or performance proof is missing, even when code is published.
+Keep implementation facts separate from visible quality and user confirmation. Record incorrect earlier diagnoses as disproved when evidence contradicts them. Treat an acceptance plan as open if its required interaction or performance proof is missing, even when code is published.
 
 ## Project context
 

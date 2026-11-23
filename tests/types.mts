@@ -20,3 +20,11 @@ import { GlassProvider, GlassToolbar, GlassSearch } from "@ios-liquid-glass/web/
 
 createElement(GlassProvider, { theme: "neutral-dark" },
   createElement(GlassToolbar, { material: "regular" }, createElement(GlassSearch, { "aria-label": "Search" })));
+
+import { mountGlassSheet, mountGlassStepper } from "@ios-liquid-glass/web";
+import { GlassSlider, GlassSwitch } from "@ios-liquid-glass/web/react";
+
+mountGlassSheet(document.createElement("button"), document.createElement("dialog")).close();
+mountGlassStepper(document.createElement("div"), { min: 0, max: 20 }).setValue(11);
+createElement(GlassSwitch, { defaultChecked: true }, "Compact layout");
+createElement(GlassSlider, { min: 0, max: 100 });
