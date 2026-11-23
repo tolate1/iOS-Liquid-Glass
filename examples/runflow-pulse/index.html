@@ -26,7 +26,7 @@
 
   <main id="main">
     <header class="topbar">
-      <span class="breadcrumb">Аналитика <span class="breadcrumb-slash">/</span> <strong>Обзор</strong></span>
+      <span class="breadcrumb">Мой дневник <span class="breadcrumb-slash">/</span> <strong>Прогресс</strong></span>
       <span class="demo-mobile"><span class="demo-dot"></span> Демо-данные</span>
       <button class="lg-button theme-button" type="button" id="theme" aria-label="Включить светлую тему" title="Переключить тему">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19m0-14-1.5 1.5m-11 11L5 19"/></svg>
@@ -35,8 +35,8 @@
     <div class="dashboard" id="overview">
       <header class="page-heading">
         <div>
-          <h1>Пульс тренировок</h1>
-          <p>Нагрузка, темп и стабильность бега.</p>
+          <h1>Прогресс</h1>
+
         </div>
         <div class="period-control">
           <div id="period" aria-label="Период">
@@ -48,17 +48,16 @@
         </div>
       </header>
 
-      <div class="metric-grid" aria-label="Сводка за период" id="metrics"></div>
-
       <div class="analysis-grid" id="dynamics">
         <section class="an-panel chart-panel" aria-labelledby="chart-heading">
           <header class="panel-head">
-            <div><h2 id="chart-heading">Объём бега</h2><p id="chart-description">Дистанция по неделям</p></div>
-            <span class="chart-key"><i></i> Дистанция</span>
+            <div><h2 id="chart-heading">Динамика стабильности</h2><p id="chart-description">Коэффициент вариации темпа</p></div>
+            <span class="chart-key"><i></i> CV, %</span>
           </header>
           <div id="chart-readout" class="chart-readout"></div>
           <div class="chart" id="chart"></div>
         </section>
+        <div class="metric-grid" aria-label="Сводка за период" id="metrics"></div>
         <section class="an-panel intensity-panel" aria-labelledby="intensity-heading">
           <header class="panel-head"><div><h2 id="intensity-heading">Профиль темпа</h2><p>Доля дистанции по типу бега</p></div></header>
           <div class="zone-strip" id="zone-strip" aria-hidden="true"></div>
@@ -71,6 +70,12 @@
         <div class="workout-list" id="workouts"></div>
         <button class="lg-button show-all" id="show-all" type="button" aria-expanded="false" aria-controls="workouts">Показать все</button>
       </section>
+    </div>
+    <div class="mobile-navigation">
+      <div class="lg-dock" id="progress-dock" aria-label="Разделы страницы">
+        <button class="lg-button" type="button" data-lg-value="dynamics"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 5-5 4 4 7-9m-5 0h5v5"/></svg>Прогресс</button>
+        <button class="lg-button" type="button" data-lg-value="journal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Журнал</button>
+      </div>
     </div>
   </main>
   <dialog id="workout-dialog" class="an-panel workout-dialog" aria-labelledby="workout-title">

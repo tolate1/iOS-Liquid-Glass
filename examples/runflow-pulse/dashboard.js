@@ -1,10 +1,12 @@
-import { mountGlassSegmentedControl } from "../../dist/index.js";
+import { mountGlassDock, mountGlassSegmentedControl, mountGlassSurface } from "../../dist/index.js";
 
 const byId = (id) => document.getElementById(id);
 const dayMs = 86_400_000;
 const referenceDay = Date.UTC(2026, 10, 22);
 const dateAt = (offset) => new Date(referenceDay - offset * dayMs);
 const dateFormat = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short", timeZone: "UTC" });
+const compactDate = new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", timeZone: "UTC" });
+const axisDecimal = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
 const decimal = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
 const pace = (seconds) => {
   const value = Math.round(seconds);
@@ -68,31 +70,32 @@ function drawChart(items, days) {
     const to = from - step + 1;
     const start = dateFormat.format(dateAt(from));
     const end = dateFormat.format(dateAt(to));
-    return { label: start, range: step === 1 ? start : start + " — " + end,
-      km: distance(items.filter(({ day }) => day <= from && day >= to)) };
+    const group = items.filter(({ day }) => day <= from && day >= to);
+    return { label: start, compact: compactDate.format(dateAt(from)), range: step === 1 ? start : start + " — " + end,
+      cv: group.length ? median(group.map((run) => run.cv)) : null };
   });
-  byId("chart-description").textContent = step === 1 ? "Дистанция по дням" : "Дистанция за каждые " + step + " дней";
-  const tick = Math.ceil(Math.max(...bins.map(({ km }) => km)) / 4 / 5) * 5;
+  byId("chart-description").textContent = step === 1 ? "CV по тренировкам · ниже — ровнее темп" : "Медиана CV за каждые " + step + " дней · ниже — ровнее темп";
+  const values = bins.flatMap(({ cv }) => cv === null ? [] : [cv]);
+  const floor = Math.floor(Math.min(...values) * 2) / 2;
+  const tick = Math.max(.25, Math.ceil((Math.max(...values) - floor) * 2) / 8);
   const base = 148;
-  const points = bins.map(({ km }, index) =>
-    [65 + (935 / bins.length) * (index + .5), base - (km / (tick * 4)) * 135]);
+  const points = bins.map(({ cv }, index) => cv === null ? null :
+    [65 + (935 / bins.length) * (index + .5), base - ((cv - floor) / (tick * 4)) * 135]);
   const grid = Array.from({ length: 5 }, (_, index) => {
     const y = base - index * 135 / 4;
     return '<line class="chart-grid" x1="65" x2="1000" y1="' + y + '" y2="' + y + '"/>';
   }).join("");
-  const line = "M" + points.map((point) => point.join(",")).join(" L");
-  const area = line + " L" + points.at(-1)[0] + "," + base + " L" + points[0][0] + "," + base + " Z";
+  const plotted = points.filter(Boolean);
+  const line = "M" + plotted.map((point) => point.join(",")).join(" L");
   chart.innerHTML = '<svg viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true">' +
-    '<defs><linearGradient id="chart-fill" x2="0%" y2="100%"><stop stop-color="var(--fill)" stop-opacity=".46"/>' +
-    '<stop offset="100%" stop-color="var(--fill)" stop-opacity=".03"/></linearGradient></defs>' + grid +
-    '<path d="' + area + '" fill="url(#chart-fill)"/><path class="chart-line" d="' + line + '"/></svg>' +
+    grid + '<path class="chart-line" d="' + line + '"/>' + '</svg>' +
     '<div class="chart-axis" aria-hidden="true">' + [4, 3, 2, 1, 0].map((index) =>
-      '<span style="--tick-y:' + ((base - index * 135 / 4) / 1.6) + '%">' + index * tick + '</span>').join("") + '</div>' +
-    '<div class="chart-targets" role="radiogroup" aria-label="Дистанция по отрезкам периода">' +
-    bins.map(({ range, km }, index) => '<button type="button" role="radio" class="chart-point" aria-label="' +
-      range + ', ' + decimal.format(km) + ' км' + '" style="--point-y:' + points[index][1] / 1.6 + '%"></button>').join("") +
-    '</div><div class="chart-labels" aria-hidden="true">' + bins.map(({ label }, index) =>
-      '<span>' + (step === 1 ? label.split(" ")[0] : label) + '</span>').join("") + '</div>';
+      '<span style="--tick-y:' + ((base - index * 135 / 4) / 1.6) + '%">' + axisDecimal.format(floor + index * tick) + '</span>').join("") + '</div>' +
+    '<div class="chart-targets" role="radiogroup" aria-label="Стабильность по отрезкам периода">' +
+    bins.map(({ range, cv }, index) => '<button type="button" role="radio" class="chart-point" aria-label="' +
+      range + ', ' + (cv === null ? "без тренировок" : decimal.format(cv) + "% CV") + '" style="--point-y:' + (points[index] ? points[index][1] / 1.6 + "%" : "100%") + '" data-point-state="' + (cv === null ? "empty" : "") + '"></button>').join("") +
+    '</div><div class="chart-labels" aria-hidden="true">' + bins.map(({ label, compact }) =>
+      '<span>' + (step === 1 ? label.split(" ")[0] : compact) + '</span>').join("") + '</div>';
 
   const markers = Array.from(chart.querySelectorAll(".chart-point"));
   function select(index) {
@@ -100,8 +103,8 @@ function drawChart(items, days) {
       marker.tabIndex = i === index ? 0 : -1;
       marker.setAttribute("aria-checked", String(i === index));
     });
-    const { range, km } = bins[index];
-    byId("chart-readout").innerHTML = '<strong>' + decimal.format(km) + ' км</strong><span>' + range + '</span>';
+    const { range, cv } = bins[index];
+    byId("chart-readout").innerHTML = '<strong>' + (cv === null ? 'Без тренировок' : decimal.format(cv) + '% CV') + '</strong><span>' + range + '</span>';
   }
   select(markers.length - 1);
   markers.forEach((marker, index) => {
@@ -160,7 +163,14 @@ function render(value) {
 }
 const defaultPeriod = "30";
 mountGlassSegmentedControl(byId("period"), { value: defaultPeriod, onValueChange: render });
+mountGlassSurface(byId("period"), { material: "regular", role: "functional-control" });
 render(defaultPeriod);
+
+const dock = byId("progress-dock");
+mountGlassSegmentedControl(dock, { value: "dynamics", onValueChange: (value) => {
+  byId(value).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+} });
+mountGlassDock(dock, { layout: byId("main") });
 
 byId("show-all").addEventListener("click", () => {
   expanded = !expanded;
