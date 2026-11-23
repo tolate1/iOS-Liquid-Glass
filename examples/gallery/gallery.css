@@ -33,3 +33,6 @@ select { min-height: 44px; font: inherit; padding-inline: .7rem; border-radius: 
 output { display: block; margin-top: .5rem; font-size: .8rem; }
 .reading { padding: 1.25rem; margin-top: 1.5rem; }
 @media (max-width: 640px) { .scenes { grid-template-columns: 1fr; } }
+.interactive { margin-block-end: 2rem; }
+.interactive .lg-toolbar { width: fit-content; max-width: 100%; }
+.workspace-preview { padding: .8rem 0; color: var(--lg-muted); }
