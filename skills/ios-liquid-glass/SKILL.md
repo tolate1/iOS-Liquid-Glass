@@ -7,6 +7,10 @@ description: "Build, refine, and audit layered Liquid Glass interfaces across ex
 
 Create one coherent system of surfaces, motion, and readable controls. Adapt it to the product instead of turning the product into a glass demo. Keep the distinction between implementing an effect and proving it works.
 
+## Engine integration
+
+When the engine checkout is available, run `npm ci` and `npm run build` from its root. Run `node dist/cli.cjs audit --json --root /path/to/project` and `node dist/cli.cjs plan --dry-run --root /path/to/project` before choosing an integration. Treat locations as static evidence and confirm them in the rendered app. Reuse the installed surface, toolbar, tabs/segments and menu where their behavior fits. The vanilla entry is `@ios-liquid-glass/web`; React bindings are in `@ios-liquid-glass/web/react`. Import `@ios-liquid-glass/web/styles.css` and verify with `npm run test:browser` in the engine checkout. A standalone skill copy still has the legacy map and references.
+
 ## Workflow
 
 1. Inspect the actual rendering surface and current application. Read relevant components, theme files, storage boundaries, and existing controllers. Capture the complaint at the user's viewport. Preserve working routes, formulas, data and input flows.

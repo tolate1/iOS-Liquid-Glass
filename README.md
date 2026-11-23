@@ -27,7 +27,7 @@ console.log(surface.diagnostics);
 
 Проверки `npm test`, `npm run build` и `npm run typecheck` выполняются локально. Для Playwright установите браузер через `npx playwright install chromium --only-shell` и запустите `npm run test:browser`. Существующий Chromium можно указать через `CHROMIUM_PATH`.
 
-[Архитектура](docs/ARCHITECTURE.md) · [Совместимость и результаты](docs/COMPATIBILITY.md)
+[Архитектура](docs/ARCHITECTURE.md) · [Совместимость и результаты](docs/COMPATIBILITY.md) · [React, Next и CLI](docs/TOOLING.md)
 
 ## Установка в Codex
 

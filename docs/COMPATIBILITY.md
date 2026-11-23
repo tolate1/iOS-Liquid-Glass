@@ -31,3 +31,7 @@ The SVG path uses embedded PNG data in a same-document filter and needs the docu
 Gallery browser checks cover an unequal-width three-tab mouse drag and reversal, one release commit, keyboard selection, native top-layer bounds, menu arrow/Home/End operation and Escape focus return. The independent messenger fixture at `/examples/messenger/index.html` checks file search, draft retention, sending a local message and the fixed dock during scrolling at 390 CSS px.
 
 Tested with Chromium Headless Shell 153 on Linux. Popover support requires the native Popover API. Anchored enter/exit motion, physical touch, screen readers and virtual keyboard behavior remain open acceptance checks.
+
+## Stage 3 consumer validation
+
+The React 19 fixture installs the engine tarball into a fresh directory and runs React SSR plus hydration in Chromium. The fixture checks actual search results, input persistence and theme updates. A clean Next.js 16.4.6 project installed the same tarball, built a production static export via webpack, and verified the computed SVG backdrop and search result at 768 CSS px in Chromium. React 18 is in the peer dependency range and has not been exercised here.

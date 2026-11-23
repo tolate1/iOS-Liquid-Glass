@@ -214,3 +214,55 @@ test("mobile dock retains viewport bounds while the workspace scrolls", async (t
   const form = await page.locator("form").boundingBox();
   assert.ok(form.y + form.height < initial.y);
 });
+
+test("React SSR markup hydrates cleanly and retains input and callbacks across theme changes", async (t) => {
+  const page = await browser.newPage();
+  t.after(() => page.close());
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+  const response = await page.goto(url + "examples/react-fixture/generated/index.html");
+  const html = await response.text();
+  assert.match(html, /Handoff\.md/);
+  assert.doesNotMatch(html, /lg-backdrop/);
+  await page.locator(".lg-react-toolbar[data-lg-renderer]").waitFor();
+  await page.getByRole("searchbox").fill("layout");
+  await page.getByRole("button", { name: "Change theme" }).click();
+  assert.deepEqual(await page.getByRole("listitem").allTextContents(), ["Layout-notes.txt"]);
+  assert.equal(await page.getByRole("searchbox").inputValue(), "layout");
+  assert.equal(await page.locator("[data-lg-theme=neutral-dark]").count(), 1);
+  assert.deepEqual(errors, []);
+});
+
+test("pointer cancellation leaves the selected panel and reduced motion still permits committed drag", async (t) => {
+  const page = await visit(t, { width: 520, height: 830 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const chat = page.getByRole("tab", { name: "Chat" });
+  const project = page.getByRole("tab", { name: "Project notes" });
+  const initial = await chat.boundingBox();
+  const final = await project.boundingBox();
+  const y = initial.y + initial.height / 2;
+  await page.evaluate(() => {
+    document.addEventListener("pointerdown", (event) => {
+      window.lastPointerId = event.pointerId;
+    }, { once: true });
+  });
+  await page.mouse.move(initial.x + initial.width / 2, y);
+  await page.mouse.down();
+  await page.mouse.move(final.x + final.width / 2, y, { steps: 4 });
+  await page.locator("[data-lg-dragging]").waitFor();
+  await chat.evaluate((node) => node.dispatchEvent(new PointerEvent("pointercancel", {
+    bubbles: true, pointerId: window.lastPointerId,
+  })));
+  await page.mouse.up();
+  assert.equal(await chat.getAttribute("aria-selected"), "true");
+  assert.equal(await page.locator("[data-lg-dragging]").count(), 0);
+
+  await page.mouse.move(initial.x + initial.width / 2, y);
+  await page.mouse.down();
+  await page.mouse.move(final.x + final.width / 2, y, { steps: 5 });
+  await page.mouse.up();
+  assert.equal(await project.getAttribute("aria-selected"), "true");
+  const indicator = await page.locator(".lg-segment-indicator").boundingBox();
+  assert.ok(Math.abs(indicator.x - final.x) <= 1);
+});
