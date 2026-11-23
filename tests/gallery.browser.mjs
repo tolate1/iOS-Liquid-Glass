@@ -152,7 +152,7 @@ test("tabs commit once on release after reversal and support keyboard in fallbac
   await project.press("Home");
   assert.equal(await chat.getAttribute("aria-selected"), "true");
   const groupBox = await group.boundingBox();
-  const indicator = await page.locator(".lg-segment-indicator").boundingBox();
+  const indicator = await page.locator("#segments > .lg-segment-indicator").boundingBox();
   assert.ok(indicator.x >= groupBox.x - 1 && indicator.x + indicator.width <= groupBox.x + groupBox.width + 1);
 });
 
@@ -263,7 +263,7 @@ test("pointer cancellation leaves the selected panel and reduced motion still pe
   await page.mouse.move(final.x + final.width / 2, y, { steps: 5 });
   await page.mouse.up();
   assert.equal(await project.getAttribute("aria-selected"), "true");
-  const indicator = await page.locator(".lg-segment-indicator").boundingBox();
+  const indicator = await page.locator("#segments > .lg-segment-indicator").boundingBox();
   assert.ok(Math.abs(indicator.x - final.x) <= 1);
 });
 
@@ -442,4 +442,19 @@ test("touch emulation dismisses the sheet by the handle", async (t) => {
   }
   await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   await dialog.waitFor({ state: "hidden" });
+});
+
+test("collection switches layout and restores an archived tile with keyboard undo", async (t) => {
+  const page = await visit(t, { width: 390, height: 900 });
+  await page.getByRole("radio", { name: "List" }).click();
+  assert.equal(await page.locator("#collection-items").getAttribute("data-layout"), "list");
+  const archive = page.getByRole("button", { name: "Archive Clear" });
+  await archive.click();
+  assert.equal(await archive.isVisible(), false);
+  assert.equal(await page.locator("#collection-status").textContent(), "Clear archived.");
+  await page.getByRole("button", { name: "Undo" }).press("Enter");
+  assert.equal(await archive.isVisible(), true);
+  assert.equal(await archive.evaluate(node => node === document.activeElement), true);
+  await page.getByText("About these materials").click();
+  assert.equal(await page.locator(".lg-disclosure").getAttribute("open"), "");
 });

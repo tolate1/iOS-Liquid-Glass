@@ -115,3 +115,52 @@ document.querySelector("#compact-layout").addEventListener("change", (event) => 
   document.querySelector("main").classList.toggle("compact", event.target.checked);
 });
 renderGrid();
+
+const collection = document.querySelector("#collection-items");
+const viewSwitch = document.querySelector("#collection-view");
+mountGlassSurface(viewSwitch);
+mountGlassSegmentedControl(viewSwitch, {
+  onValueChange(value) {
+    const tiles = [...collection.querySelectorAll("article:not([hidden])")];
+    const before = tiles.map((tile) => tile.getBoundingClientRect());
+    tiles.forEach((tile) => tile.getAnimations().forEach((animation) => animation.cancel()));
+    collection.dataset.layout = value;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    tiles.forEach((tile, index) => {
+      const after = tile.getBoundingClientRect();
+      const x = before[index].left - after.left;
+      const y = before[index].top - after.top;
+      if (x || y) tile.animate(
+        [{ translate: `${x}px ${y}px` }, { translate: "0 0" }],
+        { duration: 250, easing: "cubic-bezier(.2,.75,.25,1)" },
+      );
+    });
+  },
+});
+const banner = document.querySelector("#collection-toast");
+const message = document.querySelector("#collection-status");
+const undo = document.querySelector("#collection-undo");
+const dismiss = document.querySelector("#collection-dismiss");
+mountGlassSurface(banner, { material: "transient" });
+let archive;
+collection.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (!button) return;
+  archive = button.closest("article");
+  archive.hidden = true;
+  banner.hidden = false;
+  message.textContent = `${archive.querySelector("h3").textContent} archived.`;
+  undo.focus({ preventScroll: true });
+});
+undo.addEventListener("click", () => {
+  if (!archive) return;
+  archive.hidden = false;
+  archive.querySelector("button").focus({ preventScroll: true });
+  archive = undefined;
+  banner.hidden = true;
+});
+dismiss.addEventListener("click", () => {
+  archive = undefined;
+  banner.hidden = true;
+  viewSwitch.querySelector('[aria-checked="true"]').focus({ preventScroll: true });
+});

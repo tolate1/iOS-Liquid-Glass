@@ -38,3 +38,5 @@ See [compatibility](COMPATIBILITY.md) for the verification boundaries.
 The React/Vite pilot binds one marked toolbar source to Git root, a deterministic transform and exact before/after SHA-256. Checked Git patches leave the index alone. Revert requires the exact transformed contents; user changes cause a refusal. The plan contains no copy of the application source.
 
 The sheet controller takes a trigger and a native dialog with a local ID and an element marked data-lg-sheet-handle. Mark dismiss buttons with data-lg-sheet-close. Keyboard dismissal and drag dismissal use the same exit path. Native inputs power the switch and slider; React exposes corresponding wrappers. Use the stepper CSS class to group standard buttons with a visible value.
+
+The collection styles support grid and list using the same markup. Gallery animates the tiles from their current positions while retaining the same buttons and items. The action banner uses a status announcement and explicit Undo and Dismiss controls. Disclosure uses native details and summary.

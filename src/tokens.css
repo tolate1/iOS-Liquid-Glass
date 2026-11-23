@@ -321,3 +321,50 @@
   .lg-switch > input:checked { background: Highlight; }
   .lg-switch > input:checked::after { background: HighlightText; }
 }
+
+.lg-collection {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+  gap: var(--lg-space-3, .75rem);
+}
+.lg-collection[data-layout="list"] { grid-template-columns: 1fr; }
+.lg-collection-item {
+  padding: var(--lg-space-3, .75rem);
+  border-radius: var(--lg-radius-control, 16px);
+  background: var(--lg-content, #fafafa);
+}
+.lg-collection[data-layout="list"] .lg-collection-item:not([hidden]) {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr auto;
+  gap: .75rem;
+  align-items: center;
+}
+.lg-disclosure {
+  border-radius: var(--lg-radius-control, 16px);
+  background: var(--lg-content, #fafafa);
+  padding-inline: 1rem;
+}
+.lg-disclosure > summary {
+  min-height: var(--lg-target, 44px);
+  align-content: center;
+  cursor: pointer;
+}
+.lg-disclosure > div { padding-block-end: 1rem; }
+.lg-banner:not([hidden]) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+  padding: .6rem .75rem;
+  animation: lg-banner-enter var(--lg-motion-control, 240ms) var(--lg-motion-ease, ease-out);
+}
+.lg-banner [role="status"] { flex: 1 1 8rem; }
+@keyframes lg-banner-enter {
+  from { opacity: 0; translate: 0 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lg-banner:not([hidden]) { animation: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lg-disclosure[open] > div { animation: lg-banner-enter var(--lg-motion-control, 240ms) var(--lg-motion-ease, ease-out); }
+}

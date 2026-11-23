@@ -96,6 +96,29 @@
         Compact layout
       </label>
     </dialog>
+    <section class="collection" aria-labelledby="collection-title">
+      <div class="control-heading">
+        <h2 id="collection-title">Collection</h2>
+        <div id="collection-view" aria-label="Collection layout">
+          <button class="lg-button" type="button" data-lg-value="grid">Grid</button>
+          <button class="lg-button" type="button" data-lg-value="list">List</button>
+        </div>
+      </div>
+      <div class="lg-collection" id="collection-items">
+        <article class="lg-collection-item"><span class="swatch swatch-clear"></span><h3>Clear</h3><button class="lg-button" type="button" aria-label="Archive Clear">Archive</button></article>
+        <article class="lg-collection-item"><span class="swatch swatch-regular"></span><h3>Regular</h3><button class="lg-button" type="button" aria-label="Archive Regular">Archive</button></article>
+        <article class="lg-collection-item"><span class="swatch swatch-frosted"></span><h3>Frosted</h3><button class="lg-button" type="button" aria-label="Archive Frosted">Archive</button></article>
+      </div>
+      <details class="lg-disclosure">
+        <summary>About these materials</summary>
+        <div>Clear passes more backdrop detail. Regular adds density. Frosted uses diffusion.</div>
+      </details>
+      <div class="lg-banner" id="collection-toast" hidden>
+        <span role="status" id="collection-status"></span>
+        <button type="button" class="lg-button" id="collection-undo">Undo</button>
+        <button type="button" class="lg-button" id="collection-dismiss">Dismiss</button>
+      </div>
+    </section>
     <div class="scenes">
       <section>
         <h2>Candidate</h2>
