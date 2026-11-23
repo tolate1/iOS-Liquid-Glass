@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ios-liquid-glass.local/inventory-v1",
+  "title": "Liquid Glass UI inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "project", "observations", "routes", "diagnostics"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "project": {
+      "type": "object",
+      "required": ["root", "framework", "runtime", "packageManager"],
+      "properties": {
+        "root": { "const": "." },
+        "framework": { "enum": ["react", "next", "vanilla", "unsupported"] },
+        "runtime": { "enum": ["react", "vite", "next", "static", "unknown"] },
+        "packageManager": { "enum": ["npm", "pnpm", "yarn", "bun", "unknown"] }
+      },
+      "additionalProperties": false
+    },
+    "observations": { "type": "array", "items": { "$ref": "#/definitions/observation" } },
+    "routes": { "type": "array", "items": { "type": "string" } },
+    "diagnostics": { "type": "array", "items": { "type": "string" } }
+  },
+  "definitions": {
+    "source": {
+      "type": "object",
+      "required": ["path", "line", "column"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "observation": {
+      "type": "object",
+      "required": ["source", "role", "evidence", "confidence"],
+      "properties": {
+        "source": { "$ref": "#/definitions/source" },
+        "role": { "enum": ["functional-control", "content", "field", "transient", "compositing-risk", "routing"] },
+        "evidence": { "type": "string", "minLength": 1 },
+        "confidence": { "enum": ["observed", "inferred"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}

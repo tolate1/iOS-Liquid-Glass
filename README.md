@@ -2,13 +2,42 @@
 
 Переиспользуемый Agent Skill для разработки и аудита Liquid Glass UI: сайты, React-приложения, дашборды и мобильный веб. Включает накопленный опыт Runflow без кода приложения и пользовательских данных.
 
+## Веб-движок
+
+```bash
+npm ci
+npm run demo
+```
+
+Откройте [локальную Gallery](http://127.0.0.1:4173). Она использует тот же собранный пакет, что и внешний проект. Сравните SVG-преломление с матовым стеклом, переключите тему и проверьте запасной путь через `?glass-fallback`. В Gallery можно перетаскивать индикатор вкладок менять профиль стекла, пользоваться тумблером, слайдером, степпером и нижней панелью настроек. В [примере Workspace](http://127.0.0.1:4173/examples/messenger/index.html) работают поиск файлов, отправка локальных сообщений и нижний Dock на узком экране.
+
+Для установки в отдельное приложение соберите локальный архив через `npm pack` и передайте его путь команде `npm install /path/to/ios-liquid-glass-web-0.1.0.tgz`. Подключите CSS через сборщик и установите `data-lg-theme="neutral-light"` или `data-lg-theme="neutral-dark"` на контейнер темы.
+
+```js
+import "@ios-liquid-glass/web/styles.css";
+import { mountGlassSurface } from "@ios-liquid-glass/web";
+
+const surface = mountGlassSurface(document.querySelector("#toolbar"), {
+  role: "functional-control",
+  material: "regular",
+});
+console.log(surface.diagnostics);
+// При удалении панели вызовите surface.destroy().
+```
+
+Проверки `npm test`, `npm run build` и `npm run typecheck` выполняются локально. Для Playwright установите браузер через `npx playwright install chromium --only-shell` и запустите `npm run test:browser`. Существующий Chromium можно указать через `CHROMIUM_PATH`.
+
+[Архитектура](docs/ARCHITECTURE.md) · [Совместимость и результаты](docs/COMPATIBILITY.md) · [React, Next и CLI](docs/TOOLING.md)
+
+Для стиля Runflow используйте `data-lg-theme="runflow-light"` или `data-lg-theme="runflow-dark"`. Классы `lg-panel`, `lg-metric` и `lg-button lg-primary` переносят оформление панелей, числовых карточек и главных действий в любой проект. Workspace показывает обе темы, плавающую навигацию, поиск, чат и чек-лист ревью.
+
 ## Установка в Codex
 
 Склонируйте репозиторий и скопируйте папку `skills/ios-liquid-glass` в ваш каталог `~/.codex/skills/`. В Windows используйте `%USERPROFILE%\.codex\skills\`. Файл `SKILL.md` должен лежать непосредственно внутри папки `ios-liquid-glass`.
 
 Вызов: `$ios-liquid-glass`.
 
-Пример: «Используй $ios-liquid-glass. Изучи существующий интерфейс, составь карту компонентов и улучши материалы и движение, сохранив функции и данные. Проверь результат на desktop и mobile и укажи ограничения Safari».
+Пример: «Используй $ios-liquid-glass. Изучи существующий интерфейс, составь карту компонентов и улучши материалы и движение, сохранив функции и данные. Проверь результат на desktop и mobile с мышью, клавиатурой и touch-сценариями».
 
 ## Содержимое
 
@@ -25,7 +54,7 @@
 
 Clear и Regular — варианты материала Apple; Transient в этом скилле — профиль проекта для временных поверхностей, а не официальное третье название Apple.
 
-Chromium-эффект не доказывает совместимость с Safari. Физическая проверка iPhone остаётся отдельным этапом. Скилл не является нативной реализацией Apple и не гарантирует идентичность iOS.
+Это веб-дизайн в стиле iOS для разных устройств. Приёмка строится на размерах окна, способах ввода, системных настройках доступности и работающем fallback.
 
 ## Проверка
 

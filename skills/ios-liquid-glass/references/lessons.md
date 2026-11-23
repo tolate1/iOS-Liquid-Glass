@@ -21,6 +21,6 @@ Treat these as transferable failure modes, not as a fixed visual template.
 
 Retain useful existing data-entry behavior and storage. A material redesign must not break default distances, minute/second focus movement, backspace behavior, editable records, goals or comparison charts.
 
-Do not overstate the maturity of these lessons: a verified Chromium web iteration does not establish native Apple parity or physical iPhone performance.
+Scope findings to the browsers, viewport sizes and input paths used in verification.
 
 A dock unexpectedly appearing at the top can be a compositing/containing-block bug, not a spring-position bug. Inspect the mobile parent before rewriting a working drag controller. Verify empty, loading and demo states after hydration: a screenshot captured immediately after a click may still show the previous frame.
