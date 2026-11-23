@@ -1,0 +1,199 @@
+import { mountGlassSegmentedControl } from "../../dist/index.js";
+
+const byId = (id) => document.getElementById(id);
+const dayMs = 86_400_000;
+const referenceDay = Date.UTC(2026, 10, 22);
+const dateAt = (offset) => new Date(referenceDay - offset * dayMs);
+const dateFormat = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short", timeZone: "UTC" });
+const decimal = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 1 });
+const pace = (seconds) => {
+  const value = Math.round(seconds);
+  return Math.floor(value / 60) + ":" + String(value % 60).padStart(2, "0");
+};
+
+const types = [
+  ["Лёгкий бег", "Ровный темп в комфортной зоне.", '<path d="M2 12h4l3-6 3 10 3-4h5"/>'],
+  ["Длительная", "Дистанция в аэробном темпе.", '<path d="M3 15c3-10 6-10 9-5s5 5 8-2"/>'],
+  ["Темповая", "Основной отрезок в устойчивом темпе.", '<path d="m3 15 6-6 4 4 7-8"/>'],
+  ["Интервалы", "Быстрые отрезки чередуются с восстановлением.", '<path d="M2 15h4V6h4v9h4V6h4v9h2"/>'],
+];
+
+const recent = [
+  [0, 1, 12.4, 352, 1.8],
+  [2, 0, 6.8, 345, 1.4],
+  [4, 2, 8.2, 309, 2.1],
+  [6, 0, 5.6, 366, 1.5],
+];
+// Deterministic sample workouts give each range and its previous period real totals.
+const history = Array.from({ length: 173 }, (_, index) => index + 7)
+  .filter((day) => ![1, 3, 5].includes(day % 7) && day % 17 !== 0)
+  .map((day) => {
+    const type = [0, 1, 0, 2, 0, 3, 0, 0][(day * 11 + Math.floor(day / 7) * 3) % 8];
+    const load = 1 + .24 * Math.sin(day * .14) + .18 * Math.cos(day * .24);
+    return [day, type, Math.round(([6.2, 12.6, 7.3, 5.8][type] + day % 4 * .55) * load * 10) / 10,
+      [360, 355, 315, 299][type] + (day % 9) * 3, 1.4 + (day % 11) * .19];
+  });
+const workouts = [...recent, ...history].map(([day, type, km, seconds, cv]) => ({ day, type, km, seconds, cv }));
+const total = (items, project) => items.reduce((sum, item) => sum + project(item), 0);
+const distance = (items) => total(items, ({ km }) => km);
+const median = (values) => {
+  const sorted = [...values].sort((a, b) => a - b);
+  const center = Math.floor(sorted.length / 2);
+  return (sorted[center] + sorted[sorted.length - 1 - center]) / 2;
+};
+
+const chart = byId("chart");
+let visibleWorkouts = [];
+let expanded = false;
+
+function drawMetrics(items, previous) {
+  const km = distance(items);
+  const change = Math.round((km / distance(previous) - 1) * 100);
+  const delta = change > 0 ? "+" + change : String(change).replace("-", "−");
+  const metrics = [
+    ["Дистанция", decimal.format(km), "км", delta + "% к предыдущему периоду"],
+    ["Средний темп", pace(total(items, (run) => run.seconds * run.km) / km), "/км", "Взвешено по дистанции"],
+    ["Тренировки", items.length, "", Math.max(...items.map((run) => run.km)).toLocaleString("ru-RU") + " км · самая длинная"],
+    ["Разброс темпа", decimal.format(median(items.map((run) => run.cv))), "%", "Медианный коэффициент вариации"],
+  ];
+  byId("metrics").innerHTML = metrics.map(([label, value, unit, context]) =>
+    '<dl class="an-panel metric"><dt>' + label + '</dt><dd class="metric-value">' + value +
+    ' <small>' + unit + '</small></dd><dd class="metric-context">' + context + '</dd></dl>').join("");
+}
+
+function drawChart(items, days) {
+  const step = { 7: 1, 30: 5, 90: 15 }[days];
+  const bins = Array.from({ length: days / step }, (_, index) => {
+    const from = days - 1 - index * step;
+    const to = from - step + 1;
+    const start = dateFormat.format(dateAt(from));
+    const end = dateFormat.format(dateAt(to));
+    return { label: start, range: step === 1 ? start : start + " — " + end,
+      km: distance(items.filter(({ day }) => day <= from && day >= to)) };
+  });
+  byId("chart-description").textContent = step === 1 ? "Дистанция по дням" : "Дистанция за каждые " + step + " дней";
+  const tick = Math.ceil(Math.max(...bins.map(({ km }) => km)) / 4 / 5) * 5;
+  const base = 148;
+  const points = bins.map(({ km }, index) =>
+    [65 + (935 / bins.length) * (index + .5), base - (km / (tick * 4)) * 135]);
+  const grid = Array.from({ length: 5 }, (_, index) => {
+    const y = base - index * 135 / 4;
+    return '<line class="chart-grid" x1="65" x2="1000" y1="' + y + '" y2="' + y + '"/>';
+  }).join("");
+  const line = "M" + points.map((point) => point.join(",")).join(" L");
+  const area = line + " L" + points.at(-1)[0] + "," + base + " L" + points[0][0] + "," + base + " Z";
+  chart.innerHTML = '<svg viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true">' +
+    '<defs><linearGradient id="chart-fill" x2="0%" y2="100%"><stop stop-color="var(--fill)" stop-opacity=".46"/>' +
+    '<stop offset="100%" stop-color="var(--fill)" stop-opacity=".03"/></linearGradient></defs>' + grid +
+    '<path d="' + area + '" fill="url(#chart-fill)"/><path class="chart-line" d="' + line + '"/></svg>' +
+    '<div class="chart-axis" aria-hidden="true">' + [4, 3, 2, 1, 0].map((index) =>
+      '<span style="--tick-y:' + ((base - index * 135 / 4) / 1.6) + '%">' + index * tick + '</span>').join("") + '</div>' +
+    '<div class="chart-targets" role="radiogroup" aria-label="Дистанция по отрезкам периода">' +
+    bins.map(({ range, km }, index) => '<button type="button" role="radio" class="chart-point" aria-label="' +
+      range + ', ' + decimal.format(km) + ' км' + '" style="--point-y:' + points[index][1] / 1.6 + '%"></button>').join("") +
+    '</div><div class="chart-labels" aria-hidden="true">' + bins.map(({ label }, index) =>
+      '<span>' + (step === 1 ? label.split(" ")[0] : label) + '</span>').join("") + '</div>';
+
+  const markers = Array.from(chart.querySelectorAll(".chart-point"));
+  function select(index) {
+    markers.forEach((marker, i) => {
+      marker.tabIndex = i === index ? 0 : -1;
+      marker.setAttribute("aria-checked", String(i === index));
+    });
+    const { range, km } = bins[index];
+    byId("chart-readout").innerHTML = '<strong>' + decimal.format(km) + ' км</strong><span>' + range + '</span>';
+  }
+  select(markers.length - 1);
+  markers.forEach((marker, index) => {
+    marker.addEventListener("pointerenter", (event) => { if (event.pointerType === "mouse") select(index); });
+    marker.addEventListener("click", () => select(index));
+    marker.addEventListener("focus", () => select(index));
+    marker.addEventListener("keydown", (event) => {
+      const last = markers.length - 1;
+      const next = { ArrowLeft: index - 1, ArrowDown: index - 1, ArrowRight: index + 1, ArrowUp: index + 1, Home: 0, End: last }[event.key];
+      if (next === undefined) return;
+      event.preventDefault();
+      markers[(next + markers.length) % markers.length].focus();
+    });
+  });
+  // Animate the newly rendered marks while keeping the panel and its headings still.
+  chart.firstElementChild.dataset.animated = "";
+}
+
+function drawZones(items) {
+  const km = distance(items);
+  const parts = types.map((_, type) => 100 * distance(items.filter((run) => run.type === type)) / km);
+  const rounding = parts.map(Math.floor);
+  const remainder = 100 - total(rounding, (part) => part);
+  const order = parts.map((part, index) => ({ index, fraction: part - rounding[index] })).sort((a, b) => b.fraction - a.fraction);
+  order.slice(0, remainder).forEach(({ index }) => rounding[index]++);
+  byId("zone-strip").innerHTML = parts.map((part, i) => part > 0
+    ? '<span style="flex:' + part + ';--zone:var(--zone-' + (i + 1) + ')"></span>' : "").join("");
+  byId("zones").innerHTML = types.map(([name], i) => '<li style="--zone:var(--zone-' + (i + 1) +
+    ')"><i aria-hidden="true"></i><span>' + name + '</span><strong>' + rounding[i] + '%</strong></li>').join("");
+}
+
+function drawJournal() {
+  const count = visibleWorkouts.length;
+  byId("journal-count").textContent = "Тренировок за период: " + count;
+  const showAll = byId("show-all");
+  showAll.hidden = count <= 3;
+  showAll.setAttribute("aria-expanded", String(expanded));
+  showAll.textContent = expanded ? "Свернуть список" : "Показать все";
+  byId("workouts").innerHTML = visibleWorkouts.slice(0, expanded ? count : 3).map(({ day, type, km, seconds }, index) =>
+    '<button class="workout-row" type="button" data-workout="' + index + '"><span class="workout-icon" aria-hidden="true">' +
+    '<svg viewBox="0 0 22 22">' + types[type][2] + '</svg></span><span class="workout-name"><strong>' + types[type][0] +
+    '</strong><small>' + dateFormat.format(dateAt(day)) + '</small></span><span class="workout-number">' +
+    decimal.format(km) + ' км</span><span class="workout-number workout-pace">' + pace(seconds) +
+    ' /км</span><span class="workout-arrow" aria-hidden="true">›</span></button>').join("");
+}
+
+function render(value) {
+  const days = Number(value);
+  visibleWorkouts = workouts.filter(({ day }) => day < days);
+  const previous = workouts.filter(({ day }) => day >= days && day < days * 2);
+  byId("period-dates").textContent = dateFormat.format(dateAt(days - 1)) + " — " + dateFormat.format(dateAt(0));
+  drawMetrics(visibleWorkouts, previous);
+  drawChart(visibleWorkouts, days);
+  drawZones(visibleWorkouts);
+  drawJournal();
+}
+const defaultPeriod = "30";
+mountGlassSegmentedControl(byId("period"), { value: defaultPeriod, onValueChange: render });
+render(defaultPeriod);
+
+byId("show-all").addEventListener("click", () => {
+  expanded = !expanded;
+  drawJournal();
+});
+
+const dialog = byId("workout-dialog");
+byId("workouts").addEventListener("click", (event) => {
+  const row = event.target.closest("[data-workout]");
+  if (!row) return;
+  const { day, type, km, seconds, cv } = visibleWorkouts[Number(row.dataset.workout)];
+  byId("workout-title").textContent = types[type][0];
+  byId("workout-date").textContent = dateFormat.format(dateAt(day));
+  byId("workout-details").innerHTML = '<div><dt>Дистанция</dt><dd>' + decimal.format(km) +
+    ' км</dd></div><div><dt>Темп</dt><dd>' + pace(seconds) +
+    ' /км</dd></div><div><dt>Разброс темпа</dt><dd>' + decimal.format(cv) + '%</dd></div>';
+  byId("workout-note").textContent = types[type][1];
+  dialog.showModal();
+});
+
+byId("theme").addEventListener("click", (event) => {
+  const root = document.documentElement;
+  const toLight = root.dataset.lgTheme === "runflow-dark";
+  root.dataset.lgTheme = toLight ? "runflow-light" : "runflow-dark";
+  event.currentTarget.setAttribute("aria-label", toLight ? "Включить тёмную тему" : "Включить светлую тему");
+});
+
+function syncNavigation() {
+  const hash = location.hash || "#overview";
+  document.querySelectorAll(".rail-nav a").forEach((link) => {
+    if (link.hash === hash) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  });
+}
+window.addEventListener("hashchange", syncNavigation);
+syncNavigation();

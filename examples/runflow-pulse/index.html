@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru" data-lg-theme="runflow-dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Пульс тренировок Runflow. Интерактивная аналитика бега на демонстрационных данных.">
+  <title>Пульс тренировок · Runflow</title>
+  <link rel="stylesheet" href="../../dist/styles.css">
+  <link rel="stylesheet" href="./analytics.css">
+  <script type="module" src="./dashboard.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">К содержимому</a>
+  <aside class="rail">
+    <a href="#overview" class="wordmark">
+      <svg viewBox="0 0 36 36" aria-hidden="true"><rect x="1" y="1" width="34" height="34" rx="10"/><path d="M6 20h7l4-9 4 15 3-6h6"/></svg>
+      <span>runflow<span class="wordmark-dot">.</span></span>
+    </a>
+    <nav class="rail-nav" aria-label="Разделы страницы">
+      <a href="#overview" aria-current="location"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg> Обзор</a>
+      <a href="#dynamics"><svg viewBox="0 0 24 24"><path d="m4 16 5-5 4 4 7-9m-5 0h5v5"/></svg> Динамика</a>
+      <a href="#journal"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg> Журнал</a>
+    </nav>
+    <div class="rail-footer"><span class="demo-dot"></span> Демо-данные</div>
+  </aside>
+
+  <main id="main">
+    <header class="topbar">
+      <span class="breadcrumb">Аналитика <span class="breadcrumb-slash">/</span> <strong>Обзор</strong></span>
+      <span class="demo-mobile"><span class="demo-dot"></span> Демо-данные</span>
+      <button class="lg-button theme-button" type="button" id="theme" aria-label="Включить светлую тему" title="Переключить тему">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19m0-14-1.5 1.5m-11 11L5 19"/></svg>
+      </button>
+    </header>
+    <div class="dashboard" id="overview">
+      <header class="page-heading">
+        <div>
+          <h1>Пульс тренировок</h1>
+          <p>Нагрузка, темп и стабильность бега.</p>
+        </div>
+        <div class="period-control">
+          <div id="period" aria-label="Период">
+            <button class="lg-button" type="button" data-lg-value="7">7 дней</button>
+            <button class="lg-button" type="button" data-lg-value="30">30 дней</button>
+            <button class="lg-button" type="button" data-lg-value="90">90 дней</button>
+          </div>
+          <p id="period-dates"></p>
+        </div>
+      </header>
+
+      <div class="metric-grid" aria-label="Сводка за период" id="metrics"></div>
+
+      <div class="analysis-grid" id="dynamics">
+        <section class="an-panel chart-panel" aria-labelledby="chart-heading">
+          <header class="panel-head">
+            <div><h2 id="chart-heading">Объём бега</h2><p id="chart-description">Дистанция по неделям</p></div>
+            <span class="chart-key"><i></i> Дистанция</span>
+          </header>
+          <div id="chart-readout" class="chart-readout"></div>
+          <div class="chart" id="chart"></div>
+        </section>
+        <section class="an-panel intensity-panel" aria-labelledby="intensity-heading">
+          <header class="panel-head"><div><h2 id="intensity-heading">Профиль темпа</h2><p>Доля дистанции по типу бега</p></div></header>
+          <div class="zone-strip" id="zone-strip" aria-hidden="true"></div>
+          <ul class="zone-list" id="zones"></ul>
+        </section>
+      </div>
+
+      <section class="an-panel journal-panel" id="journal" aria-labelledby="journal-heading">
+        <header class="panel-head"><div><h2 id="journal-heading">Последние тренировки</h2><p id="journal-count"></p></div></header>
+        <div class="workout-list" id="workouts"></div>
+        <button class="lg-button show-all" id="show-all" type="button" aria-expanded="false" aria-controls="workouts">Показать все</button>
+      </section>
+    </div>
+  </main>
+  <dialog id="workout-dialog" class="an-panel workout-dialog" aria-labelledby="workout-title">
+    <div class="panel-head">
+      <div><h2 id="workout-title"></h2><p id="workout-date"></p></div>
+      <form method="dialog"><button class="lg-button theme-button" aria-label="Закрыть" autofocus>×</button></form>
+    </div>
+    <dl id="workout-details"></dl>
+    <p id="workout-note"></p>
+  </dialog>
+</body>
+</html>
