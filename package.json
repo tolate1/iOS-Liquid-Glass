@@ -4,8 +4,33 @@
   "private": true,
   "license": "UNLICENSED",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "test": "node skills/ios-liquid-glass/scripts/test-displacement-map.mjs"
-  }
+    "test": "node skills/ios-liquid-glass/scripts/test-displacement-map.mjs && node --test tests/*.test.mjs",
+    "build": "node scripts/build.mjs",
+    "prepack": "npm run build",
+    "test:browser": "npm run build && node --test tests/*.browser.mjs",
+    "typecheck": "tsc --noEmit --strict --lib es2022,dom --module nodenext tests/types.mts",
+    "demo": "npm run build && node scripts/serve.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright": "^1.65.1",
+    "pngjs": "^7.0.0",
+    "typescript": "^7.0.2"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist"
+  ]
 }

@@ -1,0 +1,110 @@
+[data-lg-theme] {
+  color-scheme: light;
+  --lg-canvas: #e9e9e9;
+  --lg-content: #fafafa;
+  --lg-field: #efefef;
+  --lg-selection: #dedede;
+  --lg-ink: #171717;
+  --lg-muted: #595959;
+  --lg-focus: #494949;
+  --lg-tint-rgb: 255 255 255;
+  --lg-border: #0002;
+  --lg-rim: #fffb;
+  --lg-shadow: 0 7px 25px #0002;
+  --lg-overlay-shadow: 0 14px 36px #0003;
+  --lg-radius-control: 16px;
+  --lg-radius-overlay: 24px;
+  --lg-space-1: .25rem;
+  --lg-space-2: .5rem;
+  --lg-space-3: .75rem;
+  --lg-space-4: 1rem;
+  --lg-space-6: 1.5rem;
+  --lg-target: 44px;
+  --lg-font: system-ui, -apple-system, sans-serif;
+}
+
+[data-lg-theme="dark"], [data-lg-theme="neutral-dark"] {
+  color-scheme: dark;
+  --lg-canvas: #101010;
+  --lg-content: #1d1d1d;
+  --lg-field: #272727;
+  --lg-selection: #464646;
+  --lg-ink: #f6f6f6;
+  --lg-muted: #b9b9b9;
+  --lg-focus: #e0e0e0;
+  --lg-tint-rgb: 22 22 22;
+  --lg-border: #fff3;
+  --lg-rim: #fff4;
+  --lg-shadow: 0 7px 25px #0006;
+  --lg-overlay-shadow: 0 14px 36px #0009;
+}
+
+.lg-surface {
+  position: relative;
+  isolation: isolate;
+  color: var(--lg-ink, #171717);
+  border-radius: var(--lg-radius-control, 16px);
+  --lg-fill: var(--lg-content, #fafafa);
+  --lg-tint-alpha: .78;
+  --lg-frost: 8px;
+  --lg-elevation: var(--lg-shadow, 0 7px 25px #0002);
+}
+
+.lg-surface[data-lg-role="canvas"] { --lg-fill: var(--lg-canvas, #e9e9e9); }
+.lg-surface[data-lg-role="field"] { --lg-fill: var(--lg-field, #efefef); }
+.lg-surface[data-lg-role="selection"] { --lg-fill: var(--lg-selection, #dedede); }
+.lg-surface[data-lg-material="clear"] { --lg-tint-alpha: .62; --lg-frost: 5px; }
+.lg-surface[data-lg-material="transient"] {
+  --lg-tint-alpha: .91;
+  --lg-frost: 12px;
+  --lg-elevation: var(--lg-overlay-shadow, 0 14px 36px #0003);
+  border-radius: var(--lg-radius-overlay, 24px);
+}
+
+.lg-filter-defs { position: absolute; pointer-events: none; }
+
+.lg-surface > .lg-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--lg-fill);
+}
+
+.lg-surface:is([data-lg-role="functional-control"], [data-lg-role="transient"]) > .lg-backdrop {
+  box-shadow: inset 0 0 0 1px var(--lg-rim, #fffb), var(--lg-elevation);
+}
+
+.lg-surface:is([data-lg-renderer="svg-backdrop"], [data-lg-renderer="frosted-css"]) > .lg-backdrop {
+  background: rgb(var(--lg-tint-rgb, 255 255 255) / var(--lg-tint-alpha));
+}
+
+.lg-surface[data-lg-renderer="svg-backdrop"] > .lg-backdrop {
+  -webkit-backdrop-filter: var(--lg-svg-filter);
+  backdrop-filter: var(--lg-svg-filter);
+}
+
+.lg-surface[data-lg-renderer="frosted-css"] > .lg-backdrop {
+  -webkit-backdrop-filter: blur(var(--lg-frost));
+  backdrop-filter: blur(var(--lg-frost));
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .lg-surface:is([data-lg-renderer]) > .lg-backdrop {
+    background: var(--lg-fill);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: inset 0 0 0 1px currentColor;
+  }
+}
+
+@media (forced-colors: active) {
+  .lg-surface:is([data-lg-renderer]) > .lg-backdrop {
+    background: Canvas;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    outline: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}

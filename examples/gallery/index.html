@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-lg-theme="neutral-light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Liquid Glass Gallery</title>
+  <link rel="stylesheet" href="/dist/styles.css">
+  <link rel="stylesheet" href="/examples/gallery/gallery.css">
+  <script type="module" src="/examples/gallery/gallery.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Liquid Glass Gallery</h1>
+      <p>Compare how each material renders the same background.</p>
+    </header>
+    <div class="preferences">
+      <label>Theme
+        <select id="theme">
+          <option value="neutral-light">Neutral light</option>
+          <option value="neutral-dark">Neutral dark</option>
+        </select>
+      </label>
+      <label>Renderer
+        <select id="renderer">
+          <option value="auto">Automatic</option>
+          <option value="frosted-css">Frosted</option>
+          <option value="opaque">Opaque</option>
+        </select>
+      </label>
+    </div>
+    <div class="scenes">
+      <section>
+        <h2>Candidate</h2>
+        <div class="specimen">
+          <div class="spectrum" aria-hidden="true"></div>
+          <div class="lens" id="candidate"><span>Regular glass</span></div>
+        </div>
+        <output id="status" aria-live="polite"></output>
+      </section>
+      <section>
+        <h2>Frosted baseline</h2>
+        <div class="specimen">
+          <div class="spectrum" aria-hidden="true"></div>
+          <div class="lens" id="baseline"><span>Regular glass</span></div>
+        </div>
+      </section>
+    </div>
+    <section class="reading" id="reading">
+      <h2>Content surface</h2>
+      <p>Text and data remain readable on a solid material.</p>
+    </section>
+  </main>
+</body>
+</html>

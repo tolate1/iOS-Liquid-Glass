@@ -2,6 +2,33 @@
 
 Переиспользуемый Agent Skill для разработки и аудита Liquid Glass UI: сайты, React-приложения, дашборды и мобильный веб. Включает накопленный опыт Runflow без кода приложения и пользовательских данных.
 
+## Веб-движок
+
+```bash
+npm ci
+npm run demo
+```
+
+Откройте [локальную Gallery](http://127.0.0.1:4173). Она использует тот же собранный пакет, что и внешний проект. Сравните SVG-преломление с матовым стеклом, переключите тему и проверьте запасной путь через `?glass-fallback`.
+
+Для установки в отдельное приложение соберите локальный архив через `npm pack` и передайте его путь команде `npm install /path/to/ios-liquid-glass-web-0.1.0.tgz`. Подключите CSS через сборщик и установите `data-lg-theme="neutral-light"` или `data-lg-theme="neutral-dark"` на контейнер темы.
+
+```js
+import "@ios-liquid-glass/web/styles.css";
+import { mountGlassSurface } from "@ios-liquid-glass/web";
+
+const surface = mountGlassSurface(document.querySelector("#toolbar"), {
+  role: "functional-control",
+  material: "regular",
+});
+console.log(surface.diagnostics);
+// При удалении панели вызовите surface.destroy().
+```
+
+Проверки `npm test`, `npm run build` и `npm run typecheck` выполняются локально. Для Playwright установите браузер через `npx playwright install chromium --only-shell` и запустите `npm run test:browser`. Существующий Chromium можно указать через `CHROMIUM_PATH`.
+
+[Архитектура](docs/ARCHITECTURE.md) · [Совместимость и результаты](docs/COMPATIBILITY.md)
+
 ## Установка в Codex
 
 Склонируйте репозиторий и скопируйте папку `skills/ios-liquid-glass` в ваш каталог `~/.codex/skills/`. В Windows используйте `%USERPROFILE%\.codex\skills\`. Файл `SKILL.md` должен лежать непосредственно внутри папки `ios-liquid-glass`.
