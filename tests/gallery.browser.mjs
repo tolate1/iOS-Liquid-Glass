@@ -469,29 +469,39 @@ test("settings button clears the section divider and the original archive is lin
   }
 });
 
-test("Runflow dock applies optics once and moves the content separation on scroll", async (t) => {
+test("Workspace keeps the glass and shadow on the dock across theme changes and scrolling", async (t) => {
   const page = await browser.newPage({ viewport: { width: 390, height: 720 } });
   t.after(() => page.close());
   await page.goto(url + "examples/messenger/index.html");
   const dock = page.locator("#views-tabs");
+  const backdrop = dock.locator(".lg-backdrop");
   const content = page.locator("#views");
   await dock.locator(".lg-segment-indicator").waitFor();
-  assert.match(await computedFilter(dock.locator(".lg-backdrop")), /url\(/);
+  assert.match(await computedFilter(backdrop), /url\(/);
   assert.equal(await computedFilter(dock.locator(".lg-segment-indicator")), "none");
-  assert.match(await content.evaluate(node => getComputedStyle(node).maskComposite), /exclude/);
-  const initialY = await content.evaluate(node => node.style.getPropertyValue("--lg-dock-y"));
+  const shadow = await backdrop.evaluate(node => getComputedStyle(node).boxShadow);
   await page.evaluate(() => {
     document.querySelector("#messages").style.minHeight = "1000px";
     window.scrollTo(0, 180);
   });
-  await page.waitForFunction(y => document.querySelector("#views").style.getPropertyValue("--lg-dock-y") !== y, initialY);
-  assert.ok(await page.locator("main").evaluate(node => parseInt(node.style.getPropertyValue("--lg-dock-reserve")) >= 100));
+  await page.waitForFunction(() => window.scrollY === 180);
+  assert.equal(await content.evaluate(node => getComputedStyle(node).maskImage), "none");
+  assert.equal(await backdrop.evaluate(node => getComputedStyle(node).boxShadow), shadow);
+  assert.ok(await page.locator("main").evaluate(node => parseInt(node.style.getPropertyValue("--lg-dock-reserve")) >= 112));
+  await page.getByRole("button", { name: "Light theme" }).click();
+  assert.equal(await page.locator("html").getAttribute("data-lg-theme"), "runflow-light");
+  assert.equal(await page.locator("#chat").evaluate(node => getComputedStyle(node).backgroundColor), "rgb(250, 250, 250)");
+  await page.getByRole("tab", { name: "Project" }).click();
+  await page.getByRole("checkbox", { name: "Approve the review" }).check();
+  assert.equal(await page.locator("#task-total").textContent(), "3 / 3");
+  assert.equal(await page.locator("#review-progress").evaluate(node => node.value), 3);
   await page.emulateMedia({ contrast: "more" });
   await page.locator("#views-tabs[data-lg-renderer=opaque]").waitFor();
-  assert.equal(await content.evaluate(node => getComputedStyle(node).maskImage), "none");
+  assert.equal(await computedFilter(backdrop), "none");
   await page.emulateMedia({ contrast: "no-preference" });
   await page.goto(url + "examples/messenger/index.html?glass-fallback");
-  assert.equal(await computedFilter(dock.locator(".lg-backdrop")), "blur(3px)");
+  await page.locator("#views-tabs[data-lg-renderer=frosted-css]").waitFor();
+  assert.equal(await computedFilter(backdrop), "blur(3px)");
   await page.setViewportSize({ width: 768, height: 720 });
-  await page.waitForFunction(() => !document.querySelector("#views").hasAttribute("data-lg-dock-overlap"));
+  await page.waitForFunction(() => !document.querySelector("main").style.getPropertyValue("--lg-dock-reserve"));
 });

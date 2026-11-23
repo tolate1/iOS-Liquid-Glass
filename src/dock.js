@@ -1,6 +1,6 @@
 import { mountGlassSurface } from "./surface.js";
 
-// Runflow L49 separates the content under the dock from the material and labels.
+// The optional legacy content treatment is only installed for callers that pass content.
 export function mountGlassDock(dock, { content, layout, ...options } = {}) {
   const view = dock.ownerDocument.defaultView;
   if ((content && (content.ownerDocument !== dock.ownerDocument || content.contains(dock))) ||
@@ -51,10 +51,12 @@ export function mountGlassDock(dock, { content, layout, ...options } = {}) {
     if (frame === undefined) frame = view.requestAnimationFrame(refresh);
   }
 
-  view.addEventListener("scroll", schedule, { ...listen, capture: true, passive: true });
+  if (content) view.addEventListener("scroll", schedule, { ...listen, capture: true, passive: true });
   view.addEventListener("resize", schedule, listen);
-  transparency.addEventListener("change", schedule, listen);
-  contrast.addEventListener("change", schedule, listen);
+  if (content) {
+    transparency.addEventListener("change", schedule, listen);
+    contrast.addEventListener("change", schedule, listen);
+  }
   const observer = new view.ResizeObserver(schedule);
   observer.observe(dock);
   if (content) observer.observe(content);

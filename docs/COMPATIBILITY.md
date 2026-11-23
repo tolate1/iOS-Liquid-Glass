@@ -47,3 +47,9 @@ Gallery compares SVG, frost and opaque candidates against a matched frosted refe
 ## Responsive controls and motion
 
 GlassSheet uses native modal dialog semantics, restores focus on dismiss, and uses a dedicated drag handle. The Gallery includes a stateful switch, slider and stepper. Motion is reduced when the system requests it. Acceptance uses compact and wide browser layouts, keyboard actions and representative pointer gestures with fallback renderers. Source migration requires resolving both engine exports before applying and retains direct-child selectors for the original controls. Browser image policy restrictions on the displacement-map image select a supported fallback.
+
+## Workspace in the Runflow themes
+
+Manual Chromium review covered the dark desktop layout and 390/520 CSS px frames. The narrow layouts retained a 76 px Dock and an unmasked content layer. The 390 px forced fallback computed blur(3px), while the 520 px frame used the SVG backdrop URL. The Dock stayed at the same viewport coordinate during scroll, and the composer could scroll fully above it. Theme switching, message count, file search, checklist progress and a mouse drag across the Dock were exercised.
+
+Build, type checking and numerical/CLI tests passed. The automated browser suite could not start local Chromium in the execution environment. Safari and physical iPhone hardware were outside this verification.

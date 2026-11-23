@@ -2,19 +2,28 @@ import { mountGlassDock, mountGlassPopover, mountGlassSegmentedControl, mountGla
 
 const get = (id) => document.getElementById(id);
 const panels = Object.fromEntries(["chat", "files", "project"].map((key) => [key, get(key)]));
-for (const panel of Object.values(panels)) mountGlassSurface(panel, { role: "content" });
-mountGlassDock(get("views-tabs"), { content: get("views"), layout: document.querySelector("main") });
+mountGlassSurface(document.querySelector(".workspace-actions"));
+mountGlassDock(get("views-tabs"), { layout: document.querySelector("main") });
 mountGlassSegmentedControl(get("views-tabs"), { panels });
 const info = mountGlassPopover(get("details-trigger"), get("workspace-info"));
 get("close-info").addEventListener("click", () => info.close());
 
+const themeToggle = get("theme-toggle");
+themeToggle.addEventListener("click", () => {
+  const light = document.documentElement.dataset.lgTheme === "runflow-dark";
+  document.documentElement.dataset.lgTheme = light ? "runflow-light" : "runflow-dark";
+  themeToggle.setAttribute("aria-pressed", String(light));
+});
+
+const list = get("messages");
 const input = get("message");
 input.form.addEventListener("submit", (event) => {
   event.preventDefault();
   if (!input.value.trim()) return;
   const message = document.createElement("li");
   message.textContent = input.value;
-  get("messages").append(message);
+  list.append(message);
+  get("message-total").textContent = list.childElementCount;
   input.value = "";
   input.focus();
 });
@@ -25,3 +34,17 @@ get("file-search").addEventListener("input", (event) => {
   for (const entry of fileItems) entry.hidden = !entry.textContent.toLowerCase().includes(query);
   get("files-empty").hidden = fileItems.some((entry) => !entry.hidden);
 });
+
+const checklist = get("checklist");
+const tasks = [...checklist.querySelectorAll('input[type="checkbox"]')];
+const progress = get("review-progress");
+function updateProgress() {
+  const complete = tasks.filter((task) => task.checked).length;
+  progress.max = tasks.length;
+  progress.value = complete;
+  get("checklist-caption").textContent = `${complete} of ${tasks.length}`;
+  get("task-total").textContent = `${complete} / ${tasks.length}`;
+}
+checklist.addEventListener("change", updateProgress);
+updateProgress();
+get("file-total").textContent = fileItems.length;

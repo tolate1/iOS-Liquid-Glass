@@ -5,7 +5,7 @@ type DivProps = ComponentPropsWithoutRef<"div">;
 type Forwarded<Props, Element> = ForwardRefExoticComponent<Props & RefAttributes<Element>>;
 
 export interface GlassProviderProps extends DivProps, Pick<GlassRendererPolicy, "renderer" | "fallback" | "forceFallback"> {
-  theme?: "neutral-light" | "neutral-dark";
+  theme?: "neutral-light" | "neutral-dark" | "runflow-light" | "runflow-dark";
 }
 export interface GlassSurfaceProps extends Omit<DivProps, "dangerouslySetInnerHTML">, Omit<GlassSurfaceOptions, "role"> {
   surfaceRole?: GlassSurfaceOptions["role"];

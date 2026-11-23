@@ -41,8 +41,10 @@ The sheet controller takes a trigger and a native dialog with a local ID and an 
 
 The collection styles support grid and list using the same markup. Gallery animates the tiles from their current positions while retaining the same buttons and items. The action banner uses a status announcement and explicit Undo and Dismiss controls. Disclosure uses native details and summary.
 
-## Runflow L49 dock in the web runtime
+## Runflow themes and Dock
 
-The Workspace uses the reusable GlassDock controller. It ships a single optical substrate, a thin painted selection and sharp labels. A soft alpha mask follows the measured dock in content coordinates during scroll. The dock and its buttons are outside the masked layer. The controller measures the bottom reserve, and the frosted renderer uses the L49 3 px blur with an increased tint for legibility. Reduced transparency, contrast and forced-colors preferences remove the content mask.
+Use `data-lg-theme="runflow-light"` or `data-lg-theme="runflow-dark"` on a theme container. React consumers can pass the same values to `GlassProvider`. The palette separates the canvas, solid panels, fields, navigation and primary actions. `lg-panel`, `lg-metric` and `lg-primary` are CSS hooks with no controller dependency.
 
-See the original [Runflow L49 notes](../runflow-research/RELEASE_L49.md) and [Dock CSS](../Runflow-open-source.zip) for the reference.
+Workspace pairs the existing gesture controller with a fixed Dock that owns its paint, shadow and backdrop. The selection is a thin painted layer, and the labels are outside the optical filter. Mount with `{ layout }` to reserve bottom scroll space without installing a scroll listener. Existing consumers passing `content` explicitly retain the L49 mask path. Use the self-contained mode when scroll and material must be independent.
+
+See the [Runflow L49 notes](../runflow-research/RELEASE_L49.md) for the source styling and [L50 checkpoint](../runflow-research/L50_IN_PROGRESS.md) for the separate moving-refraction experiment.

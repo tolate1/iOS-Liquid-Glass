@@ -80,6 +80,7 @@ export interface GlassStepperController {
 export function mountGlassStepper(group: HTMLElement, options?: GlassStepperOptions): GlassStepperController;
 
 export interface GlassDockOptions extends GlassSurfaceOptions {
+  /** Opts into the legacy scrolling content mask. Omit for a self-contained dock. */
   content?: HTMLElement;
   layout?: HTMLElement;
 }

@@ -410,3 +410,115 @@
   [data-lg-dock-overlap] { mask-image: none; }
   .lg-dock[data-lg-dock] > .lg-segment-indicator { background: var(--lg-selection); }
 }
+
+/* Runflow gives content, controls and selection distinct neutral surfaces. */
+[data-lg-theme="runflow-light"], [data-lg-theme="runflow-dark"] {
+  --lg-canvas: #e9e9e9;
+  --lg-content: #fafafa;
+  --lg-field: #efefef;
+  --lg-selection: #dedede;
+  --lg-ink: #181818;
+  --lg-muted: #595959;
+  --lg-border: #00000014;
+  --lg-accent: #202020;
+  --lg-accent-ink: #fff;
+  --lg-switch-on: #454545;
+  --lg-radius-panel: 24px;
+  --lg-shadow: 0 2px 8px #00000009;
+  --lg-ambient: radial-gradient(ellipse at 55% 0%, #fff8, transparent 62%);
+}
+
+[data-lg-theme="runflow-dark"] {
+  color-scheme: dark;
+  --lg-canvas: #080808;
+  --lg-content: #121212;
+  --lg-field: #202020;
+  --lg-selection: #303030;
+  --lg-ink: #f3f3f3;
+  --lg-muted: #b3b3b3;
+  --lg-focus: #e0e0e0;
+  --lg-border: #ffffff1c;
+  --lg-rim: #fff3;
+  --lg-tint-rgb: 24 24 24;
+  --lg-accent: #ededed;
+  --lg-accent-ink: #141414;
+  --lg-switch-on: #737373;
+  --lg-shadow: 0 2px 8px #0003;
+  --lg-overlay-shadow: 0 14px 36px #0009;
+  --lg-ambient: radial-gradient(ellipse at 20% 0%, #fff1, transparent 58%);
+}
+
+/* Solid content surfaces. These can be used without mounting a controller. */
+.lg-panel, .lg-metric {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  color: var(--lg-ink, #181818);
+  background: var(--lg-content, #fafafa);
+  border: 1px solid var(--lg-border, #0002);
+  border-radius: var(--lg-radius-panel, 24px);
+  padding: var(--lg-panel-padding, clamp(1rem, 3vw, 1.5rem));
+  box-shadow: var(--lg-shadow, none);
+}
+
+.lg-metric {
+  display: grid;
+  align-content: start;
+  gap: .35rem;
+  padding: var(--lg-metric-padding, 1rem);
+}
+
+.lg-metric > :is(dt, dd) { margin: 0; }
+.lg-metric > dt { color: var(--lg-muted, #595959); font-size: .8125rem; }
+.lg-metric > dd {
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: -.045em;
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-button.lg-primary {
+  background: var(--lg-accent, #202020);
+  color: var(--lg-accent-ink, #fff);
+  border-color: transparent;
+  border-radius: 100px;
+  font-weight: 650;
+}
+.lg-button.lg-primary:not(:disabled):active { background: var(--lg-accent, #202020); }
+.lg-button.lg-primary:focus-visible { outline-color: var(--lg-accent-ink, #fff); }
+
+:is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) .lg-dock[data-lg-dock] {
+  border-radius: 38px;
+  --lg-dock-selected: #18181816;
+  --lg-dock-selection-edge: #0002;
+}
+
+[data-lg-theme="runflow-dark"] .lg-dock[data-lg-dock] {
+  --lg-dock-alpha: .64;
+  --lg-dock-rim: #fff3;
+  --lg-dock-selected: #fff2;
+  --lg-dock-selection-edge: #fff3;
+}
+
+:is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) .lg-dock[data-lg-dock] > .lg-backdrop {
+  box-shadow: inset 0 1px 1px var(--lg-dock-rim), 0 3px 10px #0003;
+}
+
+:is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) .lg-dock[data-lg-dock] > .lg-segment-indicator {
+  inset-block: 6px;
+  border-radius: 100px;
+  box-shadow: inset 0 0 0 1px var(--lg-dock-selection-edge);
+}
+
+@media (max-width: 520px) {
+  :is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) .lg-dock[data-lg-dock] > .lg-button {
+    min-height: 64px;
+    border-radius: 100px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more), (forced-colors: active) {
+  :is([data-lg-theme="runflow-dark"], [data-lg-theme="runflow-light"]) .lg-dock[data-lg-dock] > .lg-segment-indicator {
+    background: var(--lg-selection);
+  }
+}

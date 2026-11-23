@@ -29,6 +29,8 @@ console.log(surface.diagnostics);
 
 [Архитектура](docs/ARCHITECTURE.md) · [Совместимость и результаты](docs/COMPATIBILITY.md) · [React, Next и CLI](docs/TOOLING.md)
 
+Для стиля Runflow используйте `data-lg-theme="runflow-light"` или `data-lg-theme="runflow-dark"`. Классы `lg-panel`, `lg-metric` и `lg-button lg-primary` переносят оформление панелей, числовых карточек и главных действий в любой проект. Workspace показывает обе темы, плавающую навигацию, поиск, чат и чек-лист ревью.
+
 ## Установка в Codex
 
 Склонируйте репозиторий и скопируйте папку `skills/ios-liquid-glass` в ваш каталог `~/.codex/skills/`. В Windows используйте `%USERPROFILE%\.codex\skills\`. Файл `SKILL.md` должен лежать непосредственно внутри папки `ios-liquid-glass`.
