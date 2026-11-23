@@ -192,3 +192,33 @@ h1 { font-size: clamp(2rem, 3.4vw, 2.85rem); line-height: 1.08; font-weight: 730
   #progress-dock > button { display: grid; place-items: center; align-content: center; gap: 3px; min-height: 49px; padding: 3px 10px; font-size: .8rem; }
   #progress-dock > button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 }
+
+.view-panel[hidden] { display: none; }
+#period {
+  padding: 4px;
+  gap: 2px;
+  overflow: clip;
+  -webkit-touch-callout: none;
+}
+#period > .lg-button,
+#period > .lg-button:not(:disabled):active {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+  transition: color 150ms ease-out;
+}
+#period > .lg-segment-indicator {
+  inset-block: 4px;
+  background: linear-gradient(var(--lg-lens-angle, 135deg), #ffffff30, #ffffff08 48%, #ffffff16);
+  box-shadow: inset 0 1px 1px #ffffff88, inset 0 -1px 1px #ffffff33;
+}
+[data-lg-theme="runflow-light"] #period > .lg-segment-indicator {
+  background: linear-gradient(var(--lg-lens-angle, 135deg), #fff, #ffffff38 52%, #15151512);
+  box-shadow: inset 0 0 0 1px #15151526, inset 0 1px 1px #fff;
+}
+#progress-dock { -webkit-touch-callout: none; overflow: clip; }
+#progress-dock > .lg-button:not(:disabled):active { background: transparent; }
+#progress-dock > .lg-segment-indicator { background: linear-gradient(var(--lg-lens-angle, 135deg), #ffffff34, var(--lg-dock-selected)); }
+@media (max-width: 390px) {
+  #period > button { padding-inline: 8px; }
+}

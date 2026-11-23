@@ -63,6 +63,17 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
 
   function paint(shape) {
     presentation = boundSegment(shape, groupWidth);
+    if (group.hasAttribute("data-lg-elastic")) {
+      // Port the horizontal Runflow lens drive and curvature to the shared DOM controller.
+      const drive = reduced.matches ? 0 : Math.max(-18, Math.min(18, (pointer?.dragging ? pointer.velocity : velocity) * .02));
+      const extra = Math.abs(drive) * 1.35;
+      const inset = measured[0].center - measured[0].width / 2;
+      const shape = boundSegment({ width: presentation.width + extra, center: presentation.center + drive * .28 - inset }, groupWidth - 2 * inset);
+      indicator.style.setProperty("--lg-lens-angle", `${135 + drive * 2}deg`);
+      indicator.style.width = `${shape.width}px`;
+      indicator.style.transform = `translateX(${inset + shape.center - shape.width / 2}px)`;
+      return;
+    }
     indicator.style.width = `${presentation.width}px`;
     indicator.style.transform = `translateX(${presentation.center - presentation.width / 2}px)`;
   }
@@ -191,7 +202,8 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
       time: event.timeStamp, velocity: 0, dragging: false,
       offset: overLens ? start - presentation.center : start - measured.find((item) => item.index === index).center,
     };
-    if (overLens) {
+    if (group.hasAttribute("data-lg-elastic")) pointer.overLens = overLens;
+    else if (overLens) {
       stop();
       velocity = widthVelocity = 0;
     }
@@ -220,6 +232,7 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
         return;
       }
       if (horizontal < 4) return;
+      if (pointer.overLens) pointer.offset = pointer.start - presentation.center;
       pointer.dragging = true;
       pointer.button.setPointerCapture(event.pointerId);
       group.dataset.lgDragging = "";
@@ -233,7 +246,7 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     if (pointer?.id !== event.pointerId) return;
     if (!pointer.dragging) {
       release();
-      settle();
+      if (!group.hasAttribute("data-lg-elastic")) settle();
       return;
     }
     const center = event.clientX - group.getBoundingClientRect().left - group.clientLeft - pointer.offset;
@@ -256,6 +269,9 @@ export function mountGlassSegmentedControl(group, { value, onValueChange, panels
     measure();
     settle(true);
   });
+  group.addEventListener("contextmenu", (event) => {
+    if (group.hasAttribute("data-lg-elastic") && pointer) event.preventDefault();
+  }, listen);
   observer.observe(group);
   buttons.forEach((button) => observer.observe(button));
   measure();

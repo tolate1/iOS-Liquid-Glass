@@ -170,22 +170,13 @@ function render(value) {
 }
 const defaultPeriod = "30";
 mountGlassSegmentedControl(byId("period"), { value: defaultPeriod, onValueChange: render });
-mountGlassSurface(byId("period"), { material: "regular", role: "functional-control" });
+mountGlassSurface(byId("period"), { material: "clear", role: "functional-control" });
 render(defaultPeriod);
 
 const dock = byId("progress-dock");
-let dockScroll;
-function scrollFromDock(value) {
-  cancelAnimationFrame(dockScroll);
-  dockScroll = requestAnimationFrame(() => {
-    byId(value).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
-  });
-}
-mountGlassSegmentedControl(dock, { value: "overview", onValueChange: scrollFromDock });
-dock.addEventListener("click", (event) => {
-  const button = event.target.closest("button[data-lg-value]");
-  if (button) scrollFromDock(button.dataset.lgValue);
-});
+const dockControl = mountGlassSegmentedControl(dock, { value: "overview", onValueChange: (value) => {
+  if (location.hash !== "#" + value) location.hash = value;
+} });
 mountGlassDock(dock, { layout: byId("main") });
 
 byId("show-all").addEventListener("click", () => {
@@ -230,12 +221,27 @@ byId("theme").addEventListener("click", (event) => {
   event.currentTarget.setAttribute("aria-label", toLight ? "Включить тёмную тему" : "Включить светлую тему");
 });
 
+const panels = ["overview", "dynamics", "journal"];
+let activePanel;
 function syncNavigation() {
-  const hash = location.hash || "#overview";
-  document.querySelectorAll(".rail-nav a").forEach((link) => {
-    if (link.hash === hash) link.setAttribute("aria-current", "location");
+  const requested = location.hash.slice(1);
+  const active = panels.includes(requested) ? requested : "overview";
+  if (active === activePanel) return;
+  for (const panel of panels) byId(panel).hidden = panel !== active;
+  for (const link of document.querySelectorAll(".rail-nav a")) {
+    if (link.hash === "#" + active) link.setAttribute("aria-current", "location");
     else link.removeAttribute("aria-current");
-  });
+  }
+  if (dockControl.value !== active) dockControl.setValue(active);
+  if (activePanel && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const panel = byId(active);
+    panel.getAnimations().forEach((animation) => animation.cancel());
+    document.title = panel.getAttribute("aria-label") + " · Runflow";
+    panel.animate([{ opacity: .55, transform: "translateY(5px)" }, { opacity: 1, transform: "none" }],
+      { duration: 210, easing: "cubic-bezier(.22,1,.36,1)" });
+  }
+  activePanel = active;
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
 window.addEventListener("hashchange", syncNavigation);
 syncNavigation();
