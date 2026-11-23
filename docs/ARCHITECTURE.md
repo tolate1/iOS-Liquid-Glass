@@ -40,3 +40,9 @@ The React/Vite pilot binds one marked toolbar source to Git root, a deterministi
 The sheet controller takes a trigger and a native dialog with a local ID and an element marked data-lg-sheet-handle. Mark dismiss buttons with data-lg-sheet-close. Keyboard dismissal and drag dismissal use the same exit path. Native inputs power the switch and slider; React exposes corresponding wrappers. Use the stepper CSS class to group standard buttons with a visible value.
 
 The collection styles support grid and list using the same markup. Gallery animates the tiles from their current positions while retaining the same buttons and items. The action banner uses a status announcement and explicit Undo and Dismiss controls. Disclosure uses native details and summary.
+
+## Runflow L49 dock in the web runtime
+
+The Workspace uses the reusable GlassDock controller. It ships a single optical substrate, a thin painted selection and sharp labels. A soft alpha mask follows the measured dock in content coordinates during scroll. The dock and its buttons are outside the masked layer. The controller measures the bottom reserve, and the frosted renderer uses the L49 3 px blur with an increased tint for legibility. Reduced transparency, contrast and forced-colors preferences remove the content mask.
+
+See the original [Runflow L49 notes](../runflow-research/RELEASE_L49.md) and [Dock CSS](../Runflow-open-source.zip) for the reference.

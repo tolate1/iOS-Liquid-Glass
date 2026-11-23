@@ -3,3 +3,4 @@ export { mountGlassSegmentedControl } from "./segments.js";
 export { mountGlassMenu, mountGlassPopover } from "./popover.js";
 export { mountGlassSheet } from "./sheet.js";
 export { mountGlassStepper } from "./stepper.js";
+export { mountGlassDock } from "./dock.js";

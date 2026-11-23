@@ -78,3 +78,9 @@ export interface GlassStepperController {
   destroy(): void;
 }
 export function mountGlassStepper(group: HTMLElement, options?: GlassStepperOptions): GlassStepperController;
+
+export interface GlassDockOptions extends GlassSurfaceOptions {
+  content?: HTMLElement;
+  layout?: HTMLElement;
+}
+export function mountGlassDock(element: HTMLElement, options?: GlassDockOptions): Pick<GlassSurfaceController, "diagnostics" | "update" | "destroy">;

@@ -5,16 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Workspace example</title>
   <link rel="stylesheet" href="/dist/styles.css">
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font: 1rem/1.5 var(--lg-font); color: var(--lg-ink); background: var(--lg-canvas); }
-    main { max-width: 52rem; margin: auto; padding: clamp(1rem, 5vw, 3rem); }
-    #views > section { padding: 1rem; margin-top: 1rem; }
-    .actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: end; }
-    .actions label { display: grid; gap: .25rem; min-width: 0; }
-    input { max-width: 100%; }
-    h1 { letter-spacing: -.04em; }
-  </style>
+  <link rel="stylesheet" href="./workspace.css">
   <script type="importmap">
     { "imports": { "@ios-liquid-glass/web": "/dist/index.js" } }
   </script>
@@ -22,14 +13,16 @@
 </head>
 <body>
   <main class="lg-dock-layout">
-    <h1>Workspace</h1>
-    <div class="actions">
+    <header class="workspace-header">
+      <div><a class="workspace-back" href="/">Gallery</a><h1>Workspace</h1></div>
+      <button id="details-trigger" class="lg-button" type="button">Workspace info</button>
+    </header>
+    <div class="workspace-navigation">
       <div id="views-tabs" class="lg-dock" aria-label="Workspace section">
         <button id="view-chat" type="button" class="lg-button" data-lg-value="chat">Chat</button>
         <button id="view-files" type="button" class="lg-button" data-lg-value="files">Files</button>
         <button id="view-project" type="button" class="lg-button" data-lg-value="project">Project</button>
       </div>
-      <button id="details-trigger" class="lg-button" type="button">Workspace info</button>
     </div>
     <div id="workspace-info">
       <p>Local demo workspace.</p>
@@ -48,6 +41,7 @@
         <h2>Files</h2>
         <label>Search files <input type="search" id="file-search" class="lg-field"></label>
         <ul id="files-list"><li>Handoff.md</li><li>Layout-notes.txt</li><li>Checklist.md</li></ul>
+        <p id="files-empty" hidden>No matching files.</p>
       </section>
       <section id="project" tabindex="0" hidden>
         <h2>Project</h2>

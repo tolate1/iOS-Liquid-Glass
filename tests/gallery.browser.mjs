@@ -468,3 +468,30 @@ test("settings button clears the section divider and the original archive is lin
     assert.match(await page.getByRole("link", { name: "Runflow source ZIP" }).getAttribute("href"), /Runflow-open-source\.zip$/);
   }
 });
+
+test("Runflow dock applies optics once and moves the content separation on scroll", async (t) => {
+  const page = await browser.newPage({ viewport: { width: 390, height: 720 } });
+  t.after(() => page.close());
+  await page.goto(url + "examples/messenger/index.html");
+  const dock = page.locator("#views-tabs");
+  const content = page.locator("#views");
+  await dock.locator(".lg-segment-indicator").waitFor();
+  assert.match(await computedFilter(dock.locator(".lg-backdrop")), /url\(/);
+  assert.equal(await computedFilter(dock.locator(".lg-segment-indicator")), "none");
+  assert.match(await content.evaluate(node => getComputedStyle(node).maskComposite), /exclude/);
+  const initialY = await content.evaluate(node => node.style.getPropertyValue("--lg-dock-y"));
+  await page.evaluate(() => {
+    document.querySelector("#messages").style.minHeight = "1000px";
+    window.scrollTo(0, 180);
+  });
+  await page.waitForFunction(y => document.querySelector("#views").style.getPropertyValue("--lg-dock-y") !== y, initialY);
+  assert.ok(await page.locator("main").evaluate(node => parseInt(node.style.getPropertyValue("--lg-dock-reserve")) >= 100));
+  await page.emulateMedia({ contrast: "more" });
+  await page.locator("#views-tabs[data-lg-renderer=opaque]").waitFor();
+  assert.equal(await content.evaluate(node => getComputedStyle(node).maskImage), "none");
+  await page.emulateMedia({ contrast: "no-preference" });
+  await page.goto(url + "examples/messenger/index.html?glass-fallback");
+  assert.equal(await computedFilter(dock.locator(".lg-backdrop")), "blur(3px)");
+  await page.setViewportSize({ width: 768, height: 720 });
+  await page.waitForFunction(() => !document.querySelector("#views").hasAttribute("data-lg-dock-overlap"));
+});
